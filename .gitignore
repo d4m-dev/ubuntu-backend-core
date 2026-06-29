@@ -10,7 +10,6 @@ __pycache__/
 phpmyadmin/
 venv/
 myenv/
-avatar-server/
 res/
 
 audio_workspace/

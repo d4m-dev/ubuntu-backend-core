@@ -96,24 +96,11 @@ def setup_new_remote():
         print(f"{Colors.OKGREEN}✅ Đã tái kết nối thành công tới: {TARGET_REMOTE_URL}{Colors.ENDC}")
     else:
         print(f"{Colors.OKGREEN}✅ Đường truyền tới Repo d4m-dev ổn định.{Colors.ENDC}")
-        
-    gitignore_path = ".gitignore"
-    rule_needed = "\naudio_workspace/\nlogs/\n"
-    if os.path.exists(gitignore_path):
-        with open(gitignore_path, "r", encoding="utf-8") as f:
-            content = f.read()
-        if "audio_workspace" not in content:
-            with open(gitignore_path, "a", encoding="utf-8") as f:
-                f.write(rule_needed)
-            print(f"{Colors.WARNING}🛡️  Đã thêm rào chắn cách ly kho nhạc vào .gitignore!{Colors.ENDC}")
-    else:
-        with open(gitignore_path, "w", encoding="utf-8") as f:
-            f.write(rule_needed)
             
     return True
 
 # ========================================================
-# 🚀 CẬP NHẬT: ĐỊNH DẠNG COMMIT TỰ ĐỘNG THÔNG MINH MỚI
+# ĐỊNH DẠNG COMMIT TỰ ĐỘNG THÔNG MINH
 # ========================================================
 def generate_smart_commit_message(current_time):
     """Tạo commit message theo định dạng: d4m-dev commit {tên file} + time"""
@@ -314,7 +301,6 @@ def deploy_process(custom_message=None, yes_to_all=False):
                     print(f"{Colors.FAIL}❌ Đã dừng lệnh. Sếp hãy reset file lớn ra rồi chạy lại nhé.{Colors.ENDC}")
                     return "failed"
 
-        # 🚀 THAY ĐỔI LOGIC: Ép cấu trúc sinh Message tự động theo form mới
         if custom_message:
             commit_message = custom_message
         else:
