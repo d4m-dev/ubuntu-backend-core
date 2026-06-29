@@ -1,7 +1,7 @@
 import os
 import time
 
-STATUS_FILE = "/storage/emulated/0/coder/media/ubuntu-backend-core/core/.ai_active"
+STATUS_FILE = "/mnt/sdcard/ubuntu-backend-core/core/.ai_active"
 
 def unload_model():
     print("🧹 Đang dọn dẹp cache và giải phóng RAM...")

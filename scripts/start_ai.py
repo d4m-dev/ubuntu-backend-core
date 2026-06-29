@@ -2,7 +2,7 @@ import os
 import time
 
 # Đường dẫn file cờ hiệu để server biết AI đang bật
-STATUS_FILE = "/storage/emulated/0/coder/media/ubuntu-backend-core/core/.ai_active"
+STATUS_FILE = "/mnt/sdcard/ubuntu-backend-core/core/.ai_active"
 
 def load_model():
     print("⏳ Bắt đầu tải Model AI vào RAM...")

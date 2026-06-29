@@ -7,7 +7,7 @@ echo " Đang khởi động hệ thống từ môi trường ảo "
 echo "========================================"
 
 # Chuyển hướng đến thư mục dự án trên bộ nhớ dùng chung của Android
-cd /storage/emulated/0/coder/media/ubuntu-backend-core || { echo "❌ Lỗi: Không tìm thấy thư mục dự án! Hãy kiểm tra lại kết nối bộ nhớ."; exit 1; }
+cd /mnt/sdcard/ubuntu-backend-core || { echo "❌ Lỗi: Không tìm thấy thư mục dự án! Hãy kiểm tra lại kết nối bộ nhớ."; exit 1; }
 
 # Khởi chạy main.py bằng cách gọi thẳng python3 chuẩn bên trong myenv
 # Cách này không cần chạy lệnh 'source activate' trước mà vẫn ăn đúng thư viện của môi trường ảo

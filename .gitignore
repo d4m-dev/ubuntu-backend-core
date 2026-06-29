@@ -2,21 +2,22 @@
 Thumbs.db
 node_modules/
 .env
+logs/
 *.log
 .continue
-
 .vscode
 __pycache__/
+
 phpmyadmin/
 venv/
 myenv/
+
+
 res/
 
 audio_workspace/
-logs/
+yt-dlp/
 
 cloudflare.log
 avatar-server-backup.zip
 project_size_report.txt
-*.mp3
-*.mp4
