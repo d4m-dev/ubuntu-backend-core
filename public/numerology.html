@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tra cứu Thần Số Học Premium</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Hiệu ứng kính mờ đặc trưng */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+        
+        /* Hiệu ứng loading quay vòng */
+        .loader {
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top: 3px solid #fff;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        body {
+            /* Hình nền Gradient tông xanh vũ trụ huyền bí */
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            min-height: 100vh;
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center p-4">
+
+    <div class="glass-panel rounded-3xl p-8 max-w-md w-full relative overflow-hidden">
+        <div class="absolute -top-16 -right-16 w-32 h-32 bg-purple-500 rounded-full mix-blend-multiply filter blur-2xl opacity-50"></div>
+        <div class="absolute -bottom-16 -left-16 w-32 h-32 bg-blue-500 rounded-full mix-blend-multiply filter blur-2xl opacity-50"></div>
+
+        <div class="relative z-10">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold tracking-wider mb-2">THẦN SỐ HỌC</h1>
+                <p class="text-sm text-gray-300">Khám phá con số chủ đạo của bạn</p>
+            </div>
+
+            <form id="numerologyForm" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium mb-1 pl-1">Họ và Tên</label>
+                    <input type="text" id="fullName" required placeholder="VD: Lý Thừa Ân" 
+                        class="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1 pl-1">Ngày Tháng Năm Sinh</label>
+                    <input type="text" id="birthDate" required placeholder="VD: 01/01/2000" 
+                        class="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all">
+                </div>
+
+                <button type="submit" id="submitBtn" 
+                    class="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 font-bold py-3 px-4 rounded-xl shadow-lg transition-transform transform hover:scale-105 flex justify-center items-center gap-2">
+                    <span>GIẢI MÃ NGAY</span>
+                    <div class="loader" id="btnLoader"></div>
+                </button>
+            </form>
+
+            <div id="resultBox" class="mt-8 hidden opacity-0 transition-opacity duration-500">
+                <hr class="border-white/20 mb-6">
+                <div class="text-center">
+                    <p class="text-sm text-gray-300 mb-1">Số Chủ Đạo Của Bạn Là</p>
+                    <div class="text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500 mb-4" id="resNumber">--</div>
+                    <h2 class="text-xl font-bold uppercase tracking-wide mb-2 text-yellow-300" id="resTitle">Đang phân tích...</h2>
+                    <p class="text-sm leading-relaxed text-gray-200" id="resDesc">...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('numerologyForm').addEventListener('submit', async function(e) {
+            e.preventDefault(); // Ngăn chặn load lại trang
+            
+            const fullName = document.getElementById('fullName').value.trim();
+            const birthDate = document.getElementById('birthDate').value.trim();
+            const submitBtn = document.getElementById('submitBtn');
+            const btnLoader = document.getElementById('btnLoader');
+            const resultBox = document.getElementById('resultBox');
+
+            // Kiểm tra định dạng ngày sinh sơ bộ
+            const dateRegex = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[012])\/\d{4}$/;
+            if (!dateRegex.test(birthDate)) {
+                alert("Sếp vui lòng nhập đúng định dạng DD/MM/YYYY nhé!");
+                return;
+            }
+
+            // Giao diện: Hiệu ứng Loading
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-75');
+            btnLoader.style.display = 'block';
+            submitBtn.querySelector('span').innerText = 'ĐANG TÍNH TOÁN...';
+
+            try {
+                // Gọi API tính toán thần số học
+                const response = await fetch('/api/bio/calculate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        full_name: fullName,
+                        birth_date: birthDate
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.status === 'success') {
+                    // Cập nhật dữ liệu vào giao diện
+                    document.getElementById('resNumber').innerText = data.data.life_path_number;
+                    document.getElementById('resTitle').innerText = data.data.traits.title;
+                    document.getElementById('resDesc').innerText = data.data.traits.desc;
+                    
+                    // Kích hoạt hiệu ứng xuất hiện
+                    resultBox.classList.remove('hidden');
+                    setTimeout(() => resultBox.classList.remove('opacity-0'), 50);
+
+                    // 🚀 GỌI THÊM API TRACKING (Chạy ngầm, không cần đợi kết quả)
+                    fetch('/api/bio/track', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            link_id: "numerology_search",
+                            platform: "Web Application"
+                        })
+                    }).catch(err => console.log("Tracking ngầm gặp lỗi nhẹ:", err));
+
+                } else {
+                    alert(data.detail || "Có lỗi xảy ra trong quá trình giải mã!");
+                }
+            } catch (error) {
+                alert("Không thể kết nối đến Máy chủ Ubuntu Core!");
+            } finally {
+                // Giao diện: Tắt hiệu ứng Loading
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-75');
+                btnLoader.style.display = 'none';
+                submitBtn.querySelector('span').innerText = 'GIẢI MÃ NGAY';
+            }
+        });
+    </script>
+</body>
+</html>

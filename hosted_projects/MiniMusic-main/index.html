@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Music Player</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css"
+    />
+    <link rel="stylesheet" href="./src/style.css" />
+    <!-- social links for d4m-dev.github.io-->
+    <script
+      src="./src/contact.js"
+      defer
+    ></script>
+  </head>
+  <body>
+    <div class="player">
+      <div class="header">
+        <button class="lyric">
+          <i class="bi bi-file-earmark-music"></i>
+        </button>
+
+        <strong>Đang Phát</strong>
+
+        <button class="show">
+          <i class="bi bi-music-note-list"></i>
+        </button>
+      </div>
+
+      <div class="track-info">
+        <img
+          src="https://placehold.co/200/363537/FFF?text=Music+Player"
+          alt=""
+          class="artwork"
+        />
+        <h2 class="name"></h2>
+        <h3 class="artist"></h3>
+      </div>
+
+      <div class="seek-slider">
+        <input type="range" min="0" max="100" value="0" step="any" />
+        <span class="current-time">0:00</span>
+        <span class="duration">0:00</span>
+      </div>
+
+      <div class="audio-controls">
+        <button class="prev">
+          <i class="bi bi-skip-start-fill"></i>
+        </button>
+
+        <button class="play-pause paused">
+          <i class="bi bi-play-circle-fill"></i>
+        </button>
+
+        <button class="next">
+          <i class="bi bi-skip-end-fill"></i>
+        </button>
+      </div>
+
+      <div class="volume-slider">
+        <i class="bi bi-volume-off-fill"></i>
+        <input type="range" min="0" max="100" value="35" step="any" />
+        <i class="bi bi-volume-up-fill"></i>
+      </div>
+
+      <div class="playlist">
+        <div class="playlist-header">
+          <button class="hide">
+            <i class="bi bi-chevron-right"></i>
+          </button>
+
+          <strong>Danh sách phát</strong>
+        </div>
+
+        <div class="playlist-content"></div>
+      </div>
+
+      <div class="container">
+        <button class="download">
+          <i class="bi bi-download"></i>
+        </button>
+      </div>
+
+      <!-- Phần hiển thị lời bài hát -->
+      <div id="lyrics" class="lyrics">
+        <div class="lyric-header">
+          <button class="hide-lyric" onclick="toggleLyrics()">
+            <i class="bi bi-chevron-left icon"></i>
+          </button>
+          <strong>Lời bài hát</strong>
+        </div>
+        <div id="lyrics-content"></div>
+      </div>
+    </div>
+    <script src="./src/tracks.js"></script>
+    <script src="./src/script.js"></script>
+  </body>
+</html>

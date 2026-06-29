@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Widget Music - Trình phát nhạc widget cho website của bạn</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 60px 20px;
+            color: white;
+        }
+        
+        header h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        header p {
+            font-size: 1.3em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            margin: 40px 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+        
+        .feature {
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            background: #f8f9fa;
+            transition: transform 0.3s ease;
+        }
+        
+        .feature:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .feature h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+        
+        .demo-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            margin: 40px 0;
+        }
+        
+        .demo-section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+        
+        code {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 5px;
+            display: block;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            margin: 20px 0;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 30px;
+            font-size: 1.2em;
+            transition: transform 0.3s ease;
+            margin: 20px 0;
+        }
+        
+        .cta-button:hover {
+            transform: scale(1.05);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: white;
+        }
+        
+        /* Style cho khung widget preview */
+        #music-widget-preview {
+            background: white;
+            padding: 0 !important;
+            margin: 0 !important;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            min-height: 680px;
+            overflow: hidden;
+        }
+        
+        /* Override style của widget để fit vào khung */
+        #music-widget-preview .music-widget-wrapper {
+            margin: 0 !important;
+            padding: 0 !important;
+            max-width: 100% !important;
+            box-shadow: none !important;
+            border-radius: 10px !important;
+        }
+        
+        #music-widget-preview .music-widget-frame {
+            margin: 0 !important;
+            padding: 0 !important;
+            display: block !important;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2em;
+            }
+            
+            header p {
+                font-size: 1.1em;
+            }
+            
+            .content {
+                padding: 20px;
+                margin: 20px 10px;
+            }
+            
+            .features {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .demo-section {
+                padding: 20px;
+            }
+            
+            code {
+                padding: 15px;
+                font-size: 0.85em;
+            }
+            
+            .cta-button {
+                padding: 12px 30px;
+                font-size: 1em;
+            }
+            
+            #music-widget-preview {
+                min-height: 650px;
+            }
+            
+            #music-widget-preview .music-widget-wrapper {
+                padding: 0 !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+            
+            header {
+                padding: 40px 15px;
+            }
+            
+            header h1 {
+                font-size: 1.8em;
+            }
+            
+            header p {
+                font-size: 1em;
+            }
+            
+            .content {
+                padding: 15px;
+                margin: 15px 5px;
+                border-radius: 10px;
+            }
+            
+            .feature h3 {
+                font-size: 1.2em;
+            }
+            
+            .demo-section {
+                padding: 15px;
+            }
+            
+            code {
+                font-size: 0.75em;
+                padding: 10px;
+            }
+            
+            #music-widget-preview {
+                border-radius: 0;
+                min-height: 600px;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            
+            #music-widget-preview .music-widget-wrapper {
+                border-radius: 0 !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            
+            #music-widget-preview .music-widget-frame {
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+        }
+        
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎵 Widget Music</h1>
+            <p>Trình phát nhạc widget đẹp mắt và dễ dàng tích hợp cho website của bạn</p>
+        </header>
+        
+        <div class="content">
+            <section>
+                <h2>Giới thiệu về Widget Music</h2>
+                <p>Widget Music là một giải pháp đơn giản và mạnh mẽ để tích hợp trình phát nhạc vào website của bạn. Chỉ với vài dòng code, bạn có thể mang đến trải nghiệm âm nhạc tuyệt vời cho người dùng.</p>
+            </section>
+            
+            <div class="features">
+                <div class="feature">
+                    <h3>🚀 Dễ dàng tích hợp</h3>
+                    <p>Chỉ cần thêm một dòng script vào website của bạn và bắt đầu sử dụng ngay lập tức.</p>
+                </div>
+                
+                <div class="feature">
+                    <h3>🎨 Giao diện đẹp mắt</h3>
+                    <p>Thiết kế hiện đại, responsive và có thể tùy chỉnh theo phong cách website của bạn.</p>
+                </div>
+                
+                <div class="feature">
+                    <h3>⚡ Hiệu suất cao</h3>
+                    <p>Tải nhanh, nhẹ và không làm chậm website của bạn.</p>
+                </div>
+                
+                <div class="feature">
+                    <h3>📱 Tương thích đa nền tảng</h3>
+                    <p>Hoạt động mượt mà trên mọi thiết bị và trình duyệt.</p>
+                </div>
+            </div>
+            
+            <div class="demo-section" style="background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%); border: 2px solid #667eea;">
+                <h2>🎧 Xem trước & Trải nghiệm Widget Music</h2>
+                <p style="margin-bottom: 30px; font-size: 1.1em;">Tương tác với widget music ngay bên dưới để xem nó hoạt động như thế nào!</p>
+                
+                <div id="music-widget-preview">
+                    <!-- Widget Music sẽ render ở đây -->
+                    <script src="https://d4m-dev.github.io/WidgetMusic.com/music-loader.js"></script>
+                </div>
+                
+                <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 5px;">
+                    <strong>💡 Lưu ý:</strong> Hãy thử các tính năng của widget như phát nhạc, tạm dừng, chuyển bài, điều chỉnh âm lượng để trải nghiệm đầy đủ!
+                </div>
+            </div>
+            
+            <div class="demo-section">
+                <h2>Cách sử dụng</h2>
+                <p>Để tích hợp Widget Music vào website của bạn, chỉ cần thêm đoạn code sau:</p>
+                
+                <code>&lt;html&gt;
+  &lt;script src="https://d4m-dev.github.io/WidgetMusic.com/music-loader.js"&gt;&lt;/script&gt;
+&lt;/html&gt;</code>
+                
+                <p style="margin-top: 20px;">Vậy là xong! Widget music sẽ tự động được tải và hiển thị trên trang web của bạn.</p>
+            </div>
+            
+            <div style="text-align: center; margin: 40px 0;">
+                <a href="https://github.com/d4m-dev/WidgetMusic.com" class="cta-button">Xem trên GitHub</a>
+            </div>
+            
+            <section>
+                <h2>Tính năng nổi bật</h2>
+                <ul style="margin: 20px 0; padding-left: 40px;">
+                    <li>Hỗ trợ nhiều định dạng âm thanh</li>
+                    <li>Danh sách phát (playlist) tùy chỉnh</li>
+                    <li>Điều khiển phát/dừng, next/prev</li>
+                    <li>Hiển thị thông tin bài hát</li>
+                    <li>Tự động phát tiếp</li>
+                    <li>Responsive design</li>
+                </ul>
+            </section>
+        </div>
+        
+        <footer>
+            <p>© 2026 Widget Music - Made with ❤️ by d4m-dev</p>
+        </footer>
+    </div>
+</body>
+</html>

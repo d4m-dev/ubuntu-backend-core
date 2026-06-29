@@ -1,0 +1,594 @@
+/* ========================================
+   GocMod.com - Main Stylesheet
+   ======================================== */
+
+/* CSS Variables */
+:root {
+    --primary-color: #17ab72;
+    --primary-dark: #0d8a5c;
+    --primary-light: #1fcea0;
+    --secondary-color: #2A99EF;
+    --accent-color: #FED148;
+    
+    --text-color: #333333;
+    --text-muted: #666666;
+    --text-light: #999999;
+    
+    --bg-color: #f5f7fa;
+    --bg-card: #ffffff;
+    --bg-header: #ffffff;
+    --bg-navbar: #ffffff;
+    
+    --border-color: #e1e4e8;
+    --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.12);
+    
+    --radius: 12px;
+    --radius-sm: 8px;
+    --radius-lg: 16px;
+    
+    --transition: all 0.3s ease;
+}
+
+/* Dark Mode */
+.dark-mode {
+    --text-color: #e0e0e0;
+    --text-muted: #a0a0a0;
+    --text-light: #707070;
+    
+    --bg-color: #1a1a2e;
+    --bg-card: #16213e;
+    --bg-header: #16213e;
+    --bg-navbar: #16213e;
+    
+    --border-color: #2a2a4a;
+    --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    --shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+/* Reset & Base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    min-height: 100vh;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+    transition: var(--transition);
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* ========================================
+   Header
+   ======================================== */
+.header {
+    background: var(--bg-header);
+    box-shadow: var(--shadow);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo img {
+    height: 40px;
+    width: auto;
+}
+
+.logo-text {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.header-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.theme-toggle,
+.search-toggle {
+    background: var(--bg-card);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: var(--transition);
+    color: var(--text-color);
+    font-size: 1.1rem;
+}
+
+.theme-toggle:hover,
+.search-toggle:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.theme-toggle i:nth-child(1) {
+    display: none;
+}
+
+.theme-toggle i:nth-child(2) {
+    display: inline;
+}
+
+.dark-mode .theme-toggle i:nth-child(1) {
+    display: inline;
+}
+
+.dark-mode .theme-toggle i:nth-child(2) {
+    display: none;
+}
+
+/* ========================================
+   Navigation
+   ======================================== */
+.navbar {
+    background: var(--bg-navbar);
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 60px;
+    z-index: 999;
+}
+
+.nav-menu {
+    display: flex;
+    list-style: none;
+    gap: 5px;
+    overflow-x: auto;
+    padding: 10px 0;
+}
+
+.nav-menu li a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: var(--radius-sm);
+    white-space: nowrap;
+    color: var(--text-color);
+}
+
+.nav-menu li a:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+.nav-menu i {
+    font-size: 1rem;
+}
+
+/* ========================================
+   Search Bar
+   ======================================== */
+.search-bar {
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border-color);
+    display: none;
+    padding: 15px 0;
+}
+
+.search-bar.active {
+    display: block;
+}
+
+.search-form {
+    display: flex;
+    gap: 10px;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.search-input {
+    flex: 1;
+    padding: 12px 20px;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    font-size: 1rem;
+    background: var(--bg-color);
+    color: var(--text-color);
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.search-btn,
+.search-close {
+    padding: 12px 20px;
+    border: none;
+    background: var(--primary-color);
+    color: white;
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 1rem;
+}
+
+.search-btn:hover,
+.search-close:hover {
+    background: var(--primary-dark);
+}
+
+.search-close {
+    background: #ff4757;
+}
+
+.search-close:hover {
+    background: #ff3344;
+}
+
+/* ========================================
+   Main Content
+   ======================================== */
+.main-content {
+    padding: 30px 0;
+    min-height: calc(100vh - 400px);
+}
+
+.section {
+    margin-bottom: 40px;
+}
+
+.section-title {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.section-title i {
+    color: var(--primary-color);
+}
+
+/* ========================================
+   App Cards Grid
+   ======================================== */
+.apps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.app-card {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    border: 1px solid var(--border-color);
+}
+
+.app-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-hover);
+}
+
+.app-card-image {
+    width: 100%;
+    height: 160px;
+    overflow: hidden;
+    background: var(--bg-color);
+}
+
+.app-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: var(--transition);
+}
+
+.app-card:hover .app-card-image img {
+    transform: scale(1.05);
+}
+
+.app-card-content {
+    padding: 15px;
+}
+
+.app-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-color);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.app-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+.badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.badge-pro {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.badge-mod {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+}
+
+.badge-no-ads {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    color: white;
+}
+
+.badge-premium {
+    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    color: white;
+}
+
+.app-version {
+    font-size: 0.8rem;
+    color: var(--text-light);
+}
+
+.btn-download {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    color: white;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.btn-download:hover {
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
+    transform: scale(1.02);
+}
+
+/* ========================================
+   Footer
+   ======================================== */
+.footer {
+    background: var(--bg-header);
+    border-top: 1px solid var(--border-color);
+    padding: 40px 0 20px;
+    margin-top: 40px;
+}
+
+.footer-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+.footer-section h3,
+.footer-section h4 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+}
+
+.footer-section p {
+    color: var(--text-muted);
+    line-height: 1.8;
+}
+
+.footer-section ul {
+    list-style: none;
+}
+
+.footer-section ul li {
+    margin-bottom: 8px;
+}
+
+.footer-section ul li a {
+    color: var(--text-muted);
+}
+
+.footer-section ul li a:hover {
+    color: var(--primary-color);
+    padding-left: 5px;
+}
+
+.footer-bottom {
+    text-align: center;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+    color: var(--text-light);
+}
+
+/* ========================================
+   Responsive Design
+   ======================================== */
+@media (max-width: 768px) {
+    .header-container {
+        padding: 12px 15px;
+    }
+    
+    .logo img {
+        height: 32px;
+    }
+    
+    .logo-text {
+        font-size: 1.2rem;
+    }
+    
+    .navbar {
+        top: 55px;
+    }
+    
+    .nav-menu {
+        padding: 8px 0;
+    }
+    
+    .nav-menu li a {
+        padding: 8px 12px;
+        font-size: 0.9rem;
+    }
+    
+    .main-content {
+        padding: 20px 0;
+    }
+    
+    .section-title {
+        font-size: 1.3rem;
+    }
+    
+    .apps-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 15px;
+    }
+    
+    .app-card-image {
+        height: 120px;
+    }
+    
+    .app-card-content {
+        padding: 12px;
+    }
+    
+    .app-title {
+        font-size: 0.9rem;
+    }
+    
+    .btn-download {
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+    
+    .footer-content {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .apps-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+    
+    .app-card-image {
+        height: 100px;
+    }
+    
+    .app-title {
+        font-size: 0.85rem;
+    }
+    
+    .app-meta {
+        gap: 5px;
+    }
+    
+    .badge {
+        padding: 3px 8px;
+        font-size: 0.7rem;
+    }
+}
+
+/* ========================================
+   Loading Animation
+   ======================================== */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.loading {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* ========================================
+   Scrollbar Styling
+   ======================================== */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-color);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-dark);
+}
+
+/* ========================================
+   Utility Classes
+   ======================================== */
+.text-center {
+    text-align: center;
+}
+
+.mt-1 { margin-top: 0.5rem; }
+.mt-2 { margin-top: 1rem; }
+.mt-3 { margin-top: 1.5rem; }
+.mb-1 { margin-bottom: 0.5rem; }
+.mb-2 { margin-bottom: 1rem; }
+.mb-3 { margin-bottom: 1.5rem; }
+
+.hidden {
+    display: none !important;
+}

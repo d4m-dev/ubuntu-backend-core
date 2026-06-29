@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Audio Studio | d4m-dev</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #0b0f19; color: white; font-family: sans-serif; overflow-x: hidden; }
+        .glass-panel { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 1.5rem; }
+        .input-glass { background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); color: white; transition: all 0.3s; }
+        .input-glass:focus { border-color: #3b82f6; outline: none; box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); }
+        .btn-gradient { background: linear-gradient(135deg, #3b82f6, #8b5cf6); transition: all 0.3s; }
+        .btn-gradient:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(59, 130, 246, 0.4); }
+        .checkbox-custom:checked + div { background-color: #3b82f6; border-color: #3b82f6; }
+        audio { height: 40px; border-radius: 8px; outline: none; }
+        audio::-webkit-media-controls-panel { background-color: #1e293b; }
+        audio::-webkit-media-controls-current-time-display,
+        audio::-webkit-media-controls-time-remaining-display { color: white; }
+    </style>
+</head>
+<body class="bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900/20 via-[#0b0f19] to-[#0b0f19] min-h-screen py-10">
+    
+    <div class="max-w-3xl mx-auto px-4 relative z-10">
+        <div class="text-center mb-10">
+            <div class="w-16 h-16 mx-auto bg-blue-500/10 rounded-2xl flex items-center justify-center mb-4 border border-blue-500/20">
+                <i class="fa-solid fa-compact-disc text-3xl text-blue-400 animate-spin" style="animation-duration: 3s;"></i>
+            </div>
+            <h1 class="text-4xl font-black mb-2 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">AI Audio Studio</h1>
+            <p class="text-gray-400">Công cụ bóc tách Beat & Lời bài hát bằng AI Demucs/Whisper</p>
+        </div>
+
+        <div class="glass-panel p-6 md:p-8 shadow-2xl">
+            <form id="uploadForm" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-bold text-gray-300 mb-2"><i class="fa-solid fa-cloud-arrow-up mr-2"></i>Chọn File (Audio/Video)</label>
+                    <div class="relative">
+                        <input type="file" id="audioFile" accept="audio/*, video/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" required>
+                        <div id="dropZone" class="border-2 border-dashed border-gray-600 rounded-xl p-8 text-center bg-black/20 transition-colors hover:border-blue-500 hover:bg-blue-500/5">
+                            <i class="fa-solid fa-file-audio text-4xl text-gray-500 mb-3" id="fileIcon"></i>
+                            <p class="text-gray-400 font-medium" id="fileNameDisplay">Kéo thả file vào đây hoặc bấm để chọn</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-gray-300 mb-2"><i class="fa-solid fa-pen-to-square mr-2"></i>Tên dự án xuất ra (Tùy chọn)</label>
+                    <input type="text" id="customName" placeholder="Để trống sẽ lấy tên file gốc" class="w-full input-glass rounded-xl px-4 py-3 text-sm">
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <label class="flex items-center p-4 border border-white/10 rounded-xl bg-black/20 cursor-pointer hover:bg-white/5 transition">
+                        <div class="relative flex items-center justify-center">
+                            <input type="checkbox" id="sepBeat" class="checkbox-custom absolute opacity-0 w-full h-full cursor-pointer" checked>
+                            <div class="w-6 h-6 border-2 border-gray-500 rounded flex items-center justify-center transition-colors">
+                                <i class="fa-solid fa-check text-white text-xs opacity-0" id="checkIcon1"></i>
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <p class="font-bold text-white text-sm">Tách Beat & Vocal</p>
+                            <p class="text-xs text-gray-400">Sử dụng Meta Demucs AI</p>
+                        </div>
+                    </label>
+
+                    <label class="flex items-center p-4 border border-white/10 rounded-xl bg-black/20 cursor-pointer hover:bg-white/5 transition">
+                        <div class="relative flex items-center justify-center">
+                            <input type="checkbox" id="extLyrics" class="checkbox-custom absolute opacity-0 w-full h-full cursor-pointer" checked>
+                            <div class="w-6 h-6 border-2 border-gray-500 rounded flex items-center justify-center transition-colors">
+                                <i class="fa-solid fa-check text-white text-xs opacity-0" id="checkIcon2"></i>
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <p class="font-bold text-white text-sm">Trích xuất Lời (Lyrics)</p>
+                            <p class="text-xs text-gray-400">Sử dụng OpenAI Whisper</p>
+                        </div>
+                    </label>
+                </div>
+
+                <button type="submit" id="submitBtn" class="relative w-full overflow-hidden bg-gray-800 text-white font-black py-4 rounded-xl text-lg flex items-center justify-center transition-all disabled:cursor-not-allowed">
+                    <div id="progressFill" class="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-600 to-purple-600 w-0 transition-all duration-300 ease-out z-0"></div>
+                    
+                    <div class="relative z-10 flex items-center">
+                        <i class="fa-solid fa-wand-magic-sparkles mr-2" id="btnIcon"></i> 
+                        <span id="btnText">BẮT ĐẦU XỬ LÝ</span>
+                    </div>
+                </button>
+            </form>
+        </div>
+
+        <div id="resultBox" class="glass-panel p-6 mt-6 hidden border-t-4 border-t-green-500">
+            <h3 class="font-black text-2xl mb-6 text-white text-center"><i class="fa-solid fa-circle-check text-green-400 mr-2"></i>ĐÃ XỬ LÝ THÀNH CÔNG</h3>
+            <div id="outputLinks" class="space-y-4">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('audioFile');
+        const fileNameDisplay = document.getElementById('fileNameDisplay');
+        const customNameInput = document.getElementById('customName');
+        const fileIcon = document.getElementById('fileIcon');
+        const submitBtn = document.getElementById('submitBtn');
+        const btnIcon = document.getElementById('btnIcon');
+        const btnText = document.getElementById('btnText');
+        const progressFill = document.getElementById('progressFill');
+        
+        let pollingInterval = null;
+        let progressInterval = null;
+        let simulatedProgress = 0;
+
+        // Auto điền tên file
+        fileInput.addEventListener('change', function(e) {
+            if (this.files && this.files[0]) {
+                const file = this.files[0];
+                fileNameDisplay.textContent = file.name;
+                fileNameDisplay.classList.add('text-blue-400', 'font-bold');
+                fileIcon.className = "fa-solid fa-music text-4xl text-blue-400 mb-3";
+                const nameWithoutExt = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+                customNameInput.value = nameWithoutExt;
+            }
+        });
+
+        // Xử lý Form
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const file = fileInput.files[0];
+            if (!file) return alert("Vui lòng chọn file!");
+
+            // 1. KHÓA NÚT VÀ KHỞI ĐỘNG THANH TIẾN ĐỘ
+            submitBtn.disabled = true;
+            btnIcon.className = "fa-solid fa-radar_stroke fa-spin mr-2 text-xl";
+            document.getElementById('resultBox').classList.add('hidden');
+            
+            simulatedProgress = 0;
+            progressFill.style.width = '0%';
+            btnText.innerText = "ĐANG CHUẨN BỊ (0%)...";
+
+            // Thuật toán Tiến độ Thông minh (Tăng nhanh -> Chậm dần -> Dừng ở 95%)
+            progressInterval = setInterval(() => {
+                if (simulatedProgress < 50) {
+                    simulatedProgress += 1; // 0 -> 50: Chạy nhanh (Đang upload & chuyển mp3)
+                } else if (simulatedProgress < 85) {
+                    simulatedProgress += 0.3; // 50 -> 85: Chạy chậm (Demucs đang chạy)
+                } else if (simulatedProgress < 95) {
+                    simulatedProgress += 0.05; // 85 -> 95: Chạy cực chậm (Whisper đang rặn)
+                }
+
+                progressFill.style.width = `${simulatedProgress}%`;
+                btnText.innerText = `ĐANG XỬ LÝ AI (${Math.floor(simulatedProgress)}%)...`;
+            }, 500); // Cập nhật mỗi nửa giây
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('custom_name', customNameInput.value);
+            formData.append('separate_beat', document.getElementById('sepBeat').checked);
+            formData.append('extract_lyrics', document.getElementById('extLyrics').checked);
+
+            try {
+                // Đẩy file lên Backend
+                const response = await fetch('/api/audio/extract', {
+                    method: 'POST',
+                    body: formData,
+                    headers: localStorage.getItem("backend_token") ? {
+                        'Authorization': `Bearer ${localStorage.getItem("backend_token")}`
+                    } : {}
+                });
+
+                const result = await response.json();
+                
+                if (response.status === 202) {
+                    const projectFolder = result.project_folder;
+                    const outputs = result.expected_outputs;
+                    
+                    // 2. RADAR QUÉT TRẠNG THÁI SERVER MỖI 5 GIÂY
+                    pollingInterval = setInterval(async () => {
+                        try {
+                            const statusRes = await fetch(`/api/audio/status/${projectFolder}`);
+                            const statusData = await statusRes.json();
+                            
+                            // NẾU BACKEND XONG -> BƠM % LÊN 100 VÀ MỞ KẾT QUẢ
+                            if (statusData.status === "completed") {
+                                clearInterval(pollingInterval);
+                                clearInterval(progressInterval);
+                                
+                                simulatedProgress = 100;
+                                progressFill.style.width = '100%';
+                                btnText.innerText = "HOÀN THÀNH (100%)!";
+                                btnIcon.className = "fa-solid fa-check mr-2";
+                                
+                                // Đợi 1 giây để user nhìn thấy 100% rồi mới load nút tải
+                                setTimeout(() => {
+                                    renderSuccessUI(outputs);
+                                }, 1000);
+                            }
+                        } catch (err) {
+                            console.error("Lỗi quét trạng thái:", err);
+                        }
+                    }, 5000);
+
+                } else {
+                    alert("Lỗi máy chủ: " + (result.message || result.detail));
+                    resetButton();
+                }
+            } catch (err) {
+                alert("Mất kết nối đến Backend: " + err.message);
+                resetButton();
+            }
+        });
+
+        // Hàm Reset Nút bấm
+        function resetButton() {
+            clearInterval(progressInterval);
+            clearInterval(pollingInterval);
+            submitBtn.disabled = false;
+            progressFill.style.width = '0%';
+            btnIcon.className = "fa-solid fa-wand-magic-sparkles mr-2";
+            btnText.innerText = "BẮT ĐẦU XỬ LÝ";
+        }
+
+        // Hàm Render Kết quả
+        function renderSuccessUI(outputs) {
+            resetButton();
+            const resultBox = document.getElementById('resultBox');
+            const outputLinks = document.getElementById('outputLinks');
+            
+            resultBox.classList.remove('hidden');
+            outputLinks.innerHTML = '';
+            
+            if (outputs.vocal) {
+                outputLinks.innerHTML += `
+                    <div class="bg-blue-900/20 border border-blue-500/20 p-4 rounded-xl flex flex-col md:flex-row items-center justify-between gap-4">
+                        <div class="flex items-center text-blue-300 font-bold min-w-[120px]"><i class="fa-solid fa-microphone-lines text-2xl mr-3"></i> Giọng Hát</div>
+                        <audio controls class="w-full max-w-md" src="${outputs.vocal}"></audio>
+                        <a href="${outputs.vocal}" download class="w-full md:w-auto bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-lg text-sm font-bold text-center transition flex-shrink-0"><i class="fa-solid fa-download mr-1"></i> Tải MP3</a>
+                    </div>`;
+            }
+            if (outputs.beat) {
+                outputLinks.innerHTML += `
+                    <div class="bg-purple-900/20 border border-purple-500/20 p-4 rounded-xl flex flex-col md:flex-row items-center justify-between gap-4">
+                        <div class="flex items-center text-purple-300 font-bold min-w-[120px]"><i class="fa-solid fa-drum text-2xl mr-3"></i> Nhạc Beat</div>
+                        <audio controls class="w-full max-w-md" src="${outputs.beat}"></audio>
+                        <a href="${outputs.beat}" download class="w-full md:w-auto bg-purple-600 hover:bg-purple-500 text-white px-5 py-2.5 rounded-lg text-sm font-bold text-center transition flex-shrink-0"><i class="fa-solid fa-download mr-1"></i> Tải MP3</a>
+                    </div>`;
+            }
+            if (outputs.lyrics) {
+                outputLinks.innerHTML += `
+                    <div class="bg-green-900/20 border border-green-500/20 p-4 rounded-xl flex flex-col md:flex-row items-center justify-between gap-4">
+                        <div class="flex items-center text-green-300 font-bold min-w-[120px]"><i class="fa-solid fa-file-lines text-2xl mr-3"></i> Lời Bài Hát</div>
+                        <div class="text-gray-400 text-sm flex-1 truncate">File Text (.txt) chứa lời được bóc tách từ Whisper AI</div>
+                        <a href="${outputs.lyrics}" target="_blank" class="w-full md:w-auto bg-gray-700 hover:bg-gray-600 border border-green-500/30 text-white px-5 py-2.5 rounded-lg text-sm font-bold text-center transition flex-shrink-0"><i class="fa-solid fa-eye mr-1"></i> Xem / Tải TXT</a>
+                    </div>`;
+            }
+        }
+    </script>
+</body>
+</html>

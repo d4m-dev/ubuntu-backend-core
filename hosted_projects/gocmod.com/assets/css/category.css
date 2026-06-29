@@ -1,0 +1,456 @@
+/* ========================================
+   GocMod.com - Category Page Styles
+   ======================================== */
+
+/* Category Header */
+.category-header {
+    display: flex;
+    gap: 25px;
+    align-items: center;
+    background: var(--bg-card);
+    padding: 30px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    margin-bottom: 25px;
+}
+
+.category-icon {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: var(--shadow-hover);
+}
+
+.category-icon i {
+    font-size: 3rem;
+    color: white;
+}
+
+.category-info {
+    flex: 1;
+}
+
+.category-title {
+    font-size: 2rem;
+    color: var(--text-color);
+    margin-bottom: 10px;
+}
+
+.category-description {
+    color: var(--text-muted);
+    margin-bottom: 15px;
+    line-height: 1.6;
+}
+
+.category-stats {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.category-stats span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-light);
+    font-size: 0.9rem;
+}
+
+.category-stats i {
+    color: var(--primary-color);
+}
+
+/* Category Toolbar */
+.category-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    background: var(--bg-card);
+    padding: 20px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+}
+
+.filter-group,
+.sort-group {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.filter-select {
+    padding: 10px 15px;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background: var(--bg-color);
+    color: var(--text-color);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: var(--transition);
+    min-width: 150px;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.filter-select:hover {
+    border-color: var(--primary-color);
+}
+
+.view-toggle {
+    display: flex;
+    gap: 5px;
+}
+
+.view-btn {
+    padding: 10px 12px;
+    border: 2px solid var(--border-color);
+    background: var(--bg-color);
+    color: var(--text-color);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 1rem;
+}
+
+.view-btn:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.view-btn.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+/* Games Grid (extends apps-grid) */
+.games-grid {
+    /* Inherits from apps-grid in style.css */
+}
+
+/* List View */
+.apps-grid.list-view {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.apps-grid.list-view .app-card {
+    display: flex;
+    flex-direction: row;
+    height: auto;
+}
+
+.apps-grid.list-view .app-card-image {
+    width: 100px;
+    height: 100px;
+    flex-shrink: 0;
+}
+
+.apps-grid.list-view .app-card-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 15px 20px;
+}
+
+.apps-grid.list-view .app-title {
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+}
+
+.apps-grid.list-view .app-meta {
+    margin-bottom: 12px;
+}
+
+.apps-grid.list-view .btn-download {
+    width: auto;
+    align-self: flex-start;
+    padding: 10px 20px;
+}
+
+/* Pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 40px;
+    flex-wrap: wrap;
+}
+
+.page-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    height: 40px;
+    padding: 0 12px;
+    border: 2px solid var(--border-color);
+    background: var(--bg-card);
+    color: var(--text-color);
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.page-btn:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.page-btn.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+}
+
+.empty-state i {
+    font-size: 4rem;
+    color: var(--text-light);
+    margin-bottom: 20px;
+}
+
+.empty-state h3 {
+    color: var(--text-color);
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+}
+
+.empty-state p {
+    color: var(--text-muted);
+    margin-bottom: 20px;
+}
+
+/* Loading State */
+.loading-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.loading-card {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+.loading-card-image {
+    height: 160px;
+    background: var(--loading-skeleton, linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%));
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+.loading-card-content {
+    padding: 15px;
+}
+
+.loading-title {
+    height: 20px;
+    width: 80%;
+    background: var(--loading-skeleton, linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%));
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+    margin-bottom: 10px;
+    border-radius: 4px;
+}
+
+.loading-meta {
+    height: 15px;
+    width: 60%;
+    background: var(--loading-skeleton, linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%));
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+    margin-bottom: 15px;
+    border-radius: 4px;
+}
+
+.loading-btn {
+    height: 40px;
+    width: 100%;
+    background: var(--loading-skeleton, linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%));
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+    border-radius: var(--radius-sm);
+}
+
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* ========================================
+   Responsive Design
+   ======================================== */
+@media (max-width: 768px) {
+    .category-header {
+        flex-direction: column;
+        text-align: center;
+        padding: 20px;
+    }
+    
+    .category-icon {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .category-icon i {
+        font-size: 2.5rem;
+    }
+    
+    .category-title {
+        font-size: 1.5rem;
+    }
+    
+    .category-stats {
+        justify-content: center;
+    }
+    
+    .category-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .filter-group,
+    .sort-group {
+        width: 100%;
+    }
+    
+    .filter-select {
+        flex: 1;
+        min-width: unset;
+    }
+    
+    .view-toggle {
+        justify-content: flex-end;
+    }
+    
+    .apps-grid.list-view .app-card {
+        flex-direction: column;
+    }
+    
+    .apps-grid.list-view .app-card-image {
+        width: 100%;
+        height: 160px;
+    }
+    
+    .apps-grid.list-view .btn-download {
+        width: 100%;
+    }
+    
+    .pagination {
+        gap: 5px;
+    }
+    
+    .page-btn {
+        min-width: 35px;
+        height: 35px;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .category-header {
+        padding: 15px;
+    }
+    
+    .category-icon {
+        width: 70px;
+        height: 70px;
+    }
+    
+    .category-icon i {
+        font-size: 2rem;
+    }
+    
+    .category-title {
+        font-size: 1.3rem;
+    }
+    
+    .category-description {
+        font-size: 0.9rem;
+    }
+    
+    .category-stats {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .category-stats span {
+        font-size: 0.85rem;
+    }
+    
+    .category-toolbar {
+        padding: 15px;
+    }
+    
+    .filter-select {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+    }
+    
+    .apps-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+    
+    .app-card-image {
+        height: 120px;
+    }
+    
+    .app-card-content {
+        padding: 10px;
+    }
+    
+    .app-title {
+        font-size: 0.85rem;
+    }
+    
+    .btn-download {
+        padding: 8px;
+        font-size: 0.85rem;
+    }
+}
+
+/* Badge variations for category page */
+.badge-gold {
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    color: white;
+}
+
+.badge-vip {
+    background: linear-gradient(135deg, #9B59B6 0%, #8E44AD 100%);
+    color: white;
+}
+
+.badge-plus {
+    background: linear-gradient(135deg, #E74C3C 0%, #C0392B 100%);
+    color: white;
+}

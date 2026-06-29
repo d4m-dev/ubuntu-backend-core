@@ -1,0 +1,548 @@
+
+<!doctype html>
+<html lang="vi" dir="">
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<title>Làm đẹp code javascript và Html</title>
+	<meta name="description" content="Công cụ làm đẹp code html và css3 trực tuyến miễn phí">
+	<meta name="keywords" content="Làm đẹp code javascript và Html">
+
+	
+<meta name="robots" content="index, archive, follow, noodp" />
+<meta name="googlebot" content="index,archive,follow,noodp" />
+
+<!-- Favicon -->
+<link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
+<link rel="manifest" href="favicon/site.webmanifest">
+<link rel="shortcut icon" href="favicon/favicon.ico">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+<!-- CSS Implementing Plugins -->
+<link rel="stylesheet" href="css/vendor.min.css">
+<link rel="stylesheet" href="css/bootstrap-icons.css">
+
+<!-- CSS Front Template -->
+<link rel="stylesheet" href="css/theme.min.css?v=1.0">
+<link rel="stylesheet" href="css/aos.css">
+<link rel="stylesheet" href="css/custom.min.css?v=1.0">
+	<link rel="stylesheet" href="web/third-party/codemirror/lib/codemirror.css">
+	<script src="web/third-party/codemirror/lib/codemirror.js"></script>
+	<script src="web/third-party/codemirror/mode/javascript/javascript.js"></script>
+	
+	<style>
+		a.self {
+			font-weight: bold;
+			text-decoration: none;
+			color: #444;
+			border-bottom: 1px solid #aaa
+		}
+
+		textarea#source {
+			border: 1px solid blue;
+		}
+
+		a.turn-off-codemirror {
+			color: #28a745;
+			text-decoration: none;
+		}
+
+		a.turn-off-codemirror:hover {
+			color: #218838;
+			text-decoration: underline;
+		}
+
+		#testresults {
+			display: none;
+		}
+
+		.CodeMirror {
+			border: 1px solid #ccc;
+			height: 450px;
+			font-size: 90%;
+			margin-bottom: 6px;
+			background: white;
+		}
+
+		.contributor-sep {
+			border-top: 1px solid #ccc;
+			padding-top: 8px;
+		}
+
+		/* Style for textarea without CodeMirror */
+		textarea#source {
+			font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+			font-size: 14px;
+			line-height: 1.5;
+			tab-size: 4;
+			white-space: pre;
+			overflow-x: auto;
+		}
+
+		/* Sample code modal */
+		.sample-code {
+			background: #1e1e1e;
+			color: #d4d4d4;
+			padding: 15px;
+			border-radius: 5px;
+			font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+			font-size: 13px;
+			overflow-x: auto;
+			max-height: 400px;
+		}
+		.sample-code .keyword { color: #569cd6; }
+		.sample-code .string { color: #ce9178; }
+		.sample-code .comment { color: #6a9955; }
+		.sample-code .function { color: #dcdcaa; }
+		.sample-code .number { color: #b5cea8; }
+		.sample-code .operator { color: #d4d4d4; }
+	</style>
+	<script src="web/third-party/jquery/jquery.js"></script>
+	<script src="web/third-party/jquery/jquery.cookie.js"></script>
+	<script src="js/lib/beautify.js"></script>
+	<script src="js/lib/beautify-css.js"></script>
+	<script src="js/lib/beautify-html.js"></script>
+	<script src="js/test/sanitytest.js"></script>
+	<script src="js/test/beautify-javascript-tests.js"></script>
+	<script src="js/test/beautify-css-tests.js"></script>
+	<script src="js/test/beautify-html-tests.js"></script>
+	<script src="js/lib/unpackers/javascriptobfuscator_unpacker.js"></script>
+	<script src="js/lib/unpackers/urlencode_unpacker.js"></script>
+	<script src="js/lib/unpackers/p_a_c_k_e_r_unpacker.js"></script>
+	<script src="js/lib/unpackers/myobfuscate_unpacker.js"></script>
+	<script>
+		var the = {
+			use_codemirror: (!window.location.href.match(/without-codemirror/)),
+			beautify_in_progress: false,
+			editor: null // codemirror editor
+		};
+
+		function run_tests() {
+			var st = new SanityTest();
+			run_javascript_tests(st, Urlencoded, js_beautify, html_beautify, css_beautify);
+			run_css_tests(st, Urlencoded, js_beautify, html_beautify, css_beautify);
+			run_html_tests(st, Urlencoded, js_beautify, html_beautify, css_beautify);
+			JavascriptObfuscator.run_tests(st);
+			P_A_C_K_E_R.run_tests(st);
+			Urlencoded.run_tests(st);
+			MyObfuscate.run_tests(st);
+			var results = st.results_raw().replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/ /g, '&nbsp;').replace(/\r/g, '·').replace(/\n/g, '<br>');
+			$('#testresults').html(results).show();
+		}
+
+		function any(a, b) {
+			return a || b;
+		}
+
+		function read_settings_from_cookie() {
+			$('#tabsize').val(any($.cookie('tabsize'), '4'));
+			$('#brace-style').val(any($.cookie('brace-style'), 'collapse'));
+			$('#detect-packers').prop('checked', $.cookie('detect-packers') !== 'off');
+			$('#max-preserve-newlines').val(any($.cookie('max-preserve-newlines'), '5'));
+			$('#keep-array-indentation').prop('checked', $.cookie('keep-array-indentation') === 'on');
+			$('#break-chained-methods').prop('checked', $.cookie('break-chained-methods') === 'on');
+			$('#indent-scripts').val(any($.cookie('indent-scripts'), 'normal'));
+			$('#space-before-conditional').prop('checked', $.cookie('space-before-conditional') !== 'off');
+			$('#wrap-line-length').val(any($.cookie('wrap-line-length'), '0'));
+			$('#unescape-strings').prop('checked', $.cookie('unescape-strings') === 'on');
+			$('#jslint-happy').prop('checked', $.cookie('jslint-happy') === 'on');
+			$('#end-with-newline').prop('checked', $.cookie('end-with-newline') === 'on');
+		}
+
+		function store_settings_to_cookie() {
+			var opts = {
+				expires: 360
+			};
+			$.cookie('tabsize', $('#tabsize').val(), opts);
+			$.cookie('brace-style', $('#brace-style').val(), opts);
+			$.cookie('detect-packers', $('#detect-packers').prop('checked') ? 'on' : 'off', opts);
+			$.cookie('max-preserve-newlines', $('#max-preserve-newlines').val(), opts);
+			$.cookie('keep-array-indentation', $('#keep-array-indentation').prop('checked') ? 'on' : 'off', opts);
+			$.cookie('break-chained-methods', $('#break-chained-methods').prop('checked') ? 'on' : 'off', opts);
+			$.cookie('space-before-conditional', $('#space-before-conditional').prop('checked') ? 'on' : 'off', opts);
+			$.cookie('unescape-strings', $('#unescape-strings').prop('checked') ? 'on' : 'off', opts);
+			$.cookie('jslint-happy', $('#jslint-happy').prop('checked') ? 'on' : 'off', opts);
+			$.cookie('end-with-newline', $('#end-with-newline').prop('checked') ? 'on' : 'off', opts);
+			$.cookie('wrap-line-length', $('#wrap-line-length').val(), opts);
+			$.cookie('indent-scripts', $('#indent-scripts').val(), opts);
+		}
+
+		function unpacker_filter(source) {
+			var trailing_comments = '',
+				comment = '',
+				unpacked = '',
+				found = false;
+			// cut trailing comments
+			do {
+				found = false;
+				if (/^\s*\/\*/.test(source)) {
+					found = true;
+					comment = source.substr(0, source.indexOf('*/') + 2);
+					source = source.substr(comment.length).replace(/^\s+/, '');
+					trailing_comments += comment + "\n";
+				} else if (/^\s*\/\//.test(source)) {
+					found = true;
+					comment = source.match(/^\s*\/\/.*/)[0];
+					source = source.substr(comment.length).replace(/^\s+/, '');
+					trailing_comments += comment + "\n";
+				}
+			} while (found);
+			var unpackers = [P_A_C_K_E_R, Urlencoded, /*JavascriptObfuscator,*/ MyObfuscate];
+			for (var i = 0; i < unpackers.length; i++) {
+				if (unpackers[i].detect(source)) {
+					unpacked = unpackers[i].unpack(source);
+					if (unpacked != source) {
+						source = unpacker_filter(unpacked);
+					}
+				}
+			}
+			return trailing_comments + source;
+		}
+
+		function beautify() {
+			if (the.beautify_in_progress)
+				return;
+			
+			try {
+				store_settings_to_cookie();
+				the.beautify_in_progress = true;
+				
+				var source = the.editor ? the.editor.getValue() : $('#source').val();
+				
+				if (!source || source.trim() === '') {
+					alert('Vui lòng nhập code cần làm đẹp!');
+					the.beautify_in_progress = false;
+					return;
+				}
+				
+				var output,
+					opts = {};
+				opts.indent_size = $('#tabsize').val();
+				opts.indent_char = opts.indent_size == 1 ? '\t' : ' ';
+				opts.max_preserve_newlines = $('#max-preserve-newlines').val();
+				opts.preserve_newlines = opts.max_preserve_newlines !== "-1";
+				opts.keep_array_indentation = $('#keep-array-indentation').prop('checked');
+				opts.break_chained_methods = $('#break-chained-methods').prop('checked');
+				opts.indent_scripts = $('#indent-scripts').val();
+				opts.brace_style = $('#brace-style').val();
+				opts.space_before_conditional = $('#space-before-conditional').prop('checked');
+				opts.unescape_strings = $('#unescape-strings').prop('checked');
+				opts.jslint_happy = $('#jslint-happy').prop('checked');
+				opts.end_with_newline = $('#end-with-newline').prop('checked');
+				opts.wrap_line_length = $('#wrap-line-length').val();
+				
+				if (looks_like_html(source)) {
+					if (typeof html_beautify === 'function') {
+						output = html_beautify(source, opts);
+					} else {
+						throw new Error('html_beautify not loaded');
+					}
+				} else {
+					if ($('#detect-packers').prop('checked')) {
+						source = unpacker_filter(source);
+					}
+					if (typeof js_beautify === 'function') {
+						output = js_beautify(source, opts);
+					} else {
+						throw new Error('js_beautify not loaded');
+					}
+				}
+				
+				if (the.editor) {
+					the.editor.setValue(output);
+					the.editor.focus();
+				} else {
+					$('#source').val(output);
+				}
+			} catch (error) {
+				console.error('Beautify error:', error);
+				alert('Có lỗi xảy ra khi làm đẹp code: ' + error.message);
+			} finally {
+				the.beautify_in_progress = false;
+			}
+		}
+
+		function looks_like_html(source) {
+			// <foo> - looks like html
+			// <!--\nalert('foo!');\n--> - doesn't look like html
+			var trimmed = source.replace(/^[ \t\n\r]+/, '');
+			var comment_mark = '<' + '!-' + '-';
+			return (trimmed && (trimmed.substring(0, 1) === '<' && trimmed.substring(0, 4) !== comment_mark));
+		}
+
+		// Test function to verify beautifiers are loaded
+		function verifyBeautifiers() {
+			if (typeof js_beautify === 'undefined') {
+				console.error('js_beautify is not loaded!');
+				return false;
+			}
+			if (typeof css_beautify === 'undefined') {
+				console.error('css_beautify is not loaded!');
+				return false;
+			}
+			if (typeof html_beautify === 'undefined') {
+				console.error('html_beautify is not loaded!');
+				return false;
+			}
+			console.log('All beautifiers loaded successfully!');
+			return true;
+		}
+	</script>
+</head>
+
+<body>
+	<!-- Header -->
+	<header class="bg-dark text-white py-3">
+		<div class="container">
+			<div class="d-flex justify-content-between align-items-center">
+				<a href="/" class="text-white text-decoration-none">
+					<h2 class="mb-0"><strong>d4m-dev</strong></h2>
+				</a>
+				<nav>
+					<a href="/" class="text-white text-decoration-none me-3">Home</a>
+					<a href="https://github.com/d4m-dev" class="text-white text-decoration-none" target="_blank">GitHub</a>
+				</nav>
+			</div>
+		</div>
+	</header>
+
+	<main id="content" role="main">
+		<div class="bg-img-start" style="background-image: linear-gradient(45deg, #667eea 0%, #764ba2 100%);">
+			<div class="container">
+				<div class="row justify-content-md-between align-items-md-center">
+					<div class="col-md-7 mb-7 mb-md-0">
+						<div class="mb-4">
+							<h1 class="fs-2 text-white">Làm đẹp code JavaScript, CSS & HTML</h1>
+							<p class="text-white">Công cụ làm đẹp code trực tuyến miễn phí từ <strong>d4m-dev</strong>. Hỗ trợ JavaScript, CSS3 và HTML với nhiều tùy chọn linh hoạt.</p>
+						</div>
+					</div>
+					<div class="col-md-5">
+						<img class="img-fluid" src="images/laptrinhvien7.png" alt="Code Beautifier">
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="container my-5">
+			<div class="row">
+
+				<div class="col-md-8 mb-3">
+					<div class="mb-3">
+						
+						<div class="mb-3">
+							<textarea id="source" class="form-control" rows="30" placeholder="Dán code JavaScript, CSS hoặc HTML của bạn vào đây..."></textarea>
+						</div>
+						<div class="mb-3"><button class="submit btn btn-primary">
+								<strong>Thực hiện</strong><em>(Hoặc nhấn ctrl-enter)</em>
+							</button></div>
+					</div>
+					<div id="testresults"></div>
+				</div>
+				<div class="col-md mb-3">
+					<div id="options">
+						<div class="mb-3">
+							<select class="form-select" name="tabsize" id="tabsize">
+								<option value="1">Thụt lùi với ký tự tab</option>
+								<option value="2">Thụt lùi 2 khoảng trắng</option>
+								<option value="3">Thụt lùi 3 khoảng trắng</option>
+								<option value="4">Thụt lùi 4 khoảng trắng</option>
+								<option value="8">Thụt lùi 8 khoảng trắng</option>
+							</select>
+						</div>
+						<div class="mb-3">
+							<select class="form-select" name="max-preserve-newlines" id="max-preserve-newlines">
+								<option value="-1">Xóa toàn bộ dòng mới thêm</option>
+								<option value="1">Cho phép xuống 1 dòng giữa các thẻ</option>
+								<option value="2">Cho phép xuống 2 dòng giữa các thẻ</option>
+								<option value="5">Cho phép xuống 5 dòng giữa các thẻ</option>
+								<option value="10">Cho phép xuống 10 dòng giữa các thẻ</option>
+								<option value="0">Cho phép dòng mới không giới hạn giữa các thẻ</option>
+							</select>
+						</div>
+						<div class="mb-3">
+							<select class="form-select" name="wrap-line-length" id="wrap-line-length">
+								<option value="0">Không cho phép trên 1 dòng</option>
+								<option value="40">Xuống dòng trong 40 ký tự</option>
+								<option value="70">Xuống dòng trong 70 ký tự</option>
+								<option value="80">Xuống dòng trong 80 ký tự</option>
+								<option value="110">Xuống dòng trong 110 ký tự</option>
+								<option value="120">Xuống dòng trong 120 ký tự</option>
+								<option value="160">Xuống dòng trong 160 ký tự</option>
+							</select>
+						</div>
+						<div class="mb-3">
+							<select class="form-select" id="brace-style">
+								<option value="collapse">Giữ và tự động kiểm soát</option>
+								<option value="expand">Giữ trên một dòng</option>
+								<option value="end-expand">Giữa các dòng cuối</option>
+								<option value="none">Cố gắng giữ các dòng đang có</option>
+							</select>
+						</div>
+						<div class="mb-3">
+							HTML &lt;style&gt;, &lt;script&gt; formatting:
+						</div>
+						<div class="mb-3">
+							<select class="form-select" id="indent-scripts">
+								<option value="keep">Giữ mức thụt lề của thẻ</option>
+								<option value="normal">Thêm một mức thụt lề</option>
+								<option value="separate">indentation riêng</option>
+							</select>
+						</div>
+						<div class="form-check">
+							<input class="checkbox form-check-input"  type="checkbox" id="end-with-newline"><label class="form-check-label" for="end-with-newline">Kết thúc script với dòng mới</label>
+						</div>
+						<div class="form-check">
+							<input class="checkbox form-check-input"  type="checkbox" id="detect-packers"><label class="form-check-label" for="detect-packers">Tự tìm các packers và obfuscators</label>
+						</div>
+						<div class="form-check">
+							<input class="checkbox form-check-input"  type="checkbox" id="keep-array-indentation"><label class="form-check-label" for="keep-array-indentation">Giữa đường viền</label>
+						</div>
+						<div class="form-check">
+							<input class="checkbox form-check-input"  type="checkbox" id="break-chained-methods"><label class="form-check-label" for="break-chained-methods">Xuống dòng trong các chained methods?</label>
+						</div>
+						<div class="form-check">
+							<input class="checkbox form-check-input"  type="checkbox" id="space-before-conditional"><label class="form-check-label" for="space-before-conditional">Khoảng trắng trước các điều kiện: "if(x)" / "if (x)"</label>
+						</div>
+						<div class="form-check">
+							<input class="checkbox form-check-input"  type="checkbox" id="unescape-strings"> <label class="form-check-label" for="unescape-strings">In theo kiểu định dạng bị mã hóa như \xNN hoặc \uNNNN?</label>
+						</div>
+						<div class="form-check">
+							<input class="checkbox form-check-input" type="checkbox" id="jslint-happy"> <label class="form-check-label" for="jslint-happy">Sử dụng kiểu định dạng JSLint-happy</label>
+						</div>
+						<div class="mb-3">
+							<button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#sampleModal">Click xem sử dụng mẫu</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+
+	<!-- Sample Modal -->
+	<div class="modal fade" id="sampleModal" tabindex="-1" aria-labelledby="sampleModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="sampleModalLabel">💡 Ví dụ sử dụng</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<h6 class="mb-2">JavaScript:</h6>
+					<div class="sample-code mb-3">
+<span class="comment">// Code xấu</span>
+<span class="keyword">if</span>(x===<span class="number">1</span>){<span class="function">console</span>.<span class="function">log</span>(<span class="string">"hello"</span>)}<span class="keyword">else</span>{<span class="keyword">var</span> a=b?(c%d):e[f];}
+
+<span class="comment">// Code đẹp sau khi beautify</span>
+<span class="keyword">if</span> (x === <span class="number">1</span>) {
+    <span class="function">console</span>.<span class="function">log</span>(<span class="string">"hello"</span>);
+} <span class="keyword">else</span> {
+    <span class="keyword">var</span> a = b ? (c % d) : e[f];
+}
+					</div>
+					<h6 class="mb-2">HTML:</h6>
+					<div class="sample-code mb-3">
+<span class="comment">&lt;!-- Code xấu --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"test"</span><span class="tag">&gt;&lt;p&gt;</span>Hello<span class="tag">&lt;/p&gt;&lt;span&gt;</span>World<span class="tag">&lt;/span&gt;&lt;/div&gt;</span>
+
+<span class="comment">&lt;!-- Code đẹp sau khi beautify --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="string">"test"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;p&gt;</span>Hello<span class="tag">&lt;/p&gt;</span>
+    <span class="tag">&lt;span&gt;</span>World<span class="tag">&lt;/span&gt;</span>
+<span class="tag">&lt;/div&gt;</span>
+					</div>
+					<h6 class="mb-2">CSS:</h6>
+					<div class="sample-code">
+<span class="comment">/* Code xấu */</span>
+<span class="selector">body</span>{<span class="property">margin</span>:<span class="number">0</span>;<span class="property">padding</span>:<span class="number">0</span>;<span class="property">background</span>:<span class="string">#fff</span>;}
+
+<span class="comment">/* Code đẹp sau khi beautify */</span>
+<span class="selector">body</span> {
+    <span class="property">margin</span>: <span class="number">0</span>;
+    <span class="property">padding</span>: <span class="number">0</span>;
+    <span class="property">background</span>: <span class="string">#fff</span>;
+}
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		$(function() {
+			// Verify beautifiers are loaded
+			if (!verifyBeautifiers()) {
+				alert('Lỗi: Không thể tải thư viện làm đẹp code. Vui lòng tải lại trang!');
+				return;
+			}
+
+			read_settings_from_cookie();
+			var default_text = "// Đây là mẫu thử nghiệm, hãy copy và paste mã html hoặc css của bạn vào khung này.\n\nif ('this_is'==/an_example/){of_beautifer();}else{var a=b?(c%d):e[f];}";
+			var textArea = $('#source')[0];
+			if (the.use_codemirror && typeof CodeMirror !== 'undefined') {
+				the.editor = CodeMirror.fromTextArea(textArea, {
+					theme: 'default',
+					lineNumbers: true,
+					mode: 'javascript'
+				});
+				the.editor.focus();
+				the.editor.setValue(default_text);
+				$('.CodeMirror').click(function() {
+					if (the.editor.getValue() == default_text) {
+						the.editor.setValue('');
+					}
+				});
+			} else {
+				$('#source').val(default_text).bind('click focus', function() {
+					if ($(this).val() == default_text) {
+						$(this).val('');
+					}
+				}).bind('blur', function() {
+					if (!$(this).val()) {
+						$(this).val(default_text);
+					}
+				});
+			}
+			$(window).bind('keydown', function(e) {
+				if (e.ctrlKey && e.keyCode == 13) {
+					beautify();
+				}
+			})
+			$('.submit').click(beautify);
+			$('select').change(beautify);
+		});
+	</script>
+
+	<!-- Footer -->
+	<footer class="bg-dark text-white py-4 mt-5">
+		<div class="container">
+			<div class="row align-items-center">
+				<div class="col-md-6">
+					<h4 class="mb-0"><strong>d4m-dev</strong></h4>
+					<p class="text-white-50 small mb-0 mt-1">Code Beautifier - Làm đẹp code JavaScript, CSS & HTML</p>
+				</div>
+				<div class="col-md-6 text-md-end mt-3 mt-md-0">
+					<a href="https://github.com/d4m-dev" class="text-white-50 text-decoration-none me-3" target="_blank">GitHub</a>
+					<a href="/" class="text-white-50 text-decoration-none me-3">Home</a>
+					<span class="text-white-50 small">&copy; 2024 d4m-dev</span>
+				</div>
+			</div>
+		</div>
+	</footer>
+</main>
+
+<!-- Bootstrap Bundle -->
+<script src="js/vendor.min.js"></script>
+<script src="js/aos.js"></script>
+<script src="js/theme.min.js"></script>
+</body>
+
+</html>

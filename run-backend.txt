@@ -1,0 +1,4 @@
+bash /storage/emulated/0/ubuntu-backend-core/scripts/auto_start.sh
+
+~/myenv/bin/python3 my_agent.py
+

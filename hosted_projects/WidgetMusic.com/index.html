@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Music Widget Pro</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+        font-family: 'Poppins', sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background: #eef2f5;
+        color: #333;
+    }
+
+    /* Container chính */
+    .music-widget {
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        width: 100%;
+        max-width: 380px;
+        padding: 30px;
+        position: relative;
+        overflow: hidden;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .music-widget::before {
+        content: '';
+        position: absolute;
+        top: -50%; left: -50%; width: 200%; height: 200%;
+        background: radial-gradient(circle, rgba(255,107,107,0.1) 0%, rgba(255,255,255,0) 70%);
+        z-index: 0; pointer-events: none;
+    }
+
+    .song-info { position: relative; z-index: 1; margin-bottom: 20px; }
+    .song-title { font-size: 18px; font-weight: 600; color: #2d3436; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .song-artist { font-size: 13px; color: #636e72; }
+
+    /* Đĩa nhạc */
+    .img-container {
+        position: relative;
+        width: 180px; height: 180px;
+        margin: 0 auto 25px;
+        z-index: 1;
+    }
+    .img-container img {
+        width: 100%; height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        border: 5px solid #fff;
+        animation: rotate 20s linear infinite;
+        animation-play-state: paused;
+    }
+    .music-widget.play .img-container img { animation-play-state: running; }
+    .img-container::after {
+        content: ''; position: absolute; top: 50%; left: 50%;
+        width: 25px; height: 25px;
+        background: #fff; border-radius: 50%;
+        transform: translate(-50%, -50%);
+        box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+    }
+    @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+    /* --- Extra Controls Row (Lyric - Switch - Playlist) --- */
+    .extra-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        position: relative;
+        z-index: 5;
+        padding: 0 5px;
+        width: 100%;
+    }
+
+    .control-btn-small {
+        background: none; border: none;
+        color: #b2bec3; font-size: 18px;
+        cursor: pointer; transition: color 0.3s;
+        width: 40px; height: 40px;
+        display: flex; align-items: center; justify-content: center;
+        border-radius: 50%;
+    }
+    .control-btn-small:hover, .control-btn-small.active {
+        color: #ff7675;
+        background: #fff0f0;
+    }
+
+    /* Toggle Switch Style */
+    .switch-container {
+        display: flex; flex-direction: column; align-items: center; gap: 5px;
+    }
+    .switch-label { font-size: 10px; color: #b2bec3; font-weight: 600; text-transform: uppercase; }
+    
+    .switch {
+        position: relative; display: inline-block; width: 44px; height: 24px;
+    }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+        position: absolute; cursor: pointer;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background-color: #dfe6e9;
+        transition: .4s; border-radius: 24px;
+    }
+    .slider:before {
+        position: absolute; content: "";
+        height: 18px; width: 18px;
+        left: 3px; bottom: 3px;
+        background-color: white;
+        transition: .4s; border-radius: 50%;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    input:checked + .slider { background-color: #6c5ce7; }
+    input:checked + .slider:before { transform: translateX(20px); }
+
+    /* --- Progress Bar --- */
+    .progress-container {
+        background: #dfe6e9; border-radius: 5px; cursor: pointer;
+        margin: 10px 0 25px; height: 6px; width: 100%; position: relative; z-index: 1;
+    }
+    .progress {
+        background: linear-gradient(90deg, #ff7675, #d63031);
+        border-radius: 5px; height: 100%; width: 0%; transition: width 0.1s linear;
+        position: relative;
+    }
+    .progress::after {
+        content: ''; position: absolute; right: -5px; top: -3px;
+        width: 12px; height: 12px; background: #d63031;
+        border-radius: 50%; box-shadow: 0 0 5px rgba(0,0,0,0.2);
+        opacity: 0; transition: opacity 0.2s;
+    }
+    .progress-container:hover .progress::after { opacity: 1; }
+    .time-stamps { display: flex; justify-content: space-between; font-size: 11px; color: #b2bec3; margin-top: 5px; }
+
+    /* Volume Control */
+    .volume-container {
+        display: flex; align-items: center; gap: 12px;
+        margin: 15px 0 25px; z-index: 1; position: relative;
+    }
+    
+    .volume-btn {
+        background: none; border: none;
+        color: #b2bec3; font-size: 18px;
+        cursor: pointer; transition: all 0.3s;
+        width: 35px; height: 35px;
+        display: flex; align-items: center; justify-content: center;
+        border-radius: 50%;
+    }
+    
+    .volume-btn:hover {
+        color: #ff7675;
+        background: #fff0f0;
+    }
+    
+    .volume-btn.muted {
+        color: #d63031;
+    }
+    
+    .volume-slider-container {
+        flex: 1; position: relative;
+        background: #dfe6e9; border-radius: 5px;
+        height: 5px; cursor: pointer;
+    }
+    
+    .volume-slider {
+        position: absolute; top: 50%; left: 0;
+        transform: translateY(-50%);
+        width: 100%; height: 5px;
+        -webkit-appearance: none; appearance: none;
+        background: transparent; outline: none;
+        cursor: pointer; z-index: 2;
+    }
+    
+    .volume-slider::-webkit-slider-thumb {
+        -webkit-appearance: none; appearance: none;
+        width: 14px; height: 14px;
+        background: #d63031; border-radius: 50%;
+        cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        transition: transform 0.2s;
+    }
+    
+    .volume-slider::-webkit-slider-thumb:hover {
+        transform: scale(1.2);
+    }
+    
+    .volume-slider::-moz-range-thumb {
+        width: 14px; height: 14px;
+        background: #d63031; border-radius: 50%;
+        cursor: pointer; border: none;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    
+    .volume-fill {
+        position: absolute; top: 0; left: 0;
+        height: 100%; background: linear-gradient(90deg, #ff7675, #d63031);
+        border-radius: 5px; pointer-events: none;
+        transition: width 0.1s linear;
+    }
+    
+    .volume-percentage {
+        font-size: 11px; color: #b2bec3;
+        min-width: 35px; text-align: right;
+    }
+
+    /* Navigation Buttons */
+    .navigation {
+        display: flex; align-items: center; justify-content: center;
+        z-index: 1; position: relative; gap: 20px;
+    }
+    .action-btn { background: none; border: none; color: #dfe6e9; font-size: 20px; cursor: pointer; transition: all 0.3s ease; }
+    .action-btn:hover { color: #636e72; }
+    .action-btn-big {
+        background: linear-gradient(135deg, #ff7675, #d63031);
+        color: #fff; font-size: 24px; width: 55px; height: 55px;
+        border-radius: 50%; box-shadow: 0 10px 20px rgba(214, 48, 49, 0.3);
+        display: flex; align-items: center; justify-content: center;
+        transition: transform 0.2s;
+    }
+    .action-btn-big:hover { transform: scale(1.1); box-shadow: 0 15px 25px rgba(214, 48, 49, 0.4); color: #fff; }
+    
+    /* Shuffle & Repeat Buttons */
+    .mode-btn {
+        background: none; border: none;
+        color: #b2bec3; font-size: 16px;
+        cursor: pointer; transition: all 0.3s;
+        width: 35px; height: 35px;
+        display: flex; align-items: center; justify-content: center;
+        border-radius: 50%;
+        position: relative;
+    }
+    .mode-btn:hover {
+        color: #636e72;
+        background: #f1f2f6;
+    }
+    .mode-btn.active {
+        color: #ff7675;
+        background: #fff0f0;
+    }
+    .mode-btn.active:hover {
+        color: #d63031;
+    }
+    
+    /* Repeat One Badge */
+    .mode-btn::after {
+        content: attr(data-badge);
+        position: absolute;
+        top: -2px; right: -2px;
+        background: #d63031;
+        color: white;
+        font-size: 9px;
+        font-weight: 600;
+        width: 14px; height: 14px;
+        border-radius: 50%;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    .mode-btn.repeat-one::after {
+        display: flex;
+    }
+
+    /* --- Overlay Containers --- */
+    .overlay-container {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(255,255,255,0.98);
+        z-index: 10;
+        transform: translateY(100%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex; flex-direction: column; padding: 20px;
+    }
+    .overlay-container.show { transform: translateY(0); }
+    
+    .overlay-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-weight: 600; color: #2d3436; border-bottom: 1px solid #f1f2f6; padding-bottom: 10px;}
+    .close-overlay { background: none; border: none; font-size: 20px; cursor: pointer; color: #636e72; }
+
+    /* Playlist Items */
+    .playlist-items { overflow-y: auto; flex: 1; }
+    .playlist-item {
+        display: flex; align-items: center; padding: 8px;
+        border-radius: 10px; margin-bottom: 5px; cursor: pointer;
+        transition: background 0.2s;
+    }
+    .playlist-item:hover { background: #f1f2f6; }
+    .playlist-item.active { background: #ffeaa7; }
+    .playlist-item.active .item-title { color: #d63031; font-weight: 600; }
+    .item-img { width: 35px; height: 35px; border-radius: 6px; margin-right: 10px; object-fit: cover; }
+    .item-info { text-align: left; overflow: hidden; }
+    .item-title { font-size: 13px; color: #2d3436; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .item-artist { font-size: 10px; color: #b2bec3; }
+
+    /* Lyric View Styles */
+    .lyrics-content {
+        flex: 1; overflow-y: auto; text-align: center;
+        padding: 10px 0; scroll-behavior: smooth;
+        mask-image: linear-gradient(transparent, black 10%, black 90%, transparent);
+        -webkit-mask-image: linear-gradient(transparent, black 10%, black 90%, transparent);
+    }
+    .lyric-line {
+        padding: 8px 0; font-size: 14px; color: #b2bec3;
+        transition: all 0.3s ease; cursor: default;
+    }
+    .lyric-line.active {
+        color: #d63031; font-weight: 600; font-size: 16px; transform: scale(1.05);
+    }
+    .no-lyric { margin-top: 50%; transform: translateY(-50%); color: #b2bec3; font-style: italic;}
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-thumb { background: #dfe6e9; border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<div class="music-widget" id="music-widget">
+    
+    <div class="extra-controls">
+        <button class="control-btn-small" id="lyric-btn" title="Lời bài hát"><i class="fas fa-file-alt"></i></button>
+        <div class="switch-container">
+            <label class="switch">
+                <input type="checkbox" id="instrumental-toggle">
+                <span class="slider"></span>
+            </label>
+            <span class="switch-label" id="mode-label">Vocal</span>
+        </div>
+        <button class="control-btn-small" id="playlist-btn" title="Danh sách phát"><i class="fas fa-list"></i></button>
+    </div>
+
+    <div class="song-info">
+        <h2 class="song-title" id="title">Đang tải danh sách...</h2>
+        <h3 class="song-artist" id="artist">Vui lòng đợi</h3>
+    </div>
+
+    <div class="img-container">
+        <img src="https://via.placeholder.com/200" alt="music-cover" id="cover">
+    </div>
+
+    <audio id="audio" crossorigin="anonymous"></audio>
+
+    <div class="progress-container" id="progress-container">
+        <div class="progress" id="progress"></div>
+    </div>
+    <div class="time-stamps">
+        <span id="current-time">0:00</span>
+        <span id="duration">0:00</span>
+    </div>
+
+    <div class="volume-container">
+        <button class="volume-btn" id="mute-btn" title="Tắt/Bật tiếng">
+            <i class="fas fa-volume-up"></i>
+        </button>
+        <div class="volume-slider-container">
+            <div class="volume-fill" id="volume-fill"></div>
+            <input type="range" min="0" max="100" value="70" class="volume-slider" id="volume-slider">
+        </div>
+        <span class="volume-percentage" id="volume-percentage">70%</span>
+    </div>
+
+    <div class="navigation">
+        <button id="shuffle" class="mode-btn" title="Ngẫu nhiên"><i class="fas fa-random"></i></button>
+        <button id="prev" class="action-btn"><i class="fas fa-backward"></i></button>
+        <button id="play" class="action-btn action-btn-big"><i class="fas fa-play"></i></button>
+        <button id="next" class="action-btn"><i class="fas fa-forward"></i></button>
+        <button id="repeat" class="mode-btn" title="Lặp lại"><i class="fas fa-redo"></i></button>
+    </div>
+
+    <div class="overlay-container" id="playlist-overlay">
+        <div class="overlay-header">
+            <span>Danh sách phát</span>
+            <button class="close-overlay" id="close-playlist"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="playlist-items" id="playlist-list"></div>
+    </div>
+
+    <div class="overlay-container" id="lyrics-overlay">
+        <div class="overlay-header">
+            <span>Lời bài hát</span>
+            <button class="close-overlay" id="close-lyrics"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="lyrics-content" id="lyrics-content">
+            <p class="no-lyric">Đang tải lời bài hát...</p>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    const TRACKS_URL = 'https://raw.githubusercontent.com/d4m-dev/media/refs/heads/main/load-track/tracks.js';
+    const normalizeTracks = (items = []) => items.map((item) => ({
+        name: item.title || item.name || 'Tạm thời chưa có!',
+        artist: item.artist || 'Tạm thời chưa có!',
+        artwork: item.cover || item.artwork || 'Tạm thời chưa có!',
+        path: item.audioSrc || item.path || 'Tạm thời chưa có!',
+        instrumental: item.instrumentalSrc || item.instrumental || 'Tạm thời chưa có!',
+        vid: item.videoSrc || item.vid || 'Tạm thời chưa có!',
+        lyric: item.lyricSrc || item.lyric || 'Tạm thời chưa có!'
+    }));
+    const loadRemoteTracks = async () => {
+        if (Array.isArray(window.TRACKS) && window.TRACKS.length) return window.TRACKS;
+        try {
+            const res = await fetch(TRACKS_URL, { cache: 'no-store' });
+            const text = await res.text();
+            const sandbox = {};
+            const getter = new Function('window', `${text}; return window.TRACKS || [];`);
+            const data = getter(sandbox);
+            return Array.isArray(data) ? data : [];
+        } catch (e) {
+            return [];
+        }
+    };
+
+    const tracks = await loadRemoteTracks().then(normalizeTracks);
+
+
+    const musicWidget = document.getElementById('music-widget');
+    const playBtn = document.getElementById('play');
+    const prevBtn = document.getElementById('prev');
+    const nextBtn = document.getElementById('next');
+    const audio = document.getElementById('audio');
+    const progress = document.getElementById('progress');
+    const progressContainer = document.getElementById('progress-container');
+    const title = document.getElementById('title');
+    const artist = document.getElementById('artist');
+    const cover = document.getElementById('cover');
+    const currTime = document.getElementById('current-time');
+    const durTime = document.getElementById('duration');
+
+    const lyricBtn = document.getElementById('lyric-btn');
+    const playlistBtn = document.getElementById('playlist-btn');
+    const instrumentalToggle = document.getElementById('instrumental-toggle');
+    const modeLabel = document.getElementById('mode-label');
+    
+    const playlistOverlay = document.getElementById('playlist-overlay');
+    const closePlaylist = document.getElementById('close-playlist');
+    const playlistList = document.getElementById('playlist-list');
+    
+    const lyricsOverlay = document.getElementById('lyrics-overlay');
+    const closeLyrics = document.getElementById('close-lyrics');
+    const lyricsContent = document.getElementById('lyrics-content');
+    const volumeSlider = document.getElementById('volume-slider');
+    const volumeFill = document.getElementById('volume-fill');
+    const volumePercentage = document.getElementById('volume-percentage');
+    const muteBtn = document.getElementById('mute-btn');
+    
+    const shuffleBtn = document.getElementById('shuffle');
+    const repeatBtn = document.getElementById('repeat');
+
+    let songIndex = 0;
+    let lyricsData = [];
+    let lastVolume = 70;
+    let isShuffleOn = false;
+    let repeatMode = 0; // 0: off, 1: repeat all, 2: repeat one
+
+    // Hàm xử lý URL GitHub
+    function fixGithubUrl(url, isMedia = false) {
+        if (!url || url === '' || url === 'Tạm thời chưa có!') return '';
+        
+        if (!url.includes('github.com') || !url.includes('/raw/')) return url;
+        
+        const match = url.match(/github\.com\/([^\/]+)\/([^\/]+)\/raw\/(.+)/);
+        if (!match) return url;
+        
+        const owner = match[1];
+        const repo = match[2];
+        const path = match[3];
+        const fullPath = path.startsWith('refs/heads/') ? path : 'refs/heads/' + path;
+        
+        // Phân biệt: ảnh dùng raw.githubusercontent.com, audio/video dùng media.githubusercontent.com
+        const isAudioVideo = /\.(mp3|mp4|wav|ogg|webm|m4a)$/i.test(url);
+        
+        if (isAudioVideo) {
+            // Audio/Video: media CDN
+            return `https://media.githubusercontent.com/media/${owner}/${repo}/${fullPath}`;
+        } else {
+            // Ảnh/Text: raw CDN
+            return `https://raw.githubusercontent.com/${owner}/${repo}/${fullPath}`;
+        }
+    }
+
+    function loadSong(song) {
+        title.innerText = song.name;
+        artist.innerText = song.artist;
+        cover.src = fixGithubUrl(song.artwork);
+
+        const isInstrumental = instrumentalToggle.checked;
+        let audioSrc = "";
+
+        if (isInstrumental && song.instrumental) {
+            audioSrc = fixGithubUrl(song.instrumental);
+            modeLabel.innerText = "Beat";
+            modeLabel.style.color = "#6c5ce7";
+        } else {
+            audioSrc = fixGithubUrl(song.path);
+            modeLabel.innerText = "Vocal";
+            modeLabel.style.color = "#b2bec3";
+        }
+
+        // Kiểm tra nếu link rỗng
+        if (!audioSrc || audioSrc === '') {
+            console.warn("⚠️ Link bài hát không có:", song.name);
+            title.innerText = song.name + " (Chưa có nhạc)";
+            audio.src = '';
+            return;
+        }
+
+        console.log('🎵 Loading audio from:', audioSrc);
+        
+        // Reset audio state
+        audio.pause();
+        audio.currentTime = 0;
+        
+        // Set audio source
+        audio.src = audioSrc;
+        
+        // Preload audio
+        audio.load();
+        
+        updatePlaylistActive();
+        loadLyrics(fixGithubUrl(song.lyric));
+        
+        // Log khi audio sẵn sàng
+        audio.addEventListener('loadeddata', function onLoaded() {
+            console.log('✅ Audio loaded successfully!');
+            audio.removeEventListener('loadeddata', onLoaded);
+        }, { once: true });
+        
+        // Log nếu có lỗi
+        audio.addEventListener('error', function onError(e) {
+            console.error('❌ Audio error:', audio.error);
+            console.error('Error code:', audio.error?.code);
+            console.error('Error message:', audio.error?.message);
+            console.error('Failed URL:', audioSrc);
+            audio.removeEventListener('error', onError);
+        }, { once: true });
+    }
+
+    async function loadLyrics(lyricUrl) {
+        lyricsContent.innerHTML = '<p class="no-lyric">Đang tải...</p>';
+        lyricsData = [];
+        
+        if (!lyricUrl) {
+            lyricsContent.innerHTML = '<p class="no-lyric">Không có lời bài hát</p>';
+            return;
+        }
+
+        try {
+            const response = await fetch(lyricUrl);
+            if (response.ok) {
+                const text = await response.text();
+                parseLyrics(text);
+            } else {
+                lyricsContent.innerHTML = '<p class="no-lyric">Lỗi tải lời bài hát</p>';
+            }
+        } catch (error) {
+            console.error("Lỗi fetch lyric:", error);
+            lyricsContent.innerHTML = '<p class="no-lyric">Không thể tải lời</p>';
+        }
+    }
+
+    function parseLyrics(lrcText) {
+        const lines = lrcText.split('\n');
+        const regex = /^\[(\d{2}):(\d{2}(?:\.\d+)?)\](.*)/;
+        
+        lyricsData = [];
+        let html = '';
+
+        lines.forEach(line => {
+            const match = line.match(regex);
+            if (match) {
+                const minutes = parseFloat(match[1]);
+                const seconds = parseFloat(match[2]);
+                const text = match[3].trim();
+                const time = minutes * 60 + seconds;
+                
+                if (text) {
+                    lyricsData.push({ time, text });
+                    html += `<div class="lyric-line" data-time="${time}">${text}</div>`;
+                }
+            }
+        });
+
+        if (lyricsData.length > 0) {
+            lyricsContent.innerHTML = html;
+        } else {
+            lyricsContent.innerHTML = '<p class="no-lyric">Lời bài hát trống</p>';
+        }
+    }
+
+    // --- PLAYBACK CONTROLS ---
+
+    function playSong() {
+        musicWidget.classList.add('play');
+        playBtn.querySelector('i').classList.remove('fa-play');
+        playBtn.querySelector('i').classList.add('fa-pause');
+        
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(error => {
+                console.log("Playback prevented:", error);
+                // Có thể do trình duyệt chặn autoplay hoặc link lỗi
+            });
+        }
+    }
+
+    function pauseSong() {
+        musicWidget.classList.remove('play');
+        playBtn.querySelector('i').classList.add('fa-play');
+        playBtn.querySelector('i').classList.remove('fa-pause');
+        audio.pause();
+    }
+
+    function togglePlay() {
+        if (musicWidget.classList.contains('play')) {
+            pauseSong();
+        } else {
+            playSong();
+        }
+    }
+
+    function prevSong() {
+        songIndex--;
+        if (songIndex < 0) songIndex = tracks.length - 1;
+        loadSong(tracks[songIndex]);
+        playSong();
+    }
+
+    function nextSong() {
+        if (isShuffleOn) {
+            let newIndex;
+            do {
+                newIndex = Math.floor(Math.random() * tracks.length);
+            } while (newIndex === songIndex && tracks.length > 1);
+            songIndex = newIndex;
+        } else {
+            songIndex++;
+            if (songIndex > tracks.length - 1) songIndex = 0;
+        }
+        loadSong(tracks[songIndex]);
+        playSong();
+    }
+    
+    function toggleShuffle() {
+        isShuffleOn = !isShuffleOn;
+        if (isShuffleOn) {
+            shuffleBtn.classList.add('active');
+        } else {
+            shuffleBtn.classList.remove('active');
+        }
+    }
+    
+    function toggleRepeat() {
+        repeatMode = (repeatMode + 1) % 3;
+        const icon = repeatBtn.querySelector('i');
+        
+        if (repeatMode === 0) {
+            // Off
+            repeatBtn.classList.remove('active', 'repeat-one');
+            repeatBtn.removeAttribute('data-badge');
+            icon.className = 'fas fa-redo';
+            repeatBtn.setAttribute('title', 'Lặp lại');
+        } else if (repeatMode === 1) {
+            // Repeat one (lần ấn đầu tiên)
+            repeatBtn.classList.add('active', 'repeat-one');
+            repeatBtn.setAttribute('data-badge', '1');
+            icon.className = 'fas fa-redo';
+            repeatBtn.setAttribute('title', 'Lặp 1 bài');
+        } else {
+            // Repeat all (lần ấn thứ 2)
+            repeatBtn.classList.add('active');
+            repeatBtn.classList.remove('repeat-one');
+            repeatBtn.removeAttribute('data-badge');
+            icon.className = 'fas fa-redo';
+            repeatBtn.setAttribute('title', 'Lặp tất cả');
+        }
+    }
+
+    instrumentalToggle.addEventListener('change', () => {
+        const isPlaying = !audio.paused;
+        const currentTime = audio.currentTime;
+        const song = tracks[songIndex];
+
+        if (instrumentalToggle.checked) {
+            if(song.instrumental) {
+                audio.src = fixGithubUrl(song.instrumental);
+                modeLabel.innerText = "Beat";
+                modeLabel.style.color = "#6c5ce7";
+            } else {
+                alert("Bài này chưa có Beat!");
+                instrumentalToggle.checked = false;
+                return;
+            }
+        } else {
+            audio.src = fixGithubUrl(song.path);
+            modeLabel.innerText = "Vocal";
+            modeLabel.style.color = "#b2bec3";
+        }
+
+        audio.currentTime = currentTime;
+        if (isPlaying) audio.play();
+    });
+
+    // --- UI UPDATES ---
+
+    function updateProgress(e) {
+        const { duration, currentTime } = e.srcElement;
+        if(duration) {
+            const progressPercent = (currentTime / duration) * 100;
+            progress.style.width = `${progressPercent}%`;
+
+            const durMin = Math.floor(duration / 60);
+            let durSec = Math.floor(duration % 60);
+            if (durSec < 10) durSec = `0${durSec}`;
+            durTime.innerText = `${durMin}:${durSec}`;
+
+            const curMin = Math.floor(currentTime / 60);
+            let curSec = Math.floor(currentTime % 60);
+            if (curSec < 10) curSec = `0${curSec}`;
+            currTime.innerText = `${curMin}:${curSec}`;
+
+            syncLyrics(currentTime);
+        }
+    }
+
+    function syncLyrics(currentTime) {
+        if (lyricsData.length === 0) return;
+        let activeIndex = -1;
+        for (let i = 0; i < lyricsData.length; i++) {
+            if (currentTime >= lyricsData[i].time) activeIndex = i;
+            else break;
+        }
+
+        const lines = document.querySelectorAll('.lyric-line');
+        lines.forEach(line => line.classList.remove('active'));
+
+        if (activeIndex !== -1 && lines[activeIndex]) {
+            const activeLine = lines[activeIndex];
+            activeLine.classList.add('active');
+            if (lyricsOverlay.classList.contains('show')) {
+                activeLine.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    }
+
+    function setProgress(e) {
+        const width = this.clientWidth;
+        const clickX = e.offsetX;
+        const duration = audio.duration;
+        audio.currentTime = (clickX / width) * duration;
+    }
+
+    function renderPlaylist() {
+        playlistList.innerHTML = '';
+        if(tracks && tracks.length > 0) {
+            tracks.forEach((song, index) => {
+                const item = document.createElement('div');
+                item.classList.add('playlist-item');
+                if (index === songIndex) item.classList.add('active');
+                
+                item.innerHTML = `
+                    <img src="${fixGithubUrl(song.artwork)}" class="item-img" onerror="this.src='https://via.placeholder.com/35'">
+                    <div class="item-info">
+                        <div class="item-title">${song.name}</div>
+                        <div class="item-artist">${song.artist}</div>
+                    </div>
+                `;
+                item.addEventListener('click', () => {
+                    songIndex = index;
+                    loadSong(tracks[songIndex]);
+                    playSong();
+                    playlistOverlay.classList.remove('show');
+                });
+                playlistList.appendChild(item);
+            });
+        }
+    }
+
+    function updatePlaylistActive() {
+        const items = document.querySelectorAll('.playlist-item');
+        items.forEach((item, index) => {
+            if (index === songIndex) item.classList.add('active');
+            else item.classList.remove('active');
+        });
+    }
+
+    // --- VOLUME CONTROLS ---
+    function updateVolume() {
+        const volume = volumeSlider.value;
+        audio.volume = volume / 100;
+        volumeFill.style.width = `${volume}%`;
+        volumePercentage.textContent = `${volume}%`;
+        
+        const icon = muteBtn.querySelector('i');
+        if (volume == 0) {
+            icon.className = 'fas fa-volume-mute';
+            muteBtn.classList.add('muted');
+        } else if (volume < 50) {
+            icon.className = 'fas fa-volume-down';
+            muteBtn.classList.remove('muted');
+        } else {
+            icon.className = 'fas fa-volume-up';
+            muteBtn.classList.remove('muted');
+        }
+        
+        if (volume > 0) lastVolume = volume;
+    }
+
+    function toggleMute() {
+        if (audio.volume > 0) {
+            lastVolume = volumeSlider.value;
+            volumeSlider.value = 0;
+        } else {
+            volumeSlider.value = lastVolume || 70;
+        }
+        updateVolume();
+    }
+
+    playBtn.addEventListener('click', togglePlay);
+    prevBtn.addEventListener('click', prevSong);
+    nextBtn.addEventListener('click', nextSong);
+    audio.addEventListener('timeupdate', updateProgress);
+    audio.addEventListener('ended', () => {
+        if (repeatMode === 1) {
+            // Repeat one: play lại bài hiện tại
+            audio.currentTime = 0;
+            playSong();
+        } else if (repeatMode === 2 || repeatMode === 0) {
+            // Repeat all hoặc off: chuyển bài tiếp theo
+            nextSong();
+        }
+    });
+    progressContainer.addEventListener('click', setProgress);
+
+    playlistBtn.addEventListener('click', () => {
+        playlistOverlay.classList.add('show');
+        renderPlaylist();
+    });
+    closePlaylist.addEventListener('click', () => playlistOverlay.classList.remove('show'));
+
+    lyricBtn.addEventListener('click', () => {
+        lyricsOverlay.classList.add('show');
+        const activeLine = document.querySelector('.lyric-line.active');
+        if(activeLine) activeLine.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+    closeLyrics.addEventListener('click', () => lyricsOverlay.classList.remove('show'));
+
+    volumeSlider.addEventListener('input', updateVolume);
+    muteBtn.addEventListener('click', toggleMute);
+    
+    shuffleBtn.addEventListener('click', toggleShuffle);
+    repeatBtn.addEventListener('click', toggleRepeat);
+
+    // Init
+    if (Array.isArray(tracks) && tracks.length > 0) {
+        loadSong(tracks[0]);
+        renderPlaylist();
+    } else {
+        title.innerText = "Lỗi tải danh sách";
+        artist.innerText = "Không thể tải tracks";
+    }
+    
+    // Set initial volume
+    audio.volume = 0.7;
+    updateVolume();
+</script>
+
+</body>
+</html>

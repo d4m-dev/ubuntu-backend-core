@@ -1,0 +1,47 @@
+{
+    "name": "wedding-invitation-com",
+    "version": "1.0.0",
+    "description": "A simple and elegant wedding invitation website template, built with HTML, CSS, and JavaScript.",
+    "main": "index.html",
+    "private": true,
+    "scripts": {
+        "lint:js": "eslint js",
+        "lint:css": "stylelint css",
+        "lint:html": "htmlhint **/*.html",
+        "dev": "npx esbuild src/js/*.js --bundle --outdir=dist --servedir=. --serve=6789",
+        "build": "npx esbuild src/js/*.js --bundle --minify --outdir=dist",
+        "build:public": "npm run build && rm -rf public && mkdir -p public && cp index.html public/ && cp dashboard.html public/ && cp -R dist public/ && cp -R src/assets public/ && cp -R src/css public/ && echo '✅ Build public directory successfully!'"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/d4m-dev/WeddingInvitation.com.git"
+    },
+    "keywords": [
+        "wedding",
+        "invitation",
+        "digital",
+        "online",
+        "template",
+        "website",
+        "html",
+        "css",
+        "javascript",
+        "bootstrap"
+    ],
+    "author": "d4m-dev <andurex5555@gmail.com>",
+    "license": "MIT",
+    "homepage": "https://github.com/d4m-dev/WeddingInvitation.com#readme",
+    "bugs": {
+        "url": "https://github.com/d4m-dev/WeddingInvitation.com/issues"
+    },
+    "devDependencies": {
+        "@eslint/js": "^9.37.0",
+        "esbuild": "^0.25.10",
+        "eslint": "^9.37.0",
+        "globals": "^16.4.0",
+        "htmlhint": "^1.7.1",
+        "madge": "^8.0.0",
+        "stylelint": "^16.25.0",
+        "stylelint-config-recommended": "^17.0.0"
+    }
+}

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trợ Lý Ảo Thông Minh</title>
+    <style>
+        @font-face {
+            font-family: 'Roboto Slab';
+            src: url('./font-style/roboto_slab/static/RobotoSlab-Regular.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        
+        @font-face {
+            font-family: 'Roboto Slab';
+            src: url('./font-style/roboto_slab/static/RobotoSlab-Bold.ttf') format('truetype');
+            font-weight: bold;
+            font-style: normal;
+        }
+
+        body {
+            font-family: 'Roboto Slab', Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .chat-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .chat-history {
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #fafafa;
+        }
+        
+        .message {
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            max-width: 80%;
+        }
+        
+        .user-message {
+            background-color: #007bff;
+            color: white;
+            margin-left: auto;
+            text-align: right;
+        }
+        
+        .bot-message {
+            background-color: #e9ecef;
+            color: #333;
+        }
+        
+        .input-area {
+            display: flex;
+            gap: 10px;
+        }
+        
+        #user-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        #send-btn {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        #send-btn:hover {
+            background-color: #0056b3;
+        }
+        
+        .commands-list {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .commands-list h3 {
+            margin-top: 0;
+            color: #856404;
+        }
+        
+        .command-item {
+            margin: 5px 0;
+            font-family: monospace;
+            background-color: #f8f9fa;
+            padding: 3px 6px;
+            border-radius: 3px;
+            display: inline-block;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🤖 Trợ Lý Ảo Thông Minh</h1>
+    
+    <div class="commands-list">
+        <h3>📋 Các lệnh bạn có thể sử dụng:</h3>
+        <div>
+            <span class="command-item">Xin chào</span>
+            <span class="command-item">Mấy giờ rồi</span>
+            <span class="command-item">Thời tiết hôm nay</span>
+            <span class="command-item">Phát nhạc [tên bài hát]</span>
+            <span class="command-item">Tìm kiếm [từ khóa]</span>
+            <span class="command-item">Dịch [từ cần dịch] sang [ngôn ngữ]</span>
+            <span class="command-item">Tính [phép tính]</span>
+            <span class="command-item">Kể chuyện cười</span>
+            <span class="command-item">Ghi chú [nội dung]</span>
+            <span class="command-item">Nhắc tôi [việc cần làm] vào [giờ]</span>
+            <span class="command-item">Lịch hẹn [sự kiện] vào [giờ]</span>
+            <span class="command-item">Là gì [tên khái niệm]</span>
+            <span class="command-item">Lời khuyên [chủ đề]</span>
+            <span class="command-item">Học lệnh [câu nói] trả lời [câu trả lời]</span>
+        </div>
+    </div>
+    
+    <div class="chat-container">
+        <div id="chat-history" class="chat-history">
+            <div class="message bot-message">
+                Xin chào! Tôi là trợ lý ảo thông minh. Bạn có thể nói chuyện với tôi bằng cách gõ vào ô bên dưới.<br>
+                Gõ "Xin chào" để bắt đầu trò chuyện!
+            </div>
+        </div>
+        
+        <div class="input-area">
+            <input type="text" id="user-input" placeholder="Nhập tin nhắn của bạn..." autocomplete="off">
+            <button id="send-btn" onclick="sendMessage()">Gửi</button>
+        </div>
+    </div>
+
+    <script src="brain.js"></script>
+    <script>
+        // Hàm để hiển thị tin nhắn trong khung chat
+        function displayMessage(text, isUser = false) {
+            const chatHistory = document.getElementById('chat-history');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            messageDiv.textContent = text;
+            chatHistory.appendChild(messageDiv);
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+        }
+
+        // Hàm xử lý gửi tin nhắn
+        function sendMessage() {
+            const input = document.getElementById('user-input');
+            const message = input.value.trim();
+            
+            if (message === '') return;
+            
+            // Hiển thị tin nhắn người dùng
+            displayMessage(message, true);
+            
+            // Xóa ô nhập NGAY SAU KHI HIỂN THỊ TIN NHẮN
+            input.value = '';
+            
+            // Gửi tin nhắn đến trợ lý và nhận phản hồi
+            processCommand(message, function(text, html, onEnd) {
+                displayMessage(text);
+                
+                // Nếu có HTML đặc biệt (ví dụ video, thời tiết), thêm vào
+                if (html) {
+                    const chatHistory = document.getElementById('chat-history');
+                    const htmlDiv = document.createElement('div');
+                    htmlDiv.innerHTML = html;
+                    chatHistory.appendChild(htmlDiv);
+                    chatHistory.scrollTop = chatHistory.scrollHeight;
+                }
+                
+                // Nếu có callback khi kết thúc
+                if (onEnd) {
+                    onEnd();
+                }
+            });
+        }
+
+        // Cho phép nhấn Enter để gửi
+        document.getElementById('user-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Gợi ý một số lệnh khi trang được tải
+        function showSuggestions() {
+            const suggestions = [
+                "Bạn có thể hỏi tôi bất cứ điều gì!",
+                "Thử nói: 'Xin chào', 'Mấy giờ rồi?', 'Thời tiết hôm nay'",
+                "Tôi có thể giúp bạn tìm kiếm, dịch thuật, tính toán..."
+            ];
+            
+            setTimeout(() => {
+                displayMessage(suggestions[0]);
+            }, 1000);
+            
+            setTimeout(() => {
+                displayMessage(suggestions[1]);
+            }, 3000);
+            
+            setTimeout(() => {
+                displayMessage(suggestions[2]);
+            }, 5000);
+        }
+
+        // Gọi hàm gợi ý khi trang tải xong
+        window.onload = function() {
+            showSuggestions();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+/* Hiệu ứng Glassmorphism chủ đạo */
+.glass-header {
+    background: rgba(17, 24, 39, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.glass-card {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.glass-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Nút Toggle Switch Custom */
+.toggle-checkbox:checked {
+    right: 0;
+    border-color: #3b82f6;
+}
+.toggle-checkbox:checked + .toggle-label {
+    background-color: #3b82f6;
+}

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hình Nền Đẹp - Kho Hình Nền Chất Lượng Cao</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="src/styles.css">
+    <link rel="apple-touch-icon" sizes="180x180" href="src/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="src/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="src/favicon/favicon-16x16.png">
+    <link rel="manifest" href="src/favicon/site.webmanifest">
+    <link rel="shortcut icon" href="src/favicon/favicon.ico">
+</head>
+<body>
+
+    <header>
+        <h1>Hình Nền Đẹp</h1>
+        <p>Khám phá thế giới hình nền chất lượng cao</p>
+        <div class="search-container">
+            <input type="text" id="search-input" placeholder="Tìm kiếm hình nền...">
+            <i class="fas fa-search"></i>
+        </div>
+    </header>
+
+    <main>
+        <div id="wallpaper-grid" class="wallpaper-grid">
+            <!-- Wallpapers will be loaded here by AJAX -->
+        </div>
+        <div id="loading-spinner" class="loading-spinner"></div>
+    </main>
+
+    <!-- Modal for viewing and downloading image -->
+    <div id="image-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <img id="modal-image" src="" alt="Hình nền phóng to">
+            <div class="modal-footer">
+                <h3 id="modal-title"></h3>
+                <div class="modal-actions">
+                    <button id="modal-favorite-button" class="btn-icon">
+                        <i class="far fa-heart"></i> Yêu thích
+                    </button>
+                    <a id="download-button" href="#" download class="download-btn">
+                        <i class="fas fa-download"></i> Tải xuống
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <button class="nav-link active" data-filter="all">
+            <i class="fas fa-home"></i>
+            <span>Trang chủ</span>
+        </button>
+        <button class="nav-link" data-filter="explore">
+            <i class="fas fa-compass"></i>
+            <span>Khám phá</span>
+        </button>
+        <button class="nav-link" data-filter="favorites">
+            <i class="fas fa-heart"></i>
+            <span>Yêu thích</span>
+        </button>
+    </nav>
+
+    <footer>
+        <p>&copy; 2026 - Tạo bởi d4m-dev và Gemini Code Assist</p>
+    </footer>
+
+    <script type="module" src="src/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "fetch": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-fetch"
+      ]
+    },
+    "sqlite": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sqlite",
+        "/sdcard/coder/media/ubuntu-backend-core/database/database.db"
+      ]
+    }
+  }
+}

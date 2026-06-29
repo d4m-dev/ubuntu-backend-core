@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Instagram MVP</title>
+    <script type="module" crossorigin src="/instagram-mvp/assets/index-ZZPqQZwU.js"></script>
+    <link rel="stylesheet" crossorigin href="/instagram-mvp/assets/index-DfkR4u69.css">
+  </head>
+  <body>
+    <div id="root"></div>
+    <script>
+      (function () {
+        const root = document.getElementById("root");
+        const basePath = window.location.pathname.replace(/\/+$/, "/");
+        const candidates = [`${basePath}manifest.json`, `${basePath}dist/manifest.json`];
+
+        function showError(message, err) {
+          if (!root) return;
+          const detail = err ? `\n${err}` : "";
+          root.innerHTML = `
+            <div style="max-width: 820px; margin: 0 auto; padding: 32px 16px; font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;">
+              <div style="background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 18px; box-shadow: 0 6px 20px rgba(0,0,0,.06);">
+                <strong>Không thể tải ứng dụng.</strong>
+                <div style="height: 10px;"></div>
+                <div style="color: #6b7280; white-space: pre-wrap;">${message}${detail}</div>
+                <div style="height: 10px;"></div>
+                <div style="color: #374151;">Hãy kiểm tra GitHub Pages đang dùng GitHub Actions hoặc thư mục dist đã được commit.</div>
+              </div>
+            </div>
+          `;
+        }
+
+        async function loadManifest() {
+          let lastError = "";
+          for (const url of candidates) {
+            try {
+              const res = await fetch(url, { cache: "no-cache" });
+              if (!res.ok) continue;
+              const manifest = await res.json();
+              const entry = manifest["index.html"];
+              if (!entry || !entry.file) continue;
+
+              const baseUrl = new URL("./", new URL(url, window.location.href));
+              const cssFiles = entry.css || [];
+              cssFiles.forEach((css) => {
+                const link = document.createElement("link");
+                link.rel = "stylesheet";
+                link.href = new URL(css, baseUrl).toString();
+                document.head.appendChild(link);
+              });
+
+              const script = document.createElement("script");
+              script.type = "module";
+              script.src = new URL(entry.file, baseUrl).toString();
+              document.body.appendChild(script);
+              return;
+            } catch (err) {
+              lastError = err?.message || String(err);
+            }
+          }
+
+          showError("Không tìm thấy file build để chạy ứng dụng.", lastError);
+        }
+
+        window.addEventListener("load", () => {
+          setTimeout(() => {
+            if (window.__APP_BOOTSTRAPPED__) return;
+            loadManifest();
+          }, 1500);
+        });
+      })();
+    </script>
+  </body>
+</html>

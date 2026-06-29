@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>QR Generator</title>
+  <link rel="stylesheet" href="./css/app.css">
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+  />
+</head>
+<body>
+  <!-- Banner -->
+  <header class="github-banner">
+    <p>🚀 Mã nguồn mở bởi <a href="https://github.com/d4m-dev" target="_blank">d4m-dev</a></p>
+    <div class="dark-toggle-inline">
+      <label class="switch">
+        <input type="checkbox" id="darkToggle">
+        <span class="slider"></span>
+      </label>
+      <span class="label-dark">Dark Mode</span>
+    </div>
+  </header>
+
+  <!-- Nút chuyển chế độ -->
+  <div class="switch-mode-button" id="btnSwitchMode">
+    <button onclick="toggleQRMode()">
+      <i class="fas fa-sync-alt"></i> Chuyển sang QR ngân hàng
+    </button>
+  </div>
+
+  <!-- QR văn bản / WiFi -->
+  <div id="qrNormalForm">
+    <div class="card">
+      <h1>Tạo mã QR</h1>
+      <div class="input-wrapper">
+        <label for="qrType">Loại mã QR:</label>
+        <select id="qrType">
+          <option value="text">QR văn bản / URL</option>
+          <option value="wifi">QR WiFi</option>
+        </select>
+
+        <label for="inputMain">Nội dung văn bản (tối đa 500 ký tự):</label>
+        <textarea id="inputMain" maxlength="500"></textarea>
+        <div id="charCount" class="char-counter">0 / 500 ký tự</div>
+
+        <div id="wifiPasswordGroup" style="display:none;">
+        <label for="inputExtra">Mật khẩu WiFi:</label>
+        <input type="text" id="inputExtra">
+      </div>
+
+        <button onclick="handleCreate()">Tạo mã QR</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- QR ngân hàng -->
+  <div id="qrBankForm" style="display:none;">
+    <div class="card">
+      <h1>Tạo mã QR ngân hàng</h1>
+      <form id="qrForm">
+        <label for="bankCode">Ngân hàng:</label>
+        <select id="bankCode">
+          <option value="">Chọn ngân hàng</option>
+          <option value="VCB">Vietcombank</option>
+          <option value="TCB">Techcombank</option>
+          <option value="MB">MB Bank</option>
+          <option value="ACB">ACB</option>
+          <option value="BIDV">BIDV</option>
+          <option value="VIB">VIB</option>
+          <option value="VPB">VPBank</option>
+          <option value="STB">Sacombank</option>
+          <option value="HDB">HDBank</option>
+          <option value="SHB">SHB</option>
+          <option value="TPB">TPBank</option>
+          <option value="EIB">Eximbank</option>
+          <option value="OCB">OCB</option>
+          <option value="SCB">SCB</option>
+          <option value="ABB">ABBank</option>
+          <option value="PGB">PG Bank</option>
+          <option value="MSB">MSB</option>
+          <option value="LPB">LienVietPostBank</option>
+          <option value="KLB">Kienlongbank</option>
+          <option value="SEA">SeaBank</option>
+          <option value="NAB">Nam A Bank</option>
+          <option value="BVB">Bao Viet Bank</option>
+          <option value="IVB">Indovina Bank</option>
+          <option value="UOB">UOB Vietnam</option>
+          <option value="CIMB">CIMB Vietnam</option>
+          <option value="VRB">Vietnam-Russia Bank</option>
+          <option value="HSBC">HSBC</option>
+          <option value="CITIBANK">Citibank</option>
+          <option value="WVB">Woori Bank</option>
+          <option value="SHINHAN">Shinhan Bank</option>
+        </select>
+
+        <label for="accountNumber">Số tài khoản:</label>
+        <input type="text" id="accountNumber" required>
+
+        <label for="accountName">Tên tài khoản:</label>
+        <input type="text" id="accountName" required>
+
+        <label for="amount">Số tiền (tùy chọn):</label>
+        <input type="number" id="amount">
+
+        <label for="note">Nội dung chuyển khoản:</label>
+        <textarea id="note"></textarea>
+
+        <button type="submit">Tạo mã QR ngân hàng</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal QR -->
+  <div id="qrModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">×</span>
+      <h2>Mã QR của bạn</h2>
+
+      <!-- Huy hiệu VietQR -->
+      <div id="verifiedBadge" class="verified-badge" style="display:none;">
+        <span>Đã xác minh bởi <strong>VietQR</strong></span>
+        <img class="tick-icon" src="https://i.postimg.cc/jS63P8cv/tick-blue.png" alt="Tick xanh VietQR"/>
+      </div>
+
+      <div id="modalQrImage"><p>Đang tạo mã QR...</p></div>
+      <div class="modal-actions">
+        <button onclick="downloadQR()">Tải về</button>
+        <button onclick="printQR()">In</button>
+        <button onclick="smartShare()">Chia sẻ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="github-footer">
+    <div class="verified-badge">
+      <span>Được hỗ trợ bởi <strong>VietQR</strong></span>
+      <img class="tick-icon" src="https://i.postimg.cc/jS63P8cv/tick-blue.png" alt="Tick xanh VietQR"/>
+    </div>
+    <p>🧑‍💻 Made with ❤️ by <a href="https://github.com/d4m-dev" target="_blank">d4m-dev</a></p>
+  </footer>
+
+  <script src="./js/app.js"></script>
+</body>
+</html>

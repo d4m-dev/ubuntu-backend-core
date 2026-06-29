@@ -1,0 +1,456 @@
+/* RESET & BASE
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --pg-bg: #fafafa;
+  --pg-border: #dbdbdb;
+  --pg-text-main: #262626;
+  --pg-text-muted: #8e8e8e;
+  --pg-accent: #0095f6;
+  --pg-danger: #ed4956;
+  --pg-radius-md: 8px;
+  --pg-radius-lg: 12px;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
+  background: var(--pg-bg);
+  color: var(--pg-text-main);
+}
+
+/* HEADER
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+.pg-header {
+  border-bottom: 1px solid var(--pg-border);
+  background: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.pg-header-inner {
+  max-width: 975px;
+  margin: 0 auto;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.pg-logo {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  cursor: default;
+}
+
+.pg-search {
+  flex: 1;
+  max-width: 260px;
+}
+
+.pg-search input {
+  width: 100%;
+  background: #efefef;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 14px;
+}
+
+.pg-nav-icons {
+  display: flex;
+  gap: 8px;
+}
+
+.icon-btn {
+  border: none;
+  background: transparent;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 999px;
+  transition: background 0.15s ease;
+}
+
+.icon-btn:hover {
+  background: #f0f0f0;
+}
+
+/* MAIN LAYOUT
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+.pg-main {
+  max-width: 975px;
+  margin: 24px auto;
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+  gap: 24px;
+}
+
+.pg-feed {
+  max-width: 614px;
+}
+
+/* STORIES
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+.pg-stories {
+  background: #fff;
+  border: 1px solid var(--pg-border);
+  border-radius: var(--pg-radius-md);
+  padding: 12px;
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  margin-bottom: 16px;
+}
+
+.pg-stories::-webkit-scrollbar {
+  height: 6px;
+}
+
+.pg-stories::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 999px;
+}
+
+.pg-story {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 12px;
+  min-width: 64px;
+}
+
+.pg-story-avatar-border {
+  padding: 2px;
+  border-radius: 50%;
+  background: linear-gradient(45deg, #f99, #f09, #f0f);
+  margin-bottom: 4px;
+}
+
+.pg-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.pg-avatar--lg {
+  width: 56px;
+  height: 56px;
+}
+
+/* POST CARD
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+.pg-post {
+  background: #fff;
+  border: 1px solid var(--pg-border);
+  border-radius: var(--pg-radius-md);
+  margin-bottom: 24px;
+}
+
+.pg-post-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+}
+
+.pg-post-user {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pg-username {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.pg-text-muted {
+  font-size: 12px;
+  color: var(--pg-text-muted);
+}
+
+.pg-post-image img {
+  display: block;
+  width: 100%;
+  max-height: 650px;
+  object-fit: cover;
+  cursor: pointer;
+}
+
+.pg-post-actions {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+}
+
+.pg-post-actions-left,
+.pg-post-actions-right {
+  display: flex;
+  gap: 8px;
+}
+
+.pg-like-btn {
+  border: none;
+  background: transparent;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 2px;
+  transition: transform 0.1s ease;
+}
+
+.pg-like-btn:hover {
+  transform: scale(1.05);
+}
+
+.pg-post-likes {
+  padding: 0 12px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.pg-post-caption {
+  padding: 4px 12px;
+  font-size: 14px;
+}
+
+.pg-post-caption strong {
+  margin-right: 4px;
+}
+
+.pg-post-comments {
+  padding: 4px 12px;
+}
+
+.pg-post-comments li {
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.pg-post-time {
+  padding: 4px 12px;
+  font-size: 10px;
+  color: var(--pg-text-muted);
+  text-transform: uppercase;
+}
+
+/* COMMENT FORM */
+.pg-comment-form {
+  border-top: 1px solid #efefef;
+  display: flex;
+  gap: 8px;
+  padding: 8px 12px;
+  align-items: center;
+}
+
+.pg-comment-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 14px;
+}
+
+.pg-comment-submit {
+  border: none;
+  background: transparent;
+  color: var(--pg-accent);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* SIDEBAR
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+.pg-sidebar {
+  position: sticky;
+  top: 80px;
+  align-self: flex-start;
+  font-size: 14px;
+}
+
+.pg-sidebar-profile {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.link-btn {
+  border: none;
+  background: transparent;
+  color: var(--pg-accent);
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.pg-suggestions-header {
+  color: var(--pg-text-muted);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.pg-suggestions-list {
+  list-style: none;
+}
+
+.pg-suggestions-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.pg-suggestion-info {
+  flex: 1;
+  margin: 0 8px;
+  font-size: 12px;
+}
+
+.pg-footer {
+  margin-top: 16px;
+  color: var(--pg-text-muted);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+/* BUTTONS & UTILS
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+.pg-btn-primary {
+  border: none;
+  background: var(--pg-accent);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.pg-btn-primary:hover {
+  filter: brightness(0.95);
+}
+
+.pg-btn-full {
+  width: 100%;
+}
+
+/* MODAL TẠO BÀI VIẾT
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+.pg-modal {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.pg-modal[aria-hidden="false"] {
+  display: flex;
+}
+
+.pg-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.pg-modal-dialog {
+  position: relative;
+  background: #fff;
+  border-radius: var(--pg-radius-lg);
+  width: 100%;
+  max-width: 420px;
+  padding: 16px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.16);
+  z-index: 1;
+}
+
+.pg-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.pg-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pg-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+}
+
+.pg-field input,
+.pg-field textarea {
+  border-radius: 8px;
+  border: 1px solid var(--pg-border);
+  padding: 6px 10px;
+  font-size: 14px;
+  resize: vertical;
+}
+
+/* TOAST
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+.pg-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  background: #333;
+  color: #fff;
+  font-size: 13px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 100;
+}
+
+.pg-toast.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* RESPONSIVE
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+@media (max-width: 900px) {
+  .pg-main {
+    grid-template-columns: 1fr;
+  }
+  .pg-sidebar {
+    display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .pg-header-inner {
+    gap: 8px;
+  }
+  .pg-search {
+    display: none;
+  }
+}

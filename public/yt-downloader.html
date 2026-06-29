@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Studio YT Downloader | Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap');
+        body { background-color: #0A0A0A; color: #FFFFFF; font-family: 'Inter', sans-serif; min-height: 100vh; padding: 2rem 1rem;}
+        .glass-box { background: #121212; border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; }
+        .progress-btn { position: relative; overflow: hidden; }
+        .progress-fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0%; transition: width 0.3s linear; }
+        .progress-text { position: relative; z-index: 10; }
+        
+        .video-card:hover .hover-overlay { opacity: 1; }
+        .video-card img { transition: transform 0.3s; }
+        .video-card:hover img { transform: scale(1.05); }
+    </style>
+</head>
+<body class="antialiased flex flex-col items-center">
+
+    <div class="w-full max-w-5xl flex flex-col gap-8">
+        <div class="text-center mb-2">
+            <h1 class="text-4xl font-black tracking-tight mb-2 flex justify-center items-center gap-3">
+                <i class="fa-brands fa-youtube text-red-500"></i> Music Hub Pro
+            </h1>
+            <p id="authStatus" class="text-xs font-bold uppercase tracking-widest text-gray-600">Đang truy cập chế độ: KHÁCH</p>
+        </div>
+
+        <div class="flex items-center gap-2 bg-[#1A1A1A] p-2 rounded-full border border-white/10 shadow-2xl transition focus-within:border-white/30">
+            <i class="fa-solid fa-magnifying-glass text-gray-500 ml-4"></i>
+            <input type="text" id="ytInput" class="bg-transparent w-full text-sm text-white px-2 py-3 outline-none" placeholder="Dán link YouTube HOẶC nhập tên bài hát cần tìm...">
+            <button id="analyzeBtn" onclick="handleInput()" class="bg-white text-black font-bold text-sm px-8 py-3 rounded-full hover:scale-105 transition-transform whitespace-nowrap">
+                Tìm & Tải
+            </button>
+        </div>
+
+        <div id="discoverySection" class="w-full">
+            <h2 id="gridTitle" class="text-xl font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-fire text-orange-500"></i> Thịnh Hành Hôm Nay</h2>
+            
+            <div id="videoGrid" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <!-- Data đổ vào đây -->
+            </div>
+            
+            <div id="loadingGrid" class="hidden text-center py-10 text-gray-500">
+                <i class="fa-solid fa-circle-notch fa-spin text-3xl mb-3 text-red-500"></i>
+                <p class="text-sm font-bold">Đang quét vệ tinh tìm kiếm...</p>
+            </div>
+
+            <!-- THANH PHÂN TRANG AJAX -->
+            <div id="paginationControls" class="flex justify-center items-center gap-4 mt-8 hidden">
+                <button id="prevBtn" onclick="prevPage()" class="px-5 py-2 bg-[#1A1A1A] hover:bg-gray-800 text-white font-bold rounded-lg transition border border-white/10">
+                    <i class="fa-solid fa-angle-left mr-1"></i> Trước
+                </button>
+                <span id="pageInfo" class="text-sm font-bold text-gray-400">Trang 1 / 1</span>
+                <button id="nextBtn" onclick="nextPage()" class="px-5 py-2 bg-[#1A1A1A] hover:bg-gray-800 text-white font-bold rounded-lg transition border border-white/10">
+                    Sau <i class="fa-solid fa-angle-right ml-1"></i>
+                </button>
+            </div>
+        </div>
+
+        <div id="resultSection" class="hidden opacity-0 transition-opacity duration-700">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-bold"><i class="fa-solid fa-gears text-blue-400 mr-2"></i> Bảng Điều Khiển Tải Xuống</h2>
+                <button onclick="backToGrid()" class="text-sm text-gray-400 hover:text-white underline"><i class="fa-solid fa-arrow-left mr-1"></i> Quay lại khám phá</button>
+            </div>
+            <div class="glass-box p-6 grid grid-cols-1 md:grid-cols-2 gap-8 shadow-2xl">
+                <div class="rounded-2xl overflow-hidden aspect-video bg-[#111] relative shadow-lg">
+                    <img id="ytThumbnail" src="" alt="Thumbnail" class="w-full h-full object-cover">
+                </div>
+                <div class="flex flex-col justify-center">
+                    <h2 id="videoTitle" class="text-xl font-bold text-white mb-6 leading-snug line-clamp-2">Đang lấy dữ liệu...</h2>
+                    
+                    <div id="formatSelection" class="hidden grid-cols-2 gap-4 mb-2">
+                        <div onclick="selectFormat('mp4')" class="cursor-pointer bg-[#1A1A1A] hover:bg-[#2A2A2A] p-6 rounded-2xl text-center border border-white/5 transition">
+                            <i class="fa-solid fa-video text-3xl mb-3 text-red-400"></i>
+                            <h3 class="font-bold text-sm">Video MP4</h3>
+                        </div>
+                        <div onclick="selectFormat('mp3')" class="cursor-pointer bg-[#1A1A1A] hover:bg-[#2A2A2A] p-6 rounded-2xl text-center border border-white/5 transition">
+                            <i class="fa-solid fa-headphones text-3xl mb-3 text-blue-400"></i>
+                            <h3 class="font-bold text-sm">Audio MP3 & Lời</h3>
+                        </div>
+                    </div>
+                    
+                    <div id="qualitySelection" class="hidden flex-col">
+                        <h3 class="text-xs font-bold text-gray-400 uppercase mb-3 flex justify-between">Chọn chất lượng <button onclick="resetFormat()" class="text-blue-400 hover:underline">Đổi định dạng</button></h3>
+                        <div id="qualityList" class="flex flex-col gap-2 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar"></div>
+                    </div>
+                    
+                    <div id="progressSection" class="hidden mt-6">
+                        <button id="downloadBtn" class="progress-btn w-full h-16 bg-[#1A1A1A] border border-white/10 rounded-2xl">
+                            <div id="progressFill" class="progress-fill bg-gradient-to-r from-blue-600 to-cyan-500"></div>
+                            <div class="progress-text font-bold text-sm text-white" id="btnText">ĐANG CHUẨN BỊ...</div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const _auth = (() => {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('x_auth') || "";
+        })();
+
+        if (_auth === "admin16868") { 
+            document.getElementById('authStatus').innerText = "⚡ Đang truy cập chế độ: ADMIN (Music Hub Pro)";
+            document.getElementById('authStatus').classList.replace('text-gray-600', 'text-green-500');
+        }
+
+        let videoInfo = null;
+        let selectedFormat = null;
+        let currentTargetUrl = "";
+
+        // Biến lưu trữ cho Phân trang AJAX
+        let currentList = [];
+        let currentPage = 1;
+        const itemsPerPage = 8;
+
+        window.addEventListener('DOMContentLoaded', loadTrending);
+
+        async function loadTrending() {
+            try {
+                const res = await fetch('/api/ytdl/trending');
+                const data = await res.json();
+                if(data.status === 'success' && data.results.length > 0) {
+                    currentList = data.results;
+                    renderPage(1);
+                } else {
+                    document.getElementById('gridTitle').innerHTML = '<i class="fa-solid fa-music text-blue-500"></i> Hôm nay nghe gì?';
+                    document.getElementById('videoGrid').innerHTML = '<p class="col-span-full text-center text-gray-500 py-10">Nhập tên bài hát lên thanh tìm kiếm để bắt đầu...</p>';
+                }
+            } catch(e) { console.log("Không load được trending"); }
+        }
+
+        // --- HÀM RENDER PHÂN TRANG ---
+        function renderPage(page) {
+            currentPage = page;
+            const totalPages = Math.ceil(currentList.length / itemsPerPage);
+            
+            // Cắt mảng dữ liệu theo trang hiện tại
+            const start = (page - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const pageData = currentList.slice(start, end);
+            
+            const grid = document.getElementById('videoGrid');
+            grid.innerHTML = '';
+            
+            pageData.forEach(item => {
+                const cleanId = item.id.split('&')[0];
+                const url = `https://www.youtube.com/watch?v=${cleanId}`;
+                grid.innerHTML += `
+                    <div class="video-card bg-[#1A1A1A] rounded-xl overflow-hidden border border-white/5 cursor-pointer relative group flex flex-col h-full" onclick="triggerAnalyze('${url}')">
+                        <div class="aspect-video relative overflow-hidden bg-black flex-shrink-0">
+                            <img src="${item.thumbnail}" class="w-full h-full object-cover opacity-80" alt="thumb">
+                            <div class="absolute bottom-1 right-1 bg-black/80 px-2 py-0.5 rounded text-[10px] font-bold">${item.duration}</div>
+                            <div class="hover-overlay absolute inset-0 bg-black/60 opacity-0 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm">
+                                <button class="bg-red-600 text-white font-bold px-4 py-2 rounded-full text-xs shadow-[0_0_15px_rgba(220,38,38,0.5)] transform scale-90 group-hover:scale-100 transition-transform">
+                                    <i class="fa-solid fa-cloud-arrow-down mr-1"></i> Tải Ngay
+                                </button>
+                            </div>
+                        </div>
+                        <div class="p-3 flex-grow flex flex-col justify-between">
+                            <h3 class="font-bold text-sm text-white line-clamp-2 leading-tight mb-2" title="${item.title}">${item.title}</h3>
+                            <p class="text-[11px] text-gray-400 truncate"><i class="fa-solid fa-circle-user mr-1"></i>${item.uploader}</p>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Xử lý thanh điều hướng
+            const pagination = document.getElementById('paginationControls');
+            if(currentList.length > itemsPerPage) {
+                pagination.classList.remove('hidden');
+                document.getElementById('pageInfo').innerText = `Trang ${currentPage} / ${totalPages}`;
+                
+                // Khóa/Mở khóa nút
+                document.getElementById('prevBtn').disabled = (currentPage === 1);
+                document.getElementById('nextBtn').disabled = (currentPage === totalPages);
+                
+                document.getElementById('prevBtn').className = currentPage === 1 ? "px-5 py-2 bg-gray-800 text-gray-500 font-bold rounded-lg cursor-not-allowed" : "px-5 py-2 bg-[#1A1A1A] hover:bg-gray-800 text-white font-bold rounded-lg transition border border-white/10";
+                document.getElementById('nextBtn').className = currentPage === totalPages ? "px-5 py-2 bg-gray-800 text-gray-500 font-bold rounded-lg cursor-not-allowed" : "px-5 py-2 bg-[#1A1A1A] hover:bg-gray-800 text-white font-bold rounded-lg transition border border-white/10";
+            } else {
+                pagination.classList.add('hidden');
+            }
+        }
+
+        function nextPage() {
+            if (currentPage < Math.ceil(currentList.length / itemsPerPage)) renderPage(currentPage + 1);
+        }
+
+        function prevPage() {
+            if (currentPage > 1) renderPage(currentPage - 1);
+        }
+
+        function isUrl(str) {
+            const regex = /(http|https):\/\/(\w+:{0,1}\w*)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%!\-\/]))?/;
+            return regex.test(str);
+        }
+
+        async function handleInput() {
+            const input = document.getElementById('ytInput').value.trim();
+            if(!input) return;
+
+            if(isUrl(input)) {
+                triggerAnalyze(input);
+            } else {
+                document.getElementById('discoverySection').classList.remove('hidden');
+                document.getElementById('resultSection').classList.add('hidden');
+                document.getElementById('videoGrid').innerHTML = '';
+                document.getElementById('paginationControls').classList.add('hidden');
+                document.getElementById('loadingGrid').classList.remove('hidden');
+                document.getElementById('gridTitle').innerHTML = `<i class="fa-solid fa-magnifying-glass text-blue-500"></i> Kết quả tìm kiếm cho: "${input}"`;
+
+                try {
+                    const res = await fetch('/api/ytdl/search', {
+                        method: 'POST', headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({query: input})
+                    });
+                    const data = await res.json();
+                    document.getElementById('loadingGrid').classList.add('hidden');
+                    
+                    if(data.status === 'success' && data.results.length > 0) {
+                        currentList = data.results;
+                        renderPage(1);
+                    } else {
+                        document.getElementById('videoGrid').innerHTML = '<p class="col-span-full text-center text-gray-500 py-10">Không tìm thấy kết quả phù hợp.</p>';
+                    }
+                } catch(e) {
+                    document.getElementById('loadingGrid').classList.add('hidden');
+                    document.getElementById('videoGrid').innerHTML = '<p class="col-span-full text-center text-red-500 py-10">Lỗi kết nối đến máy chủ tìm kiếm.</p>';
+                }
+            }
+        }
+
+        function extractId(url) {
+            const urlObj = new URL(url.replace('&', '?').split('?')[0]); 
+            const vid = url.includes('youtu.be') ? url.split('/').pop().split('?')[0] : new URLSearchParams(url.split('?')[1]).get('v');
+            return vid ? vid.substring(0, 11) : null;
+        }
+
+        function backToGrid() {
+            document.getElementById('resultSection').classList.add('hidden');
+            document.getElementById('discoverySection').classList.remove('hidden');
+        }
+
+        function resetFormat() {
+            document.getElementById('formatSelection').style.display = 'grid';
+            document.getElementById('qualitySelection').classList.add('hidden');
+        }
+
+        async function triggerAnalyze(url) {
+            currentTargetUrl = url;
+            const vid = extractId(url);
+            if(!vid) return alert("Hệ thống không nhận diện được ID video!");
+            
+            document.getElementById('discoverySection').classList.add('hidden');
+            document.getElementById('resultSection').classList.remove('hidden', 'opacity-0');
+            
+            document.getElementById('formatSelection').classList.add('hidden');
+            document.getElementById('qualitySelection').classList.add('hidden');
+            document.getElementById('progressSection').classList.add('hidden');
+            
+            document.getElementById('ytThumbnail').src = `https://i.ytimg.com/vi/${vid}/maxresdefault.jpg`;
+            document.getElementById('videoTitle').innerText = "Đang quét vệ tinh thông số...";
+            
+            try {
+                const res = await fetch('/api/ytdl/info', {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({url: currentTargetUrl})
+                });
+
+                const data = await res.json();
+                if (res.ok) {
+                    videoInfo = data;
+                    document.getElementById('videoTitle').innerText = videoInfo.title;
+                    document.getElementById('formatSelection').classList.remove('hidden');
+                    document.getElementById('formatSelection').style.display = 'grid';
+                } else {
+                    document.getElementById('videoTitle').innerText = "❌ Lỗi: " + (data.detail || "Không xác định");
+                }
+            } catch(e) { 
+                document.getElementById('videoTitle').innerText = "❌ Lỗi kết nối đến máy chủ phân tích!"; 
+            }
+        }
+
+        function selectFormat(fmt) {
+            selectedFormat = fmt;
+            document.getElementById('formatSelection').style.display = 'none';
+            document.getElementById('qualitySelection').classList.remove('hidden');
+            const qList = document.getElementById('qualityList');
+            qList.innerHTML = '';
+            
+            if(fmt === 'mp4') {
+                videoInfo.resolutions.forEach(resObj => {
+                    qList.innerHTML += `
+                        <div onclick="startDownload('${resObj.height}')" class="p-4 bg-[#1A1A1A] hover:bg-[#2A2A2A] rounded-xl cursor-pointer flex justify-between border border-white/5 transition">
+                            <span class="font-bold text-sm"><i class="fa-solid fa-display text-gray-500 mr-2"></i> ${resObj.height}p</span>
+                            <span class="text-gray-500 text-xs">${resObj.size}</span>
+                        </div>`;
+                });
+            } else {
+                qList.innerHTML += `
+                    <div onclick="startDownload('320')" class="p-4 bg-[#1A1A1A] hover:bg-[#2A2A2A] rounded-xl cursor-pointer flex justify-between border border-white/5 transition">
+                        <span class="font-bold text-sm"><i class="fa-solid fa-headphones text-blue-500 mr-2"></i> 320 kbps (Cao cấp)</span>
+                        <span class="text-gray-500 text-xs">${videoInfo.audio_sizes["320"]}</span>
+                    </div>
+                    <div onclick="startDownload('128')" class="p-4 bg-[#1A1A1A] hover:bg-[#2A2A2A] rounded-xl cursor-pointer flex justify-between border border-white/5 transition">
+                        <span class="font-bold text-sm"><i class="fa-solid fa-music text-gray-500 mr-2"></i> 128 kbps (Tiêu chuẩn)</span>
+                        <span class="text-gray-500 text-xs">${videoInfo.audio_sizes["128"]}</span>
+                    </div>`;
+            }
+        }
+
+        async function startDownload(quality) {
+            document.getElementById('qualitySelection').classList.add('hidden');
+            document.getElementById('progressSection').classList.remove('hidden');
+            
+            const fill = document.getElementById('progressFill');
+            const text = document.getElementById('btnText');
+            const btn = document.getElementById('downloadBtn');
+            btn.onclick = null;
+            
+            fill.className = `progress-fill transition-all duration-300 ${selectedFormat === 'mp4' ? 'bg-gradient-to-r from-red-600 to-orange-500' : 'bg-gradient-to-r from-blue-600 to-cyan-500'}`;
+            
+            let progress = 0;
+            let progressInterval = setInterval(() => {
+                if(progress < 90) progress += 1.5;
+                fill.style.width = `${progress}%`;
+                text.innerHTML = `<i class="fa-solid fa-compact-disc fa-spin mr-2"></i> ĐANG TẢI & XỬ LÝ AI (${Math.floor(progress)}%)`;
+            }, 500);
+            
+            try {
+                const response = await fetch('/api/ytdl/download', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ 
+                        url: currentTargetUrl, 
+                        format: selectedFormat, 
+                        quality: quality.toString(), 
+                        title: videoInfo.title,
+                        x_auth: _auth
+                    })
+                });
+
+                const data = await response.json();
+                clearInterval(progressInterval);
+
+                if (response.ok) {
+                    fill.style.width = '100%';
+                    fill.className = "progress-fill bg-[#1DB954] transition-all duration-500";
+                    text.innerHTML = `<i class="fa-solid fa-cloud-arrow-down mr-2 text-xl"></i> ẤN ĐỂ LƯU TỆP XUỐNG MÁY!`;
+                    btn.onclick = () => { window.location.href = data.download_url; };
+                } else {
+                    text.innerText = "❌ LỖI: " + (data.detail || "Không xác định");
+                    fill.style.width = '0%';
+                }
+            } catch(err) {
+                clearInterval(progressInterval);
+                text.innerText = "❌ LỖI KẾT NỐI SERVER";
+                fill.style.width = '0%';
+            }
+        }
+
+        document.getElementById("ytInput").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                handleInput();
+            }
+        });
+    </script>
+</body>
+</html>

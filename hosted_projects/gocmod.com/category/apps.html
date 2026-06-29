@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ứng dụng Mod APK mới nhất - GocMod.com</title>
+    <meta name="description" content="Tải xuống ứng dụng Mod APK mới nhất cho Android. App Premium, Pro unlocked miễn phí.">
+    <link rel="icon" href="../assets/images/favicon.png">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/category.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container header-container">
+            <a href="/" class="logo">
+                <img src="../assets/images/logo.png" alt="GocMod.com" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                <span class="logo-text" style="display:none">GocMod.com</span>
+            </a>
+            <div class="header-actions">
+                <button class="theme-toggle" id="themeToggle" aria-label="Chế độ tối">
+                    <i class="fas fa-sun"></i>
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button class="search-toggle" id="searchToggle" aria-label="Tìm kiếm">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <ul class="nav-menu">
+                <li><a href="/"><i class="fas fa-home"></i> Trang chủ</a></li>
+                <li><a href="games.html"><i class="fas fa-gamepad"></i> Trò chơi</a></li>
+                <li><a href="apps.html" class="active"><i class="fas fa-mobile-alt"></i> Ứng dụng</a></li>
+                <li><a href="../top-100.html"><i class="fas fa-trophy"></i> TOP 100</a></li>
+                <li><a href="../news.html"><i class="fas fa-bolt"></i> Tin mới</a></li>
+                <li><a href="../order.html"><i class="fas fa-plus-circle"></i> Yêu cầu Mod</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Search Bar -->
+    <div class="search-bar" id="searchBar">
+        <div class="container">
+            <form class="search-form" action="../search.html" method="get">
+                <input type="search" name="q" placeholder="Tìm kiếm ứng dụng..." class="search-input">
+                <button type="submit" class="search-btn"><i class="fas fa-search"></i></button>
+                <button type="button" class="search-close" id="searchClose"><i class="fas fa-times"></i></button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Category Header -->
+            <div class="category-header">
+                <div class="category-icon">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+                <div class="category-info">
+                    <h1 class="category-title">Ứng dụng Mod</h1>
+                    <p class="category-description">Kho ứng dụng Mod APK Premium, Pro unlocked miễn phí cho Android</p>
+                    <div class="category-stats">
+                        <span><i class="fas fa-download"></i> 50M+ lượt tải</span>
+                        <span><i class="fas fa-mobile-alt"></i> 1000+ ứng dụng</span>
+                        <span><i class="fas fa-clock"></i> Cập nhật hàng ngày</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter & Sort -->
+            <div class="category-toolbar">
+                <div class="filter-group">
+                    <select class="filter-select" id="categoryFilter">
+                        <option value="all">Tất cả thể loại</option>
+                        <option value="photo-video">Ảnh & Video</option>
+                        <option value="music-audio">Nhạc & Âm thanh</option>
+                        <option value="social">Mạng xã hội</option>
+                        <option value="productivity">Năng suất</option>
+                        <option value="education">Giáo dục</option>
+                        <option value="lifestyle">Lối sống</option>
+                        <option value="health-fitness">Sức khỏe</option>
+                        <option value="tools">Công cụ</option>
+                    </select>
+                    <select class="filter-select" id="modTypeFilter">
+                        <option value="all">Tất cả Mod</option>
+                        <option value="premium">Premium</option>
+                        <option value="pro">Pro Unlocked</option>
+                        <option value="no-ads">No Ads</option>
+                        <option value="gold">Gold</option>
+                        <option value="vip">VIP</option>
+                    </select>
+                </div>
+                <div class="sort-group">
+                    <select class="filter-select" id="sortOrder">
+                        <option value="newest">Mới nhất</option>
+                        <option value="popular">Phổ biến</option>
+                        <option value="downloads">Nhiều tải nhất</option>
+                        <option value="rating">Đánh giá cao</option>
+                    </select>
+                    <div class="view-toggle">
+                        <button class="view-btn active" data-view="grid"><i class="fas fa-th-large"></i></button>
+                        <button class="view-btn" data-view="list"><i class="fas fa-list"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Apps Grid -->
+            <div class="apps-grid" id="appsContainer">
+                <!-- App 1 -->
+                <div class="app-card" data-category="photo-video" data-mod="premium">
+                    <div class="app-card-image">
+                        <img src="https://play-lh.googleusercontent.com/tj1Qy7kkXxH2YneJ-4QzP3D4wSG-9QZOcpVJCAXQD0Tya0DRVcivtaSlF9e0NeiaYJwN" alt="Remini" onerror="this.src='../assets/images/default-app.png'">
+                    </div>
+                    <div class="app-card-content">
+                        <h3 class="app-title">Remini - Làm Nét Ảnh</h3>
+                        <p class="app-meta">
+                            <span class="badge badge-pro">PRO</span>
+                            <span class="app-version">Android 5.0+</span>
+                        </p>
+                        <a href="../app/remini.html" class="btn btn-download">
+                            <i class="fas fa-download"></i> Tải về
+                        </a>
+                    </div>
+                </div>
+
+                <!-- App 2 -->
+                <div class="app-card" data-category="photo-video" data-mod="pro">
+                    <div class="app-card-image">
+                        <img src="https://play-lh.googleusercontent.com/capcut.jpg" alt="CapCut" onerror="this.src='../assets/images/default-app.png'">
+                    </div>
+                    <div class="app-card-content">
+                        <h3 class="app-title">CapCut Pro</h3>
+                        <p class="app-meta">
+                            <span class="badge badge-pro">PRO</span>
+                            <span class="app-version">Android 9.0+</span>
+                        </p>
+                        <a href="../app/capcut.html" class="btn btn-download">
+                            <i class="fas fa-download"></i> Tải về
+                        </a>
+                    </div>
+                </div>
+
+                <!-- App 3 -->
+                <div class="app-card" data-category="music-audio" data-mod="premium">
+                    <div class="app-card-image">
+                        <img src="https://play-lh.googleusercontent.com/spotify.jpg" alt="Spotify" onerror="this.src='../assets/images/default-app.png'">
+                    </div>
+                    <div class="app-card-content">
+                        <h3 class="app-title">Spotify Premium</h3>
+                        <p class="app-meta">
+                            <span class="badge badge-premium">PREMIUM</span>
+                            <span class="app-version">Android 8.0+</span>
+                        </p>
+                        <a href="../app/spotify.html" class="btn btn-download">
+                            <i class="fas fa-download"></i> Tải về
+                        </a>
+                    </div>
+                </div>
+
+                <!-- App 4 -->
+                <div class="app-card" data-category="photo-video" data-mod="pro">
+                    <div class="app-card-image">
+                        <img src="https://play-lh.googleusercontent.com/lightroom.jpg" alt="Lightroom" onerror="this.src='../assets/images/default-app.png'">
+                    </div>
+                    <div class="app-card-content">
+                        <h3 class="app-title">Lightroom Premium</h3>
+                        <p class="app-meta">
+                            <span class="badge badge-pro">PREMIUM</span>
+                            <span class="app-version">Android 8.0+</span>
+                        </p>
+                        <a href="../app/lightroom.html" class="btn btn-download">
+                            <i class="fas fa-download"></i> Tải về
+                        </a>
+                    </div>
+                </div>
+
+                <!-- App 5 -->
+                <div class="app-card" data-category="social" data-mod="no-ads">
+                    <div class="app-card-image">
+                        <img src="https://play-lh.googleusercontent.com/youtube.jpg" alt="YouTube ReVanced" onerror="this.src='../assets/images/default-app.png'">
+                    </div>
+                    <div class="app-card-content">
+                        <h3 class="app-title">YouTube ReVanced</h3>
+                        <p class="app-meta">
+                            <span class="badge badge-no-ads">NO ADS</span>
+                            <span class="app-version">Android 9.0+</span>
+                        </p>
+                        <a href="../app/youtube-revanced.html" class="btn btn-download">
+                            <i class="fas fa-download"></i> Tải về
+                        </a>
+                    </div>
+                </div>
+
+                <!-- App 6 -->
+                <div class="app-card" data-category="education" data-mod="premium">
+                    <div class="app-card-image">
+                        <img src="https://play-lh.googleusercontent.com/duolingo.jpg" alt="Duolingo" onerror="this.src='../assets/images/default-app.png'">
+                    </div>
+                    <div class="app-card-content">
+                        <h3 class="app-title">Duolingo Super</h3>
+                        <p class="app-meta">
+                            <span class="badge badge-pro">SUPER</span>
+                            <span class="app-version">Android 6.0+</span>
+                        </p>
+                        <a href="../app/duolingo.html" class="btn btn-download">
+                            <i class="fas fa-download"></i> Tải về
+                        </a>
+                    </div>
+                </div>
+
+                <!-- App 7 -->
+                <div class="app-card" data-category="social" data-mod="plus">
+                    <div class="app-card-image">
+                        <img src="https://play-lh.googleusercontent.com/telegram.jpg" alt="Telegram" onerror="this.src='../assets/images/default-app.png'">
+                    </div>
+                    <div class="app-card-content">
+                        <h3 class="app-title">Telegram Plus</h3>
+                        <p class="app-meta">
+                            <span class="badge badge-pro">PLUS</span>
+                            <span class="app-version">Android 6.0+</span>
+                        </p>
+                        <a href="../app/telegram.html" class="btn btn-download">
+                            <i class="fas fa-download"></i> Tải về
+                        </a>
+                    </div>
+                </div>
+
+                <!-- App 8 -->
+                <div class="app-card" data-category="photo-video" data-mod="gold">
+                    <div class="app-card-image">
+                        <img src="https://play-lh.googleusercontent.com/picsart.jpg" alt="PicsArt" onerror="this.src='../assets/images/default-app.png'">
+                    </div>
+                    <div class="app-card-content">
+                        <h3 class="app-title">PicsArt Gold</h3>
+                        <p class="app-meta">
+                            <span class="badge badge-gold">GOLD</span>
+                            <span class="app-version">Android 7.0+</span>
+                        </p>
+                        <a href="../app/picsart.html" class="btn btn-download">
+                            <i class="fas fa-download"></i> Tải về
+                        </a>
+                    </div>
+                </div>
+
+                <!-- App 9 -->
+                <div class="app-card" data-category="lifestyle" data-mod="premium">
+                    <div class="app-card-image">
+                        <img src="https://play-lh.googleusercontent.com/netflix.jpg" alt="Netflix" onerror="this.src='../assets/images/default-app.png'">
+                    </div>
+                    <div class="app-card-content">
+                        <h3 class="app-title">Netflix Premium</h3>
+                        <p class="app-meta">
+                            <span class="badge badge-pro">4K HDR</span>
+                            <span class="app-version">Android 7.0+</span>
+                        </p>
+                        <a href="../app/netflix.html" class="btn btn-download">
+                            <i class="fas fa-download"></i> Tải về
+                        </a>
+                    </div>
+                </div>
+
+                <!-- App 10 -->
+                <div class="app-card" data-category="tools" data-mod="pro">
+                    <div class="app-card-image">
+                        <img src="https://play-lh.googleusercontent.com/solidexplorer.jpg" alt="Solid Explorer" onerror="this.src='../assets/images/default-app.png'">
+                    </div>
+                    <div class="app-card-content">
+                        <h3 class="app-title">Solid Explorer</h3>
+                        <p class="app-meta">
+                            <span class="badge badge-pro">FULL</span>
+                            <span class="app-version">Android 5.0+</span>
+                        </p>
+                        <a href="../app/solid-explorer.html" class="btn btn-download">
+                            <i class="fas fa-download"></i> Tải về
+                        </a>
+                    </div>
+                </div>
+
+                <!-- App 11 -->
+                <div class="app-card" data-category="health-fitness" data-mod="premium">
+                    <div class="app-card-image">
+                        <img src="https://play-lh.googleusercontent.com/myfitnesspal.jpg" alt="MyFitnessPal" onerror="this.src='../assets/images/default-app.png'">
+                    </div>
+                    <div class="app-card-content">
+                        <h3 class="app-title">MyFitnessPal</h3>
+                        <p class="app-meta">
+                            <span class="badge badge-pro">PREMIUM</span>
+                            <span class="app-version">Android 8.0+</span>
+                        </p>
+                        <a href="../app/myfitnesspal.html" class="btn btn-download">
+                            <i class="fas fa-download"></i> Tải về
+                        </a>
+                    </div>
+                </div>
+
+                <!-- App 12 -->
+                <div class="app-card" data-category="productivity" data-mod="premium">
+                    <div class="app-card-image">
+                        <img src="https://play-lh.googleusercontent.com/notion.jpg" alt="Notion" onerror="this.src='../assets/images/default-app.png'">
+                    </div>
+                    <div class="app-card-content">
+                        <h3 class="app-title">Notion Premium</h3>
+                        <p class="app-meta">
+                            <span class="badge badge-pro">PLUS</span>
+                            <span class="app-version">Android 8.0+</span>
+                        </p>
+                        <a href="../app/notion.html" class="btn btn-download">
+                            <i class="fas fa-download"></i> Tải về
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination">
+                <a href="#" class="page-btn"><i class="fas fa-chevron-left"></i></a>
+                <a href="#" class="page-btn active">1</a>
+                <a href="#" class="page-btn">2</a>
+                <a href="#" class="page-btn">3</a>
+                <a href="#" class="page-btn">4</a>
+                <a href="#" class="page-btn">5</a>
+                <a href="#" class="page-btn"><i class="fas fa-ellipsis-h"></i></a>
+                <a href="#" class="page-btn"><i class="fas fa-chevron-right"></i></a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>GocMod.com</h3>
+                    <p>Kho ứng dụng Mod cho Android miễn phí, an toàn và tốc độ. Cập nhật 24/7 liên tục.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Liên kết</h4>
+                    <ul>
+                        <li><a href="games.html">Trò chơi</a></li>
+                        <li><a href="apps.html">Ứng dụng</a></li>
+                        <li><a href="../top-100.html">TOP 100</a></li>
+                        <li><a href="../order.html">Yêu cầu Mod</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Pháp lý</h4>
+                    <ul>
+                        <li><a href="../dmca.html">DMCA</a></li>
+                        <li><a href="../privacy.html">Bảo mật</a></li>
+                        <li><a href="../terms.html">Điều khoản</a></li>
+                        <li><a href="../contact.html">Liên hệ</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 GocMod.com. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../assets/js/main.js"></script>
+    <script src="../assets/js/category.js"></script>
+</body>
+</html>

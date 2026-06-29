@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI ChatBox - Pro Glassmorphism</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* --- Kỹ thuật Glassmorphism Cốt Lõi --- */
+        .glass-panel {
+            background: rgba(20, 20, 25, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        body { transition: background-color 0.5s ease, color 0.5s ease; }
+        .glass-panel, .glass-header, .message-wrapper.user .message, .message-wrapper.bot .message, #inputBoxWrapper, #chatInput, #sendBtn, #newChatBtn, #startAiServerBtn, #stopAiServerBtn, #historyList div {
+            transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease, opacity 0.5s ease;
+        }
+        
+        .glass-header {
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* --- Tùy chỉnh thanh cuộn --- */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+        /* --- Animations --- */
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .spin-icon { animation: spin 1s linear infinite; }
+        
+        @keyframes pulse-star { 0% { transform: scale(0.95); opacity: 0.8; filter: drop-shadow(0 0 15px rgba(66, 133, 244, 0.5)); } 
+                                100% { transform: scale(1.05); opacity: 1; filter: drop-shadow(0 0 30px rgba(155, 114, 203, 0.8)); } }
+        
+        .gemini-star {
+            background: linear-gradient(135deg, #4285f4, #9b72cb, #d96570);
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+            animation: pulse-star 2.5s infinite alternate ease-in-out;
+        }
+
+        /* --- Trạng thái hiển thị điều khiển bằng JS --- */
+        .sidebar {
+            transform: translateX(-100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .sidebar.active { transform: translateX(0); }
+        
+        .overlay { display: none; }
+        .overlay.active { display: block; }
+        
+        @media (min-width: 768px) {
+            .sidebar { transform: translateX(0); position: relative !important; }
+            .overlay { display: none !important; }
+            .menu-btn-close, .menu-btn-open { display: none; }
+        }
+
+        /* --- Định dạng tin nhắn Chat --- */
+        .message-wrapper { display: flex; width: 100%; margin-bottom: 24px; }
+        .message-wrapper.user { justify-content: flex-end; }
+        .message-wrapper.bot { justify-content: flex-start; }
+
+        .message {
+            max-width: 85%; padding: 14px 20px; font-size: 15px; 
+            line-height: 1.6; word-wrap: break-word;
+        }
+        
+        .message-wrapper.user .message { 
+            background: rgba(59, 130, 246, 0.15); backdrop-filter: blur(10px);
+            border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 24px 24px 4px 24px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .message-wrapper.bot .message { 
+            background: transparent; border-radius: 0px 24px 24px 24px; 
+            padding-left: 0; color: #e2e8f0;
+        }
+
+        .message.bot p { margin-bottom: 12px; }
+        .message.bot p:last-child { margin-bottom: 0; }
+        .message.bot strong { color: #fff; font-weight: 600; }
+        .message.bot ul, .message.bot ol { padding-left: 20px; margin-bottom: 12px; list-style-type: disc; }
+        .message.bot pre {
+            background: rgba(0,0,0,0.4); backdrop-filter: blur(5px);
+            padding: 16px; border-radius: 12px; overflow-x: auto; 
+            margin: 12px 0; border: 1px solid rgba(255,255,255,0.1);
+        }
+        .message.bot code { 
+            font-family: monospace; background: rgba(255,255,255,0.1); 
+            padding: 2px 6px; border-radius: 6px; color: #93c5fd; font-size: 14px;
+        }
+        .message.bot pre code { background: transparent; padding: 0; color: #e2e8f0; }
+
+        /* --- Popup Toast --- */
+        .toast-notification {
+            visibility: hidden; opacity: 0;
+            background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.1); color: #fff;
+            transform: translate(-50%, 20px); transition: all 0.3s ease;
+        }
+        .toast-notification.show { 
+            visibility: visible; opacity: 1; transform: translate(-50%, 0); 
+        }
+        .toast-notification.success { border-bottom: 3px solid #22c55e; }
+        .toast-notification.warning { border-bottom: 3px solid #f59e0b; color: #fef3c7; }
+        .toast-notification.error { border-bottom: 3px solid #ef4444; }
+
+        /* --- Light Theme Overrides (Theme Sáng) --- */
+        body.light-theme {
+            background-color: #f8f9fa;
+            color: #1a1a1b;
+            background-image: url('https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=2070&auto=format&fit=crop'); 
+        }
+        body.light-theme ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); }
+        body.light-theme ::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.3); }
+        body.light-theme .bg-black\/60 { background-color: rgba(248, 249, 250, 0.85) !important; backdrop-filter: blur(2px); }
+        
+        body.light-theme .glass-panel {
+            background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px); border-right: 1px solid rgba(0, 0, 0, 0.1); color: #333;
+        }
+        body.light-theme .glass-header {
+            background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid rgba(0, 0, 0, 0.1); color: #333;
+        }
+
+        body.light-theme .text-white { color: #000 !important; }
+        body.light-theme .text-gray-100 { color: #111 !important; }
+        body.light-theme .text-gray-300 { color: #222 !important; }
+        body.light-theme .text-gray-400 { color: #444 !important; }
+        body.light-theme .text-gray-500 { color: #555 !important; }
+        body.light-theme .material-symbols-outlined { color: #666; }
+        
+        body.light-theme #newChatBtn { background: rgba(0, 0, 0, 0.05); border: 1px solid rgba(0, 0, 0, 0.1); color: #444; }
+        body.light-theme #newChatBtn:hover { background: rgba(0, 0, 0, 0.1); }
+        body.light-theme #newChatBtn .material-symbols-outlined { color: #555; }
+
+        body.light-theme #startAiServerBtn, body.light-theme #stopAiServerBtn { background: rgba(0, 0, 0, 0.05); border-color: rgba(0, 0, 0, 0.15); color: #444; }
+        body.light-theme #startAiServerBtn:hover, body.light-theme #stopAiServerBtn:hover:not([disabled]) { background: rgba(0, 0, 0, 0.1); }
+        
+        body.light-theme #historyList div { color: #222; }
+        body.light-theme #historyList div:hover { background: rgba(0, 0, 0, 0.08); }
+        body.light-theme #historyList div .material-symbols-outlined { color: #777; }
+
+        body.light-theme .message-wrapper.user .message { 
+            background: rgba(59, 130, 246, 0.8); backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(59, 130, 246, 0.6);
+            border-radius: 24px 24px 4px 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); color: #fff;
+        }
+        body.light-theme .message-wrapper.bot .message { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(5px); border: 1px solid rgba(0, 0, 0, 0.08); border-radius: 0px 24px 24px 24px; padding-left: 14px; color: #111; }
+        body.light-theme .message.bot p { color: #111; }
+        body.light-theme .message.bot strong { color: #333; }
+        body.light-theme .message.bot ul, body.light-theme .message.bot ol { list-style-type: decimal; color: #555; }
+        body.light-theme .message.bot pre { background: rgba(0,0,0,0.1); border: 1px solid rgba(0,0,0,0.2); color: #333; }
+        body.light-theme .message.bot code { background: rgba(0,0,0,0.05); color: #007bff; }
+        body.light-theme .message.bot pre code { color: #333; }
+        
+        body.light-theme #inputBoxWrapper { background: rgba(255, 255, 255, 0.8); border: 1px solid rgba(0, 0, 0, 0.1); }
+        body.light-theme #chatInput { color: #333; }
+        body.light-theme #chatInput::placeholder { color: #777; }
+        body.light-theme #sendBtn { background: #3b82f6; color: #fff; border-color: #3b82f6; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3); }
+        body.light-theme #sendBtn:hover { background: #2563eb; border-color: #2563eb; }
+        body.light-theme #sendBtn.disabled, body.light-theme #sendBtn[style*="opacity: 0.5"] { background: rgba(59, 130, 246, 0.2); color: #888; border-color: rgba(59, 130, 246, 0.3); box-shadow: none; }
+        body.light-theme #sendBtn .material-symbols-outlined { color: inherit; }
+
+        body.light-theme .toast-notification { background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(0, 0, 0, 0.1); color: #333; }
+        body.light-theme .toast-notification.success { border-bottom: 3px solid #22c55e; }
+        body.light-theme .toast-notification.warning { border-bottom: 3px solid #f59e0b; color: #666; }
+        body.light-theme .toast-notification.error { border-bottom: 3px solid #ef4444; }
+
+        .theme-toggle-btn {
+            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 8px; border-radius: 50%; cursor: pointer; display: flex; align-items: center;
+            justify-content: center; transition: background 0.3s ease, border-color 0.3s ease;
+        }
+        .theme-toggle-btn:hover { background: rgba(255, 255, 255, 0.1); }
+        body.light-theme .theme-toggle-btn { background: rgba(0, 0, 0, 0.05); border: 1px solid rgba(0, 0, 0, 0.1); }
+        body.light-theme .theme-toggle-btn:hover { background: rgba(0, 0, 0, 0.1); }
+        body.light-theme .theme-toggle-btn .material-symbols-outlined { color: #555; }
+
+        .switch { position: relative; display: inline-block; width: 38px; height: 20px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255, 255, 255, 0.15); transition: .4s; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.1); }
+        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        input:checked + .slider { background-color: #3b82f6; }
+        input:checked + .slider:before { transform: translateX(18px); }
+        
+        body.light-theme .slider { background-color: rgba(0, 0, 0, 0.1); border-color: rgba(0, 0, 0, 0.1); }
+        body.light-theme .slider:before { background-color: #fff; }
+    </style>
+</head>
+
+<body class="w-full h-[100dvh] overflow-hidden text-gray-100 bg-[url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop')] bg-cover bg-center">
+    
+    <div class="absolute inset-0 bg-black/60 z-0"></div>
+
+    <div class="relative z-10 flex w-full h-full">
+        <div class="overlay fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity" id="overlay"></div>
+
+        <div class="sidebar absolute md:relative z-50 w-[300px] h-full glass-panel flex flex-col p-5 shadow-2xl" id="sidebar">
+            <div class="flex justify-between items-center mb-6">
+                <span class="text-xl font-semibold tracking-wide text-white">Gemini Local</span>
+                <button class="menu-btn-close text-gray-400 hover:text-white transition" id="closeSidebar">
+                    <span class="material-symbols-outlined">menu_open</span>
+                </button>
+            </div>
+
+            <button class="flex items-center gap-3 w-full p-3.5 mb-4 rounded-full bg-white/5 hover:bg-white/10 border border-white/5 transition-all text-sm font-medium" id="newChatBtn">
+                <span class="material-symbols-outlined text-gray-300">edit_square</span> Cuộc trò chuyện mới
+            </button>
+
+            <button class="flex items-center gap-3 w-full p-3.5 mb-3 rounded-full border transition-all text-sm font-medium bg-blue-900/40 hover:bg-blue-900/60 border-blue-500/30 text-blue-300" id="startAiServerBtn">
+                <span class="material-symbols-outlined spin-icon" id="serverBtnIcon">sync</span> 
+                <span id="serverBtnText">Đang kiểm tra Server...</span>
+            </button>
+
+            <button class="flex items-center gap-3 w-full p-3.5 mb-6 rounded-full border transition-all text-sm font-medium bg-red-900/40 hover:bg-red-900/60 border-red-500/30 text-red-300 opacity-50 cursor-not-allowed" id="stopAiServerBtn" disabled>
+                <span class="material-symbols-outlined">power_settings_new</span> 
+                <span>Tắt AI Server</span>
+            </button>
+
+            <div class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-gray-300 cursor-pointer transition text-sm mb-4">
+                <span class="material-symbols-outlined">search</span> Tìm kiếm...
+            </div>
+            
+            <div class="flex items-center justify-between p-3 rounded-xl hover:bg-white/5 text-gray-300 transition text-sm mb-4">
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-[20px]" id="themeIcon">dark_mode</span> 
+                    <span id="themeLabel">Chế độ tối</span>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="themeToggleCheckbox">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-2">Gần đây</div>
+            
+            <div class="flex flex-col gap-1 flex-1 overflow-y-auto" id="historyList">
+                <div class="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-gray-300 cursor-pointer transition text-sm">
+                    <span class="material-symbols-outlined text-[18px]">chat_bubble</span> 
+                    <span class="truncate">Test giao diện kính mờ</span>
+                </div>
+            </div>
+
+            <div class="mt-4 pt-4 border-t border-white/10 flex items-center justify-between px-2 flex-shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-orange-400 via-pink-500 to-purple-500 flex items-center justify-center font-bold text-white shadow-lg text-sm">
+                        LÂ
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-sm font-medium text-white">LÝ ÂN ÂN</span>
+                        <span class="text-[11px] text-gray-400">PRO - Lệnh chạy: dev</span>
+                    </div>
+                </div>
+                <button class="text-gray-400 hover:text-white transition">
+                    <span class="material-symbols-outlined">settings</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="flex-1 flex flex-col h-full relative w-full bg-black/20">
+            
+            <div class="glass-header h-16 flex justify-between items-center px-4 md:px-6 shrink-0 z-20">
+                <button class="menu-btn-open text-gray-300 hover:text-white transition flex items-center justify-center" id="openSidebar">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
+
+                <div class="flex items-center gap-1 text-[15px] font-medium text-gray-300 cursor-pointer hover:text-white transition" id="modelSelector">
+                    <span id="topModelName" class="tracking-wide">Đang tải trạng thái...</span> 
+                    <span class="material-symbols-outlined text-lg">expand_more</span>
+                </div>
+                
+                <button class="text-gray-300 hover:text-white transition flex items-center justify-center">
+                    <span class="material-symbols-outlined">history</span>
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto overflow-x-hidden flex flex-col scroll-smooth relative z-10" id="scrollArea">
+                <div class="flex-1 flex flex-col items-center justify-center text-center p-6" id="greetingArea">
+                    <div class="gemini-star w-16 h-16 mb-8"></div>
+                    <h1 class="text-3xl md:text-4xl font-light leading-tight bg-clip-text text-transparent bg-gradient-to-r from-gray-100 to-gray-400">
+                        Đến lượt bạn rồi,<br><span class="font-medium text-white">LÝ ÂN ÂN</span> thân mến!
+                    </h1>
+                </div>
+                <div class="hidden flex-col pt-8 pb-4 px-4 md:px-8 max-w-4xl mx-auto w-full" id="chatArea"></div>
+            </div>
+
+            <div class="w-full px-4 md:px-8 pb-6 pt-4 z-20 flex justify-center shrink-0 bg-gradient-to-t from-black/80 to-transparent">
+                <div class="flex items-center bg-white/10 backdrop-blur-xl border border-white/10 shadow-2xl rounded-[32px] px-3 py-2 w-full max-w-3xl" id="inputBoxWrapper">
+                    <button class="text-gray-400 hover:text-white p-2 transition flex items-center justify-center rounded-full hover:bg-white/5">
+                        <span class="material-symbols-outlined">add</span>
+                    </button>
+                    
+                    <input type="text" id="chatInput" placeholder="Đang kiểm tra kết nối hệ thống..." autocomplete="off" disabled 
+                           class="flex-1 bg-transparent border-none text-gray-100 text-[15px] px-3 py-3 outline-none placeholder-gray-400 disabled:text-gray-500 disabled:cursor-not-allowed">
+                    
+                    <button class="text-gray-400 hover:text-white p-2 transition flex items-center justify-center rounded-full hover:bg-white/5 hidden sm:flex">
+                        <span class="material-symbols-outlined">mic</span>
+                    </button>
+                    
+                    <button class="bg-blue-600/30 text-blue-400 border border-blue-500/30 rounded-full w-10 h-10 flex items-center justify-center ml-2 cursor-pointer transition-all hover:bg-blue-600/50 flex-shrink-0" id="sendBtn" style="pointer-events: none; opacity: 0.5;">
+                        <span class="material-symbols-outlined text-[20px]" id="sendIcon">graphic_eq</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toastNotif" class="toast-notification fixed left-1/2 bottom-24 min-w-[280px] text-center rounded-xl px-5 py-3 shadow-2xl z-[1000] text-sm font-medium"></div>
+
+    <script>
+        marked.setOptions({ breaks: true });
+
+        // --- CÁC BIẾN GIAO DIỆN & HẰNG SỐ ---
+        const LOCAL_STORAGE_THEME_KEY = 'ai_chat_theme_pref'; // FIXED: Đã thêm hằng số Theme
+        
+        const toastNotif = document.getElementById('toastNotif');
+        const startAiServerBtn = document.getElementById('startAiServerBtn');
+        const stopAiServerBtn = document.getElementById('stopAiServerBtn');
+        const serverBtnIcon = document.getElementById('serverBtnIcon');
+        const serverBtnText = document.getElementById('serverBtnText');
+        const topModelName = document.getElementById('topModelName');
+        const chatInput = document.getElementById('chatInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const sendIcon = document.getElementById('sendIcon');
+
+        // --- HÀM QUẢN LÝ SESSION (Đã thêm mock function để không lỗi js) ---
+        function saveCurrentSession() {
+            // TODO: Bổ sung logic lưu localStorage/Database ở đây
+            console.log("Saving session..."); 
+        }
+
+        function loadAllSessions() {
+            // TODO: Bổ sung logic tải lịch sử ở đây
+            console.log("Loading all sessions...");
+        }
+
+        // --- HIỆU ỨNG CHẠY CHỮ (TYPEWRITER) ---
+        let placeholderTimer;
+        let isDeleting = false;
+        let textIndex = 0;
+        const textToType = "Server hiện đang tắt, vào menu để bật!";
+
+        function typePlaceholder() {
+            if (!chatInput.disabled) {
+                chatInput.placeholder = "Hỏi AI Local...";
+                return;
+            }
+            
+            let currentText = textToType.substring(0, textIndex);
+            chatInput.placeholder = currentText + (textIndex === textToType.length ? "" : "|");
+            
+            let typeSpeed = 50; 
+            
+            if (!isDeleting && textIndex === textToType.length) {
+                typeSpeed = 3000; 
+                isDeleting = true;
+            } else if (isDeleting && textIndex === 0) {
+                isDeleting = false;
+                typeSpeed = 500; 
+            }
+            
+            if (isDeleting) {
+                textIndex--;
+                typeSpeed = 20; 
+            } else {
+                textIndex++;
+            }
+            
+            placeholderTimer = setTimeout(typePlaceholder, typeSpeed);
+        }
+
+        // --- LẤY TÊN MODEL OLLAMA ĐỘNG ---
+        async function updateModelDisplay() {
+            try {
+                const res = await fetch(`http://${window.location.hostname}:11434/api/tags`);
+                if(res.ok) {
+                    const data = await res.json();
+                    if(data.models && data.models.length > 0) {
+                        let modelName = data.models[0].name;
+                        modelName = modelName.replace(':', ' ').toUpperCase();
+                        topModelName.textContent = modelName;
+                        return;
+                    }
+                }
+            } catch(e) {}
+            topModelName.textContent = "GEMMA 2B";
+        }
+
+        function showToast(message, type = 'error') {
+            toastNotif.textContent = message;
+            toastNotif.className = 'toast-notification fixed left-1/2 bottom-24 min-w-[280px] text-center rounded-xl px-5 py-3 shadow-2xl z-[1000] text-sm font-medium show ' + type;
+            setTimeout(() => { toastNotif.className = toastNotif.className.replace("show", ""); }, 4000);
+        }
+
+        function setChatState(enabled) {
+            chatInput.disabled = !enabled;
+            clearTimeout(placeholderTimer); 
+            
+            if (enabled) {
+                chatInput.placeholder = "Hỏi AI Local...";
+                sendBtn.style.pointerEvents = 'auto';
+                sendBtn.style.opacity = '1';
+                updateModelDisplay(); 
+            } else {
+                isDeleting = false;
+                textIndex = 0;
+                typePlaceholder(); 
+                
+                sendBtn.style.pointerEvents = 'none';
+                sendBtn.style.opacity = '0.5';
+                topModelName.textContent = "Chưa kết nối AI";
+            }
+        }
+
+        const baseBtnClasses = 'flex items-center gap-3 w-full p-3.5 mb-3 rounded-full border transition-all text-sm font-medium';
+        const startStateClasses = 'bg-blue-900/40 hover:bg-blue-900/60 border-blue-500/30 text-blue-300';
+        const successStateClasses = 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30 pointer-events-none';
+
+        function setBtnSuccessState() {
+            serverBtnIcon.className = 'material-symbols-outlined'; 
+            serverBtnIcon.textContent = 'check_circle';
+            serverBtnText.textContent = 'Đã Bật AI Server';
+            startAiServerBtn.className = `${baseBtnClasses} ${successStateClasses}`;
+            
+            stopAiServerBtn.disabled = false;
+            stopAiServerBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+
+        function resetBtnState() {
+            serverBtnIcon.className = 'material-symbols-outlined';
+            serverBtnIcon.textContent = 'power_settings_new';
+            serverBtnText.textContent = 'Bật AI Server';
+            startAiServerBtn.className = `${baseBtnClasses} ${startStateClasses}`;
+            
+            stopAiServerBtn.disabled = true;
+            stopAiServerBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+
+        // --- HÀM KIỂM TRA SERVER ---
+        async function checkAiServerAlive() {
+            try {
+                const flaskCtrl = new AbortController();
+                const flaskTimer = setTimeout(() => flaskCtrl.abort(), 2000);
+
+                const res = await fetch(`http://${window.location.hostname}:25152/api/status`, {
+                    method: 'GET',
+                    signal: flaskCtrl.signal
+                });
+                clearTimeout(flaskTimer);
+
+                return res.ok;
+            } catch (error) {
+                return false;
+            }
+        }
+        
+        window.addEventListener('DOMContentLoaded', async () => {
+            if (await checkAiServerAlive()) {
+                setBtnSuccessState();
+                setChatState(true);
+            } else {
+                resetBtnState();
+                setChatState(false);
+            }
+        });
+
+        startAiServerBtn.addEventListener('click', async () => {
+            serverBtnIcon.className = 'material-symbols-outlined spin-icon';
+            serverBtnIcon.textContent = 'sync';
+            serverBtnText.textContent = 'Đang gọi hệ thống...';
+            startAiServerBtn.classList.add('opacity-70', 'pointer-events-none');
+
+            if (await checkAiServerAlive()) {
+                showToast('✅ AI Server đã hoạt động sẵn!', 'success');
+                setBtnSuccessState();
+                setChatState(true);
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://${window.location.hostname}:25151/api/start-ai-server?_t=` + Date.now(), { method: 'POST' });
+                const data = await response.json();
+                
+                if(data.status === 'success') {
+                    showToast('⏳ Đã ra lệnh! Hệ thống đang nạp model...', 'warning');
+                    serverBtnText.textContent = 'Đang tải Model...';
+                    
+                    let attempts = 0;
+                    const pollInterval = setInterval(async () => {
+                        attempts++;
+                        if (await checkAiServerAlive()) {
+                            clearInterval(pollInterval);
+                            showToast('✅ Khởi động thành công! Bạn có thể chat ngay bây giờ.', 'success');
+                            setBtnSuccessState();
+                            setChatState(true);
+                        } else if (attempts >= 15) { 
+                            clearInterval(pollInterval);
+                            showToast('❌ Quá thời gian chờ khởi động!', 'error');
+                            resetBtnState();
+                            setChatState(false);
+                        }
+                    }, 2000); 
+
+                } else {
+                    showToast('❌ Lỗi Web Server: ' + data.message, 'error');
+                    resetBtnState();
+                    setChatState(false);
+                }
+            } catch (error) {
+                showToast('❌ Mất kết nối tới Server Chính (Port 25151)!', 'error');
+                resetBtnState();
+                setChatState(false);
+            }
+        });
+
+        stopAiServerBtn.addEventListener('click', async () => {
+            const password = prompt("Hệ thống yêu cầu mật khẩu để tắt AI Server:");
+            
+            if (password === null) return; 
+            
+            if (password !== "admin") {
+                showToast("❌ Sai mật khẩu. Không thể tắt Server!", "error");
+                return;
+            }
+
+            showToast("⏳ Đang gửi lệnh dọn dẹp hệ thống...", "warning");
+            stopAiServerBtn.classList.add('opacity-50', 'pointer-events-none');
+            
+            try {
+                const response = await fetch(`http://${window.location.hostname}:25151/api/stop-ai-server?_t=` + Date.now(), { method: 'POST' });
+                const data = await response.json();
+                
+                if(data.status === 'success') {
+                    showToast("✅ Đã tắt hoàn toàn AI Server & giải phóng RAM!", "success");
+                    resetBtnState();
+                    setChatState(false);
+                } else {
+                    showToast("❌ Lỗi khi tắt: " + data.message, "error");
+                    stopAiServerBtn.classList.remove('opacity-50', 'pointer-events-none');
+                }
+            } catch(e) {
+                showToast("❌ Không thể kết nối tới Server Chính (Port 25151)", "error");
+                stopAiServerBtn.classList.remove('opacity-50', 'pointer-events-none');
+            }
+        });
+
+        // --- CÁC LOGIC UI ---
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        const openSidebarBtn = document.getElementById('openSidebar');
+        const closeSidebarBtn = document.getElementById('closeSidebar');
+        const scrollArea = document.getElementById('scrollArea');
+        const greetingArea = document.getElementById('greetingArea');
+        const body = document.body;
+        const chatArea = document.getElementById('chatArea');
+        const newChatBtn = document.getElementById('newChatBtn');
+        const historyList = document.getElementById('historyList');
+        
+        const themeToggleCheckbox = document.getElementById('themeToggleCheckbox');
+        const themeIcon = document.getElementById('themeIcon');
+        const themeLabel = document.getElementById('themeLabel');
+
+        let currentChatId = Date.now().toString();
+        let currentChatHistory = [];
+        let allSessions = [];
+
+        function toggleSidebar() {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        function startNewChat() {
+            if (currentChatHistory.length > 0) {
+                saveCurrentSession();
+            }
+            chatArea.innerHTML = '';
+            chatArea.style.display = 'none';
+            greetingArea.style.display = 'flex';
+            currentChatId = Date.now().toString();
+            currentChatHistory = [];
+            if (sidebar.classList.contains('active')) toggleSidebar();
+        }
+
+        // FIXED: Đã đóng ngoặc }); cho Event Listener
+        chatInput.addEventListener('input', function() {
+            if (this.value.trim() !== "") {
+                sendIcon.textContent = "send";
+                sendBtn.className = "bg-blue-500 text-white shadow-lg shadow-blue-500/50 rounded-full w-10 h-10 flex items-center justify-center ml-2 cursor-pointer transition-all hover:bg-blue-400 flex-shrink-0";
+            } else {
+                sendIcon.textContent = "graphic_eq";
+                sendBtn.className = "bg-blue-600/30 text-blue-400 border border-blue-500/30 rounded-full w-10 h-10 flex items-center justify-center ml-2 cursor-pointer transition-all hover:bg-blue-600/50 flex-shrink-0";
+            }
+        });
+
+        function scrollToBottom() { 
+            setTimeout(() => {
+                scrollArea.scrollTo({ top: scrollArea.scrollHeight, behavior: 'smooth' });
+            }, 50);
+        }
+
+        function appendMessage(sender, text, isMarkdown, saveToHistory = true) {
+            const wrapperDiv = document.createElement('div');
+            wrapperDiv.classList.add('message-wrapper', sender);
+            
+            const msgDiv = document.createElement('div');
+            msgDiv.classList.add('message', sender);
+            const id = 'msg-' + Date.now();
+            msgDiv.id = id;
+        
+            if (isMarkdown && sender === 'bot') {
+                msgDiv.innerHTML = marked.parse(text);
+            } else {
+                msgDiv.textContent = text;
+            }
+        
+            wrapperDiv.appendChild(msgDiv);
+            chatArea.appendChild(wrapperDiv);
+            scrollToBottom();
+        
+            if (saveToHistory) {
+                currentChatHistory.push({ sender, text, isMarkdown });
+                saveCurrentSession();
+            }
+            return id;
+        }
+        
+        function appendBotStreamChunk(id, chunkText) {
+            const msgDiv = document.getElementById(id);
+            if (msgDiv) {
+                msgDiv.textContent += chunkText;
+                scrollToBottom();
+            }
+        }
+        
+        function finalizeBotMessage(id, fullText) {
+            const msgDiv = document.getElementById(id);
+            if (msgDiv) {
+                msgDiv.innerHTML = marked.parse(fullText);
+                scrollToBottom();
+            }
+        }
+
+        async function sendMessage() {
+            const message = chatInput.value.trim();
+            if (!message) return;
+        
+            if (greetingArea.style.display !== 'none') {
+                greetingArea.style.display = 'none';
+                chatArea.style.display = 'flex';
+            }
+        
+            appendMessage('user', message, false, true);
+            chatInput.value = '';
+            chatInput.dispatchEvent(new Event('input')); 
+        
+            const botMessageId = appendMessage('bot', 'Đang suy nghĩ...', false, false);
+            let fullBotResponse = ''; 
+        
+            try {
+                const host = window.location.hostname || '127.0.0.1';
+                const response = await fetch(`http://${host}:25152/api/chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: message })
+                });
+        
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+        
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder('utf-8');
+                let done = false;
+                let buffer = '';
+        
+                const initialBotMsgDiv = document.getElementById(botMessageId);
+                if (initialBotMsgDiv) {
+                    initialBotMsgDiv.textContent = '';
+                }
+        
+                while (!done) {
+                    const { value, done: readerDone } = await reader.read();
+                    done = readerDone;
+                    buffer += decoder.decode(value, { stream: true }); 
+        
+                    const messages = buffer.split('\n\n');
+                    buffer = messages.pop(); 
+        
+                    for (const msg of messages) {
+                        if (msg.startsWith('data: ')) {
+                            let chunk = msg.substring(6); 
+                            
+                            if (chunk.startsWith('[ERROR]')) {
+                                showToast(chunk.substring(7).trim(), 'error');
+                                const loadingMsgWrapper = document.getElementById(botMessageId)?.closest('.message-wrapper');
+                                if (loadingMsgWrapper) loadingMsgWrapper.remove();
+                                resetBtnState();
+                                setChatState(false);
+                                chatInput.value = message;
+                                chatInput.dispatchEvent(new Event('input'));
+                                return;
+                            }
+        
+                            appendBotStreamChunk(botMessageId, chunk);
+                            fullBotResponse += chunk;
+                        }
+                    }
+                }
+        
+                if (buffer.startsWith('data: ')) {
+                    let chunk = buffer.substring(6);
+                    if (chunk.startsWith('[ERROR]')) {
+                        showToast(chunk.substring(7).trim(), 'error');
+                        const loadingMsgWrapper = document.getElementById(botMessageId)?.closest('.message-wrapper');
+                        if (loadingMsgWrapper) loadingMsgWrapper.remove();
+                        resetBtnState();
+                        setChatState(false);
+                        chatInput.value = message;
+                        chatInput.dispatchEvent(new Event('input'));
+                        return;
+                    }
+                    appendBotStreamChunk(botMessageId, chunk); 
+                    fullBotResponse += chunk;
+                }
+        
+                finalizeBotMessage(botMessageId, fullBotResponse);
+                currentChatHistory.push({ sender: 'bot', text: fullBotResponse, isMarkdown: true });
+                saveCurrentSession();
+        
+            } catch (error) {
+                console.error('Lỗi trong quá trình stream chat:', error);
+                const loadingMsgWrapper = document.getElementById(botMessageId)?.closest('.message-wrapper');
+                if (loadingMsgWrapper) loadingMsgWrapper.remove();
+                
+                showToast("⚠️ Bị ngắt kết nối với AI Server đột ngột hoặc lỗi mạng!", 'error');
+                resetBtnState();
+                setChatState(false);
+                
+                chatInput.value = message;
+                chatInput.dispatchEvent(new Event('input'));
+            }
+        }
+
+        // --- KHỞI TẠO VÀ SỰ KIỆN THEME ---
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem(LOCAL_STORAGE_THEME_KEY);
+            if (savedTheme === 'light') {
+                body.classList.add('light-theme');
+                themeToggleCheckbox.checked = true;
+                themeIcon.textContent = 'light_mode';
+                themeLabel.textContent = 'Chế độ sáng';
+            }
+            loadAllSessions();
+        });
+
+        newChatBtn.addEventListener('click', startNewChat);
+        openSidebarBtn.addEventListener('click', toggleSidebar);
+        closeSidebarBtn.addEventListener('click', toggleSidebar);
+        overlay.addEventListener('click', toggleSidebar);
+        chatInput.addEventListener('keypress', function(e) { if (e.key === 'Enter' && !chatInput.disabled) sendMessage(); });
+        sendBtn.addEventListener('click', function() { if (chatInput.value.trim() !== "" && !chatInput.disabled) sendMessage(); });
+
+        themeToggleCheckbox.addEventListener('change', () => {
+            const isLight = themeToggleCheckbox.checked;
+            body.classList.toggle('light-theme', isLight);
+            localStorage.setItem(LOCAL_STORAGE_THEME_KEY, isLight ? 'light' : 'dark');
+            themeIcon.textContent = isLight ? 'light_mode' : 'dark_mode';
+            themeLabel.textContent = isLight ? 'Chế độ sáng' : 'Chế độ tối';
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>QLChiTieu.com - Quản Lý Tài Chính Cá Nhân</title>
+    <meta name="description" content="Ứng dụng quản lý chi tiêu cá nhân chuyên nghiệp với giao diện hiện đại, hỗ trợ theo dõi thu chi, lập ngân sách và phân tích tài chính">
+    <meta name="keywords" content="quản lý chi tiêu, theo dõi thu chi, ngân sách cá nhân, tài chính cá nhân, ứng dụng quản lý tài chính">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="src/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="icon" type="image/x-icon" href="src/favicon/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="src/favicon/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="src/favicon/favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="src/favicon/apple-touch-icon.png">
+    <link rel="manifest" href="src/favicon/site.webmanifest">
+    <link rel="mask-icon" href="src/favicon/android-chrome-512x512.png" color="#2962ff">
+</head>
+<body>
+    <div class="bg-gradient-overlay"></div>
+    <div class="app-container">
+        <!-- Main Header -->
+        <header class="main-header" role="banner">
+            <div class="balance-overview">
+                <div class="balance-card glass-card">
+                    <div class="balance-header">
+                        <h2>Số dư hiện tại</h2>
+                        <div class="balance-actions">
+                            <button class="action-btn" aria-label="Cập nhật số dư">
+                                Cập nhật
+                            </button>
+                        </div>
+                    </div>
+                    <div class="balance-amount-container">
+                        <p class="balance-amount" id="current-balance">₫0</p>
+                        <div class="balance-trend">
+                            <span class="trend-indicator" id="balance-trend">
+                                +5.2%
+                            </span>
+                        </div>
+                    </div>
+                    <div class="daily-summary">
+                        <div class="summary-item">
+                            <div>
+                                <span class="summary-label">Thu hôm nay</span>
+                                <span class="summary-value" id="today-income">₫0</span>
+                            </div>
+                        </div>
+                        <div class="summary-item">
+                            <div>
+                                <span class="summary-label">Chi hôm nay</span>
+                                <span class="summary-value" id="today-expense">₫0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="header-controls">
+                <div class="control-group">
+                    <div class="import-export-dropdown" role="menu">
+                        <button class="btn-secondary dropdown-toggle" aria-haspopup="true" aria-expanded="false">
+                            Dữ liệu
+                        </button>
+                        <div class="dropdown-menu" role="menu">
+                            <div class="dropdown-section">
+                                <h4>Nhập dữ liệu</h4>
+                                <button id="import-csv-btn" class="btn-secondary full-width" role="menuitem">CSV</button>
+                                <button id="import-json-btn" class="btn-secondary full-width" role="menuitem">JSON</button>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <div class="dropdown-section">
+                                <h4>Xuất dữ liệu</h4>
+                                <button id="export-csv-btn" class="btn-secondary full-width" role="menuitem">CSV</button>
+                                <button id="export-json-btn" class="btn-secondary full-width" role="menuitem">JSON</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="theme-toggle" id="theme-toggle" aria-label="Chuyển đổi chế độ sáng/tối">
+                        Giao diện
+                    </button>
+                    
+                    <button class="btn-primary action-button" id="add-transaction-btn" aria-label="Thêm giao dịch mới">
+                        <span>Thêm giao dịch</span>
+                    </button>
+                </div>
+                
+                <div class="user-profile">
+                    <div class="avatar">
+                        U
+                    </div>
+                    <div class="user-info">
+                        <span class="user-name">Người dùng</span>
+                        <span class="user-status">Online</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Quick Navigation -->
+        <nav class="quick-nav" role="navigation" aria-label="Thanh điều hướng chính">
+            <button class="nav-btn" data-view="all">
+                <span>Tất cả</span>
+            </button>
+            <button class="nav-btn active" data-view="today" aria-current="page">
+                <span>Hôm nay</span>
+            </button>
+            <button class="nav-btn" data-view="week">
+                <span>Tuần này</span>
+            </button>
+            <button class="nav-btn" data-view="month">
+                <span>Tháng này</span>
+            </button>
+            <button class="nav-btn" data-view="year">
+                <span>Năm nay</span>
+            </button>
+        </nav>
+
+        <!-- Financial Overview -->
+        <section class="financial-overview" aria-labelledby="overview-heading">
+            <h2 id="overview-heading" class="sr-only">Tổng quan tài chính</h2>
+            <div class="overview-grid">
+                <div class="overview-card glass-card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <h3>Thu nhập</h3>
+                            <p class="subtitle">Tổng cộng</p>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <p class="card-value" id="total-income">₫0</p>
+                        <div class="card-footer">
+                            <span class="trend" id="income-trend">
+                                +12.5%
+                            </span>
+                            <span class="timeframe">so với tháng trước</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="overview-card glass-card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <h3>Chi tiêu</h3>
+                            <p class="subtitle">Tổng cộng</p>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <p class="card-value" id="total-expenses">₫0</p>
+                        <div class="card-footer">
+                            <span class="trend" id="expense-trend">
+                                -3.2%
+                            </span>
+                            <span class="timeframe">so với tháng trước</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="overview-card glass-card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <h3>Còn lại</h3>
+                            <p class="subtitle">Tháng này</p>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <p class="card-value" id="monthly-summary">₫0</p>
+                        <div class="card-footer">
+                            <span class="progress-text" id="budget-usage-text">0%</span>
+                            <span class="timeframe">của ngân sách</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="overview-card glass-card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <h3>Cảnh báo</h3>
+                            <p class="subtitle">Vượt mức</p>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <p class="card-value" id="warning-count">0</p>
+                        <div class="card-footer">
+                            <span class="warning-text">Vượt ngân sách</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Dashboard Content -->
+        <main class="dashboard-main" role="main">
+            <div class="content-grid">
+                <!-- Analytics Section -->
+                <section class="analytics-section" aria-labelledby="analytics-heading">
+                    <h2 id="analytics-heading" class="section-title">
+                        Phân tích tài chính
+                    </h2>
+                    <div class="analytics-grid">
+                        <div class="chart-container glass-card">
+                            <div class="chart-toolbar">
+                                <h3>Phân bổ chi tiêu</h3>
+                                <div class="toolbar-actions">
+                                    <button class="chart-type-btn active" data-chart="doughnut" aria-label="Biểu đồ tròn">
+                                        Tròn
+                                    </button>
+                                    <button class="chart-type-btn" data-chart="bar" aria-label="Biểu đồ cột">
+                                        Cột
+                                    </button>
+                                    <button class="chart-type-btn" data-chart="line" aria-label="Biểu đồ đường">
+                                        Đường
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="chart-wrapper">
+                                <canvas id="expense-chart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div class="performance-card glass-card">
+                            <h3>Hiệu suất tài chính</h3>
+                            <div class="performance-metrics">
+                                <div class="metric-item">
+                                    <div class="metric-header">
+                                        <span class="metric-label">Tiết kiệm</span>
+                                        <span class="metric-value positive" id="savings-rate">0%</span>
+                                    </div>
+                                    <div class="metric-progress">
+                                        <div class="progress-bar">
+                                            <div class="progress-fill savings-progress" id="savings-bar" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="metric-item">
+                                    <div class="metric-header">
+                                        <span class="metric-label">Chi tiêu</span>
+                                        <span class="metric-value negative" id="spending-rate">0%</span>
+                                    </div>
+                                    <div class="metric-progress">
+                                        <div class="progress-bar">
+                                            <div class="progress-fill spending-progress" id="spending-bar" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="metric-item">
+                                    <div class="metric-header">
+                                        <span class="metric-label">Sử dụng ngân sách</span>
+                                        <span class="metric-value neutral" id="budget-rate">0%</span>
+                                    </div>
+                                    <div class="metric-progress">
+                                        <div class="progress-bar">
+                                            <div class="progress-fill investment-progress" id="budget-bar" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Recent Transactions -->
+                <section class="transactions-section" aria-labelledby="transactions-heading">
+                    <div class="section-header">
+                        <h2 id="transactions-heading" class="section-title">
+                            Giao dịch gần đây
+                        </h2>
+                        <div class="section-actions">
+                            <div class="search-container">
+                                <input type="text" id="search-input" placeholder="Tìm kiếm giao dịch..." aria-label="Tìm kiếm giao dịch">
+                            </div>
+                            <select id="category-filter" aria-label="Lọc theo danh mục">
+                                <option value="">Tất cả danh mục</option>
+                                <option value="food">Ăn uống</option>
+                                <option value="transport">Di chuyển</option>
+                                <option value="shopping">Mua sắm</option>
+                                <option value="entertainment">Giải trí</option>
+                                <option value="utilities">Tiện ích</option>
+                                <option value="health">Sức khỏe</option>
+                                <option value="education">Giáo dục</option>
+                                <option value="other">Khác</option>
+ </select>
+                        </div>
+                    </div>
+                    <div class="transactions-container">
+                        <div class="transactions-list" id="transactions-list" role="list">
+                            <!-- Transactions will be populated here -->
+                        </div>
+                        <div class="pagination-controls">
+                            <button class="btn-secondary pagination-btn" id="prev-page">
+                                Trước
+                            </button>
+                            <span class="page-info">1 / 5</span>
+                            <button class="btn-secondary pagination-btn" id="next-page">
+                                Sau
+                            </button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Budget & Goals Section -->
+        <section class="budget-goals-section" aria-labelledby="budget-heading">
+            <h2 id="budget-heading" class="sr-only">Quản lý ngân sách và mục tiêu tài chính</h2>
+            <div class="budget-goals-grid">
+                <div class="budget-card glass-card">
+                    <div class="card-header">
+                        <h3>Ngân sách tháng này</h3>
+                        <div class="card-actions">
+                            <button class="action-btn" aria-label="Cài đặt ngân sách">
+                                Cài đặt
+                            </button>
+                        </div>
+                    </div>
+                    <div class="budget-content">
+                        <div class="budget-input-container">
+                            <div class="input-with-currency">
+                                <input type="text" id="budget-input" placeholder="Nhập ngân sách tháng" aria-label="Nhập ngân sách cho tháng này">
+                                <span class="currency-symbol">₫</span>
+                            </div>
+                            <button id="set-budget-btn" class="btn-primary">
+                                Đặt ngân sách
+                            </button>
+                        </div>
+                        <div class="budget-status">
+                            <div class="progress-container">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="budget-progress"></div>
+                                </div>
+                                <span class="progress-text" id="budget-percentage">0%</span>
+                            </div>
+                            <p id="budget-status-text">Chưa đặt ngân sách</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="goals-card glass-card">
+                    <div class="card-header">
+                        <h3>Sổ Tiết Kiệm</h3>
+                        <div class="card-actions">
+                            <button class="action-btn" id="add-savings-btn" aria-label="Thêm khoản tiết kiệm">
+                                Thêm
+                            </button>
+                        </div>
+                    </div>
+                    <div class="goals-content">
+                        <!-- Goals will be rendered by JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Action Bar -->
+        <div class="action-bar">
+            <div class="action-container">
+                <button id="export-csv-btn" class="btn-secondary" aria-label="Xuất dữ liệu CSV">
+                    <span>Xuất CSV</span>
+                </button>
+                <button id="export-excel-btn" class="btn-secondary" aria-label="Xuất dữ liệu Excel">
+                    <span>Xuất Excel</span>
+                </button>
+                <button id="sync-data-btn" class="btn-secondary" aria-label="Đồng bộ dữ liệu">
+                    <span>Đồng bộ</span>
+                </button>
+                <button id="backup-btn" class="btn-secondary" aria-label="Sao lưu dữ liệu">
+                    <span>Sao lưu</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="main-footer" role="contentinfo">
+            <div class="footer-widgets">
+                <div class="currency-widget glass-card">
+                    <h4>Tỷ giá ngoại tệ</h4>
+                    <div id="currency-rates">
+                        <div class="rate-item">
+                            USD: <span id="usd-rate">0.00</span>
+                            <!-- <span class="rate-change positive">+0.1%</span> -->
+                        </div>
+                        <div class="rate-item">
+                            EUR: <span id="eur-rate">0.00</span>
+                            <!-- <span class="rate-change negative">-0.2%</span> -->
+                        </div>
+                        <div class="rate-item">
+                            JPY: <span id="jpy-rate">0.00</span>
+                            <!-- <span class="rate-change positive">+0.05%</span> -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stats-widget glass-card">
+                    <h4>Thống kê nhanh</h4>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <span class="stat-number" id="stat-total-transactions">0</span>
+                            <span class="stat-label">Giao dịch</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" id="stat-total-categories">0</span>
+                            <span class="stat-label">Danh mục</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" id="stat-total-goals">0</span>
+                            <span class="stat-label">Mục tiêu</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2026 QLChiTieu.com. Tất cả quyền được bảo lưu.</p>
+                <div class="footer-links">
+                    <a href="#" aria-label="Chính sách bảo mật">Bảo mật</a>
+                    <a href="#" aria-label="Điều khoản sử dụng">Điều khoản</a>
+                    <a href="#" aria-label="Hỗ trợ khách hàng">Hỗ trợ</a>
+                </div>
+            </div>
+        </footer>
+
+        <!-- Transaction Modal -->
+        <div class="modal-overlay" id="transaction-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modal-title"><span>Thêm giao dịch mới</span></h3>
+                    <button class="modal-close" id="close-modal-btn" aria-label="Đóng cửa sổ">
+                        X
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="transaction-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="transaction-type">Loại giao dịch</label>
+                                <select id="transaction-type" required aria-describedby="type-help">
+                                    <option value="expense">Chi tiêu</option>
+                                    <option value="income">Thu nhập</option>
+                                    <option value="savings">Tiết kiệm</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="transaction-amount">Số tiền (₫)</label>
+ <div class="input-with-currency">
+                                    <input type="text" id="transaction-amount" required placeholder="0" min="0" aria-describedby="amount-help">
+                                    <span class="currency-symbol">₫</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="transaction-category">Danh mục</label>
+                                <select id="transaction-category" required aria-describedby="category-help">
+                                    <option value="">Chọn danh mục</option>
+                                    <option value="food">Ăn uống</option>
+                                    <option value="transport">Di chuyển</option>
+                                    <option value="shopping">Mua sắm</option>
+                                    <option value="entertainment">Giải trí</option>
+                                    <option value="utilities">Tiện ích</option>
+                                    <option value="health">Sức khỏe</option>
+                                    <option value="education">Giáo dục</option>
+                                    <option value="transfer">Gửi tiền</option>
+                                    <option value="other">Khác</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="transaction-date">Ngày</label>
+                                <input type="date" id="transaction-date" required aria-describedby="date-help">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <label for="transaction-note">Ghi chú</label>
+                            <textarea id="transaction-note" placeholder="Ghi chú về giao dịch..." aria-describedby="note-help"></textarea>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="button" id="cancel-btn" class="btn-secondary">
+                                <span>Hủy</span>
+                            </button>
+                            <button type="submit" id="save-btn" class="btn-primary">
+                                <span>Lưu giao dịch</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Savings Modal -->
+        <div class="modal-overlay" id="savings-modal" role="dialog" aria-modal="true" aria-labelledby="savings-modal-title">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="savings-modal-title"><span>Gửi Tiết Kiệm</span></h3>
+                    <button class="modal-close" id="close-savings-modal-btn" aria-label="Đóng cửa sổ">
+                        X
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="savings-form">
+                        <div class="form-group full-width">
+                            <label for="savings-name">Tên khoản tiết kiệm</label>
+                            <input type="text" id="savings-name" required placeholder="Ví dụ: Mua xe, Du lịch...">
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="savings-target">Mục tiêu (₫)</label>
+                            <div class="input-with-currency">
+                                <input type="text" id="savings-target" required placeholder="0">
+                                <span class="currency-symbol">₫</span>
+                            </div>
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="savings-current">Số tiền hiện có (₫)</label>
+                            <div class="input-with-currency">
+                                <input type="text" id="savings-current" required placeholder="0">
+                                <span class="currency-symbol">₫</span>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" id="cancel-savings-btn" class="btn-secondary">
+                                <span>Hủy</span>
+                            </button>
+                            <button type="submit" id="save-savings-btn" class="btn-primary">
+                                <span>Lưu</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+ <script src="src/app.js"></script>
+    
+    <!-- Accessibility Skip Link -->
+    <div class="skip-link">
+        <a href="#main-content" aria-label="Nhảy đến nội dung chính">Bỏ qua đến nội dung chính</a>
+    </div>
+</body>
+
+</html>

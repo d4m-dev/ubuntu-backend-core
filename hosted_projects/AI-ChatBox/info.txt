@@ -1,0 +1,1 @@
+Dự án cầu nối giữa AI local trên máy bạn với giao diện chat đẹp, có thể tắt mở backend để tiết kiệm tài nguyên.

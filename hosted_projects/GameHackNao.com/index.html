@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="vi">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Game Hack Não</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap"
+            rel="stylesheet"
+        />
+        <link rel="stylesheet" href="styles.css" />
+    </head>
+    <body>
+        <div class="ambient"></div>
+        <div class="shell">
+            <header class="hero">
+                <div class="hero__logo">🧠</div>
+                <div class="hero__copy">
+                    <h1>Game Hack Não</h1>
+                    <p>Thử thách kiến thức – bứt phá điểm số</p>
+                </div>
+                <div class="hero__badge">Phiên bản web</div>
+            </header>
+
+            <div id="screen-start" class="screen active">
+                <h2 class="screen__title">Sẵn sàng lên sóng?</h2>
+                <p class="screen__subtitle">Hãy chọn trải nghiệm phù hợp với bạn.</p>
+                <button class="btn btn-primary" onclick="showScreen('screen-mode')">
+                    🎯 Bắt đầu chơi
+                </button>
+                <button class="btn btn-warning" onclick="showLeaderboard()">
+                    🏆 Bảng vinh danh
+                </button>
+                <button class="btn btn-outline" onclick="showScreen('screen-about')">
+                    📜 Luật chơi
+                </button>
+            </div>
+
+            <div id="screen-mode" class="screen">
+                <h2 class="screen__title">Chọn chế độ</h2>
+                <p class="screen__subtitle">Đua điểm hoặc luyện tập thoải mái.</p>
+                <button class="btn btn-primary" onclick="selectMode('normal')">
+                    🔥 Đua top (Tính điểm)
+                </button>
+                <button
+                    class="btn btn-secondary"
+                    onclick="selectMode('practice')"
+                >
+                    🧘 Luyện tập (Không tính điểm)
+                </button>
+                <button class="btn btn-outline" onclick="showScreen('screen-start')">
+                    ⬅️ Quay lại
+                </button>
+            </div>
+
+            <div id="screen-difficulty" class="screen">
+                <h2 class="screen__title">Chọn gói thời gian</h2>
+                <p id="mode-display" class="screen__subtitle"></p>
+                <div class="difficulty-grid">
+                    <button class="btn btn-easy" onclick="startGame('easy')">
+                        DỄ · 45 phút
+                    </button>
+                    <button class="btn btn-medium" onclick="startGame('medium')">
+                        VỪA · 25 phút
+                    </button>
+                    <button class="btn btn-hard" onclick="startGame('hard')">
+                        KHÓ · 15 phút
+                    </button>
+                </div>
+                <button class="btn btn-outline" onclick="showScreen('screen-mode')">
+                    ⬅️ Quay lại
+                </button>
+            </div>
+
+            <div id="screen-game" class="screen">
+                <div class="game-header">
+                    <div>
+                        <span class="game-label">⏱ Thời gian</span>
+                        <div id="game-timer" class="timer-box">15:00</div>
+                    </div>
+                    <div>
+                        <span class="game-label">💰 Điểm hiện tại</span>
+                        <div id="game-score" class="score-box">Điểm: 0</div>
+                    </div>
+                </div>
+
+                <div class="question-card">
+                    <h3 id="question-text">Loading...</h3>
+                    <p id="hint-text" class="hint-text"></p>
+                </div>
+
+                <input
+                    type="text"
+                    id="answer-input"
+                    class="answer-input"
+                    placeholder="Nhập đáp án (không dấu)..."
+                />
+
+                <div class="game-controls">
+                    <button class="btn btn-primary" onclick="handleAnswer()">
+                        ✅ Trả lời
+                    </button>
+                    <button class="btn btn-skip" onclick="handleSkip()">
+                        ⏭️ Bỏ qua
+                    </button>
+                </div>
+                <button class="btn btn-outline ghost" onclick="endGame()">
+                    Kết thúc ván
+                </button>
+            </div>
+
+            <div id="screen-leaderboard" class="screen">
+                <h2 class="screen__title">🏆 Bảng vinh danh</h2>
+                <p class="screen__subtitle">Top 10 người chơi xuất sắc nhất.</p>
+                <div class="leaderboard">
+                    <ul id="rank-list" class="rank-list"></ul>
+                </div>
+                <button class="btn btn-primary" onclick="showScreen('screen-start')">
+                    Về menu chính
+                </button>
+            </div>
+
+            <div id="screen-end" class="screen">
+                <h2 class="screen__title">Kết thúc</h2>
+                <div class="score-final">
+                    <h1 id="end-score">0</h1>
+                    <p>Tổng điểm của bạn</p>
+                </div>
+                <input
+                    type="text"
+                    id="player-name"
+                    class="answer-input"
+                    placeholder="Nhập tên để lưu danh..."
+                    maxlength="15"
+                />
+                <button class="btn btn-primary" onclick="saveScoreAndExit()">
+                    Lưu điểm & xem BXH
+                </button>
+                <button class="btn btn-outline" onclick="showScreen('screen-start')">
+                    Về menu (không lưu)
+                </button>
+            </div>
+
+            <div id="screen-about" class="screen">
+                <h2 class="screen__title">Luật chơi</h2>
+                <ul class="rules">
+                    <li>Trả lời đúng: +10 điểm.</li>
+                    <li>Trả lời sai: -5 điểm.</li>
+                    <li>Bỏ qua: -2 điểm.</li>
+                    <li>Ở chế độ luyện tập: không trừ điểm.</li>
+                    <li>Gợi ý hiển thị kèm câu hỏi (nếu có).</li>
+                    <li>Trả lời không dấu để dễ nhập đáp án.</li>
+                </ul>
+                <button class="btn btn-primary" onclick="showScreen('screen-start')">
+                    Đã hiểu
+                </button>
+            </div>
+        </div>
+
+        <script src="questions.js"></script>
+        <script src="app.js"></script>
+    </body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bộ Đếm Ngược</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="title">Bộ Đếm Ngược</h1>
+      <p class="author">Built with ❤️ by d4m-dev</p>
+
+      <!-- .countdown -->
+      <div class="countdown" hidden>
+        <!-- .running -->
+        <div class="running">
+          <div><span class="days">00</span>Ngày</div>
+          <div><span class="hours">00</span>Giờ</div>
+          <div><span class="minutes">00</span>Phút</div>
+          <div><span class="seconds">00</span>Giây</div>
+          <button id="reset">Đặt Lại Đếm Ngược</button>
+        </div>
+        <!-- /.running -->
+
+        <!-- .expired -->
+        <div class="expired" hidden>
+          <span>⏳</span>
+          <p>Sự kiện đã hết hạn</p>
+          <button id="new">Đếm Ngược Mới</button>
+        </div>
+        <!-- /.expired -->
+      </div>
+      <!-- /.countdown -->
+
+      <!-- .form -->
+      <form class="form">
+        <label for="event-name">Tên Sự Kiện</label>
+        <input type="text" id="event-name" required />
+
+        <label for="event-date">Ngày Đích</label>
+        <input type="date" id="event-date" required />
+
+        <label for="enable-sound">Thông Báo Âm Thanh</label>
+        <p>
+          <input type="checkbox" id="enable-sound" />
+          <label for="enable-sound">Bật</label>
+        </p>
+
+        <button type="submit">Gửi</button>
+      </form>
+      <!-- /.form -->
+    </div>
+  </body>
+</html>

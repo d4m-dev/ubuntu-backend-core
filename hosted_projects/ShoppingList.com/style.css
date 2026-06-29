@@ -1,0 +1,178 @@
+* {
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+body {
+  background: #eee;
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+.author {
+  font-size: 0.75rem;
+  color: #333;
+  opacity: 0.7;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+h1 {
+  text-align: center;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  padding: 5px 10px;
+  font-weight: 500;
+  font-size: 1rem;
+  color: #000;
+  transition: 0.5s;
+}
+
+.container {
+  width: min(480px, 90%);
+  margin-inline: auto;
+}
+
+.shopping-form {
+  padding: 1rem;
+  background: yellowgreen;
+  display: flex;
+  align-items: stretch;
+  gap: 5px;
+  border-radius: 5px;
+  margin-bottom: 1rem;
+}
+
+.shopping-form input {
+  flex: 1;
+  padding: 5px 10px;
+  border-radius: inherit;
+  border: none;
+  outline: none;
+  font-size: 1rem;
+  width: 100%;
+}
+
+.shopping-form button {
+  padding: 5px 15px;
+  border-radius: inherit;
+  background: #000;
+  color: #fff;
+  font-size: 1.5rem;
+}
+
+.shopping-filter button {
+  background: #ddd;
+  border-radius: 5px;
+}
+
+.shopping-filter button:hover,
+.shopping-filter button.active {
+  background: #000;
+  color: #fff;
+}
+
+.shopping-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.shopping-list li {
+  background: #fff;
+  margin-bottom: 5px;
+  padding: 5px 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.shopping-list li.dragging {
+  border: 1px dashed #999;
+  background: #eee;
+  opacity: 0.5;
+}
+
+.shopping-list li.dragging * {
+  visibility: hidden;
+}
+
+.shopping-list li .item-name {
+  flex: 1;
+  padding: 5px 10px;
+}
+
+.shopping-list li[data-completed] .item-name {
+  text-decoration: line-through;
+  color: #999;
+}
+
+.shopping-list li .item-name[contenteditable="true"] {
+  outline-color: yellowgreen;
+}
+
+.shopping-list li .delete-button {
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: #ccc;
+  background: transparent;
+}
+
+.shopping-list .delete-button:hover {
+  color: #f00;
+}
+
+.shopping-list li .drag-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  font-size: 1.25rem;
+  line-height: 20px;
+  color: #ccc;
+  text-align: center;
+  cursor: move;
+}
+
+.shopping-list li .drag-icon:hover {
+  color: #000;
+}
+
+.shopping-list li[draggable="false"] .drag-icon {
+  cursor: not-allowed;
+}
+
+.shopping-action button {
+  color: #777;
+}
+
+.shopping-action button:hover {
+  color: #000;
+}
+
+.shopping-notice {
+  padding: 10px;
+  background: lightblue;
+  border-radius: 5px;
+  margin-bottom: 1rem;
+  text-align: center;
+  display: none;
+}
+
+.shopping-notice.show {
+  display: block;
+}
+
+.shopping-notice.show ~ .shopping-filter,
+.shopping-notice.show ~ .shopping-action {
+  display: none;
+}
