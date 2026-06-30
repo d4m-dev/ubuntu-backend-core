@@ -1,606 +1,639 @@
 window.TRACKS = [
   {
     id: 1,
-    title: "Hay Là Chúng Ta Cứ Như Vậy Một Vạn Năm",
-    artist: "Hoàng Tiêu Vân | Trường Nguyệt Tẫn Minh OST",
-    cover: "audio_workspace/music/cunhuvaymotvannam/cunhuvaymotvannam.jpg",
-    audioSrc: "audio_workspace/music/cunhuvaymotvannam/cunhuvaymotvannam.mp3",
-    instrumentalSrc: "audio_workspace/music/cunhuvaymotvannam/cunhuvaymotvannam_beat.mp3",
-    videoSrc: "audio_workspace/music/cunhuvaymotvannam/cunhuvaymotvannam.mp4",
-    lyricSrc: "audio_workspace/music/cunhuvaymotvannam/cunhuvaymotvannam.lrc"
-  },
-
+    title: "10Mat1Con0",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/10mat1con0/10mat1con0.jpg",
+    audioSrc: "../audio_workspace/music/10mat1con0/10mat1con0.mp3",
+    instrumentalSrc: "../audio_workspace/music/10mat1con0/10mat1con0_beat.mp3",
+    videoSrc: "../audio_workspace/music/10mat1con0/10mat1con0.mp4",
+    lyricSrc: "../audio_workspace/music/10mat1con0/10mat1con0.lrc"
+  },  
+  
   {
     id: 2,
-    title: "Em Đồng Ý | I Do",
-    artist: "ĐỨC PHÚC x 911 x KHẮC HƯNG OFFICIAL",
-    cover: "audio_workspace/music/ido/ido.jpg",
-    audioSrc: "audio_workspace/music/ido/ido.mp3",
-    instrumentalSrc: "audio_workspace/music/ido/ido_beat.mp3",
-    videoSrc: "audio_workspace/music/ido/ido.mp4",
-    lyricSrc: "audio_workspace/music/ido/ido.lrc"
+    title: "aihongnhan",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/aihongnhan/aihongnhan.jpg",
+    audioSrc: "../audio_workspace/music/aihongnhan/aihongnhan.mp3",
+    instrumentalSrc: "../audio_workspace/music/aihongnhan/aihongnhan_beat.mp3",
+    videoSrc: "../audio_workspace/music/aihongnhan/aihongnhan.mp4",
+    lyricSrc: "../audio_workspace/music/aihongnhan/aihongnhan.lrc"
   },
 
   {
     id: 3,
-    title: "Vở Kịch Của Em x Vây Giữ REMIX",
-    artist: "Hồ Phong An x HuyN FT",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/vokichcuaem/cover.jpg",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/vokichcuaem/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/vokichcuaem/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/vokichcuaem/4.mp4",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/vokichcuaem/1.lrc"
+    title: "alanwalkerfaded",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/alanwalkerfaded/alanwalkerfaded.jpg",
+    audioSrc: "../audio_workspace/music/alanwalkerfaded/alanwalkerfaded.mp3",
+    instrumentalSrc: "../audio_workspace/music/alanwalkerfaded/alanwalkerfaded_beat.mp3",
+    videoSrc: "../audio_workspace/music/alanwalkerfaded/alanwalkerfaded.mp4",
+    lyricSrc: "../audio_workspace/music/alanwalkerfaded/alanwalkerfaded.lrc"
   },
 
   {
     id: 4,
-    title: "Yêu Em Nhưng Không Với Tới x Vây Giữ REMIX",
-    artist: "DC Tâm x SS x AM Remix",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/yeuemnhungkhongvoitoi/cover.jpg",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/yeuemnhungkhongvoitoi/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/yeuemnhungkhongvoitoi/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/yeuemnhungkhongvoitoi/4.mp4",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/yeuemnhungkhongvoitoi/1.lrc"
+    title: "anhdautulucemdi",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/anhdautulucemdi/anhdautulucemdi.jpg",
+    audioSrc: "../audio_workspace/music/anhdautulucemdi/anhdautulucemdi.mp3",
+    instrumentalSrc: "../audio_workspace/music/anhdautulucemdi/anhdautulucemdi_beat.mp3",
+    videoSrc: "../audio_workspace/music/anhdautulucemdi/anhdautulucemdi.mp4",
+    lyricSrc: "../audio_workspace/music/anhdautulucemdi/anhdautulucemdi.lrc"
   },
 
   {
     id: 5,
-    title: "Anh Đau Từ Lúc Em Đi",
-    artist: "Trần Mạnh Cường",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/anhdautulucemdi/cover.jpg",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/anhdautulucemdi/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/anhdautulucemdi/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/anhdautulucemdi/4.mp4",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/anhdautulucemdi/1.lrc"
+    title: "anhthoinhannhuong",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/anhthoinhannhuong/anhthoinhannhuong.jpg",
+    audioSrc: "../audio_workspace/music/anhthoinhannhuong/anhthoinhannhuong.mp3",
+    instrumentalSrc: "../audio_workspace/music/anhthoinhannhuong/anhthoinhannhuong_beat.mp3",
+    videoSrc: "../audio_workspace/music/anhthoinhannhuong/anhthoinhannhuong.mp4",
+    lyricSrc: "../audio_workspace/music/anhthoinhannhuong/anhthoinhannhuong.lrc"
   },
 
   {
     id: 6,
-    title: "Mạnh Bà Lofi",
-    artist: "Linh Hương Luz",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/manhba/cover.jpg",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/manhba/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/manhba/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/manhba/4.mp4",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/manhba/1.lrc"
+    title: "anhvui",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/anhvui/anhvui.jpg",
+    audioSrc: "../audio_workspace/music/anhvui/anhvui.mp3",
+    instrumentalSrc: "../audio_workspace/music/anhvui/anhvui_beat.mp3",
+    videoSrc: "../audio_workspace/music/anhvui/anhvui.mp4",
+    lyricSrc: "../audio_workspace/music/anhvui/anhvui.lrc"
   },
 
   {
     id: 7,
-    title: "Địa Đàng REMIX",
-    artist: "Hoàng Oanh x ACV",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/diadang/cover.jpg",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/diadang/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/diadang/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/diadang/4.mp4",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/diadang/1.lrc"
+    title: "bakieptinhmotkiepduyen",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/bakieptinhmotkiepduyen/bakieptinhmotkiepduyen.jpg",
+    audioSrc: "../audio_workspace/music/bakieptinhmotkiepduyen/bakieptinhmotkiepduyen.mp3",
+    instrumentalSrc: "../audio_workspace/music/bakieptinhmotkiepduyen/bakieptinhmotkiepduyen_beat.mp3",
+    videoSrc: "../audio_workspace/music/bakieptinhmotkiepduyen/bakieptinhmotkiepduyen.mp4",
+    lyricSrc: "../audio_workspace/music/bakieptinhmotkiepduyen/bakieptinhmotkiepduyen.lrc"
   },
 
   {
     id: 8,
-    title: "Tái Sinh REMIX",
-    artist: "Tùng Dương x ACV",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/taisinh/cover.jpg",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/taisinh/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/taisinh/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/taisinh/4.mp4",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/taisinh/1.lrc"
+    title: "batconbuomvang",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/batconbuomvang/batconbuomvang.jpg",
+    audioSrc: "../audio_workspace/music/batconbuomvang/batconbuomvang.mp3",
+    instrumentalSrc: "../audio_workspace/music/batconbuomvang/batconbuomvang_beat.mp3",
+    videoSrc: "../audio_workspace/music/batconbuomvang/batconbuomvang.mp4",
+    lyricSrc: "../audio_workspace/music/batconbuomvang/batconbuomvang.lrc"
   },
 
   {
     id: 9,
-    title: "Ải Hồng Nhan REMIX",
-    artist: "Cần Vinh x Lee Ken",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/aihongnhan/cover.jpg",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/aihongnhan/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/aihongnhan/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/aihongnhan/4.mp4",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/aihongnhan/1.lrc"
+    title: "baxacuaanh",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/baxacuaanh/baxacuaanh.jpg",
+    audioSrc: "../audio_workspace/music/baxacuaanh/baxacuaanh.mp3",
+    instrumentalSrc: "../audio_workspace/music/baxacuaanh/baxacuaanh_beat.mp3",
+    videoSrc: "../audio_workspace/music/baxacuaanh/baxacuaanh.mp4",
+    lyricSrc: "../audio_workspace/music/baxacuaanh/baxacuaanh.lrc"
   },
 
   {
     id: 10,
-    title: "Thương Thì Thôi REMIX",
-    artist: "Jank",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/thuongthithoi/cover.jpg",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/thuongthithoi/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/thuongthithoi/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/thuongthithoi/4.mp4",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/thuongthithoi/1.lrc"
+    title: "cantinhnhuthe",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/cantinhnhuthe/cantinhnhuthe.jpg",
+    audioSrc: "../audio_workspace/music/cantinhnhuthe/cantinhnhuthe.mp3",
+    instrumentalSrc: "../audio_workspace/music/cantinhnhuthe/cantinhnhuthe_beat.mp3",
+    videoSrc: "../audio_workspace/music/cantinhnhuthe/cantinhnhuthe.mp4",
+    lyricSrc: "../audio_workspace/music/cantinhnhuthe/cantinhnhuthe.lrc"
   },
 
   {
     id: 11,
-    title: "Ba Kiếp Tình Một Kiếp Duyên Lofi",
-    artist: "Lâm Tuấn x MewMew Lofi",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/bakieptinhmotkiepduyen/cover.jpg",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/bakieptinhmotkiepduyen/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/bakieptinhmotkiepduyen/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/bakieptinhmotkiepduyen/4.mp4",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/bakieptinhmotkiepduyen/1.lrc"
+    title: "changthecamhoa",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/changthecamhoa/changthecamhoa.jpg",
+    audioSrc: "../audio_workspace/music/changthecamhoa/changthecamhoa.mp3",
+    instrumentalSrc: "../audio_workspace/music/changthecamhoa/changthecamhoa_beat.mp3",
+    videoSrc: "../audio_workspace/music/changthecamhoa/changthecamhoa.mp4",
+    lyricSrc: "../audio_workspace/music/changthecamhoa/changthecamhoa.lrc"
   },
 
   {
     id: 12,
-    title: "Trả Lại Thanh Xuân Cho Em REMIX",
-    artist: "Mochiii x Domino Remix",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/tralaithanhxuanchoem/cover.jpg",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/tralaithanhxuanchoem/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/tralaithanhxuanchoem/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/tralaithanhxuanchoem/4.mp4",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/tralaithanhxuanchoem/1.lrc"
+    title: "chobaolau",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/chobaolau/chobaolau.jpg",
+    audioSrc: "../audio_workspace/music/chobaolau/chobaolau.mp3",
+    instrumentalSrc: "../audio_workspace/music/chobaolau/chobaolau_beat.mp3",
+    videoSrc: "../audio_workspace/music/chobaolau/chobaolau.mp4",
+    lyricSrc: "../audio_workspace/music/chobaolau/chobaolau.lrc"
   },
 
   {
     id: 13,
-    title: "Đào Hoa Nặc",
-    artist: "旺仔小乔",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/daohoanac/cover.jpg",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/daohoanac/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/daohoanac/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/daohoanac/4.mp4",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/daohoanac/1.lrc"
+    title: "coemanhthangdoi",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/coemanhthangdoi/coemanhthangdoi.jpg",
+    audioSrc: "../audio_workspace/music/coemanhthangdoi/coemanhthangdoi.mp3",
+    instrumentalSrc: "../audio_workspace/music/coemanhthangdoi/coemanhthangdoi_beat.mp3",
+    videoSrc: "../audio_workspace/music/coemanhthangdoi/coemanhthangdoi.mp4",
+    lyricSrc: "../audio_workspace/music/coemanhthangdoi/coemanhthangdoi.lrc"
   },
 
   {
     id: 14,
-    title: "Vây Giữ",
-    artist: "Vương Tĩnh Văn",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/vaygiu/cover.jpg",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/vaygiu/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/vaygiu/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/vaygiu/4.mp4",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/vaygiu/1.lrc"
+    title: "cunhuvaymotvannam",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/cunhuvaymotvannam/cunhuvaymotvannam.jpg",
+    audioSrc: "../audio_workspace/music/cunhuvaymotvannam/cunhuvaymotvannam.mp3",
+    instrumentalSrc: "../audio_workspace/music/cunhuvaymotvannam/cunhuvaymotvannam_beat.mp3",
+    videoSrc: "../audio_workspace/music/cunhuvaymotvannam/cunhuvaymotvannam.mp4",
+    lyricSrc: "../audio_workspace/music/cunhuvaymotvannam/cunhuvaymotvannam.lrc"
   },
 
   {
     id: 15,
-    title: "Khóa Ly Biệt Live",
-    artist: "Anh Tú",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/khoalybiet/cover.jpg",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/khoalybiet/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/khoalybiet/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/khoalybiet/4.mp4",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/khoalybiet/1.lrc"
+    title: "cuoichinh",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/cuoichinh/cuoichinh.jpg",
+    audioSrc: "../audio_workspace/music/cuoichinh/cuoichinh.mp3",
+    instrumentalSrc: "../audio_workspace/music/cuoichinh/cuoichinh_beat.mp3",
+    videoSrc: "../audio_workspace/music/cuoichinh/cuoichinh.mp4",
+    lyricSrc: "../audio_workspace/music/cuoichinh/cuoichinh.lrc"
   },
 
   {
     id: 16,
-    title: "Anh Thôi Nhân Nhượng Cover",
-    artist: "Linh Hương Luz",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/anhthoinhannhuong/cover.jpg",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/anhthoinhannhuong/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/anhthoinhannhuong/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/anhthoinhannhuong/4.mp4",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/anhthoinhannhuong/1.lrc"
+    title: "cuoitet",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/cuoitet/cuoitet.jpg",
+    audioSrc: "../audio_workspace/music/cuoitet/cuoitet.mp3",
+    instrumentalSrc: "../audio_workspace/music/cuoitet/cuoitet_beat.mp3",
+    videoSrc: "../audio_workspace/music/cuoitet/cuoitet.mp4",
+    lyricSrc: "../audio_workspace/music/cuoitet/cuoitet.lrc"
   },
 
   {
     id: 17,
-    title: "Nơi Đâu Tìm Thấy Em Lofi",
-    artist: "Chu Bin",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/noidautimthayem/cover.jpg",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/noidautimthayem/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/noidautimthayem/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/noidautimthayem/4.mp4",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/noidautimthayem/1.lrc"
+    title: "daohoanac",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/daohoanac/daohoanac.jpg",
+    audioSrc: "../audio_workspace/music/daohoanac/daohoanac.mp3",
+    instrumentalSrc: "../audio_workspace/music/daohoanac/daohoanac_beat.mp3",
+    videoSrc: "../audio_workspace/music/daohoanac/daohoanac.mp4",
+    lyricSrc: "../audio_workspace/music/daohoanac/daohoanac.lrc"
   },
 
   {
     id: 18,
-    title: "E Là Không Thể",
-    artist: "Anh Quân x Đông Thiên Đức",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/elakhongthe/cover.jpg",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/elakhongthe/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/elakhongthe/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/elakhongthe/4.mp4",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/elakhongthe/1.lrc"
+    title: "diadang",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/diadang/diadang.jpg",
+    audioSrc: "../audio_workspace/music/diadang/diadang.mp3",
+    instrumentalSrc: "../audio_workspace/music/diadang/diadang_beat.mp3",
+    videoSrc: "../audio_workspace/music/diadang/diadang.mp4",
+    lyricSrc: "../audio_workspace/music/diadang/diadang.lrc"
   },
 
   {
     id: 19,
-    title: "Mashup 6 in 1",
-    artist: "Mochiii Cover",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/mashup6in1/cover.jpg",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/mashup6in1/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/mashup6in1/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/mashup6in1/4.mp4",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/mashup6in1/1.lrc"
+    title: "diveque",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/diveque/diveque.jpg",
+    audioSrc: "../audio_workspace/music/diveque/diveque.mp3",
+    instrumentalSrc: "../audio_workspace/music/diveque/diveque_beat.mp3",
+    videoSrc: "../audio_workspace/music/diveque/diveque.mp4",
+    lyricSrc: "../audio_workspace/music/diveque/diveque.lrc"
   },
 
   {
     id: 20,
-    title: "Cạn Tình Như Thế",
-    artist: "Dickson x Thành Đạt",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/cantinhnhuthe/cover.jpg",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/cantinhnhuthe/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/cantinhnhuthe/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/cantinhnhuthe/4.mp4",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/cantinhnhuthe/1.lrc"
+    title: "elakhongthe",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/elakhongthe/elakhongthe.jpg",
+    audioSrc: "../audio_workspace/music/elakhongthe/elakhongthe.mp3",
+    instrumentalSrc: "../audio_workspace/music/elakhongthe/elakhongthe_beat.mp3",
+    videoSrc: "../audio_workspace/music/elakhongthe/elakhongthe.mp4",
+    lyricSrc: "../audio_workspace/music/elakhongthe/elakhongthe.lrc"
   },
 
   {
     id: 21,
-    title: "O Zon Dragostea Din Tei",
-    artist: "Rumun Cover",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/o-zone-dragostea-din-tei-RumunCover/cover.jpg",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/o-zone-dragostea-din-tei-RumunCover/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/o-zone-dragostea-din-tei-RumunCover/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/o-zone-dragostea-din-tei-RumunCover/4.mp4",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/o-zone-dragostea-din-tei-RumunCover/1.lrc"
+    title: "emnhacanh",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/emnhacanh/emnhacanh.jpg",
+    audioSrc: "../audio_workspace/music/emnhacanh/emnhacanh.mp3",
+    instrumentalSrc: "../audio_workspace/music/emnhacanh/emnhacanh_beat.mp3",
+    videoSrc: "../audio_workspace/music/emnhacanh/emnhacanh.mp4",
+    lyricSrc: "../audio_workspace/music/emnhacanh/emnhacanh.lrc"
   },
 
   {
     id: 22,
-    title: "Người Lạ Từng Thương Remix",
-    artist: "Mochii Cover",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/nguoilatungthuong/cover.jpg",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/nguoilatungthuong/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/nguoilatungthuong/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/nguoilatungthuong/4.mp4",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/nguoilatungthuong/1.lrc"
+    title: "emthuacota",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/emthuacota/emthuacota.jpg",
+    audioSrc: "../audio_workspace/music/emthuacota/emthuacota.mp3",
+    instrumentalSrc: "../audio_workspace/music/emthuacota/emthuacota_beat.mp3",
+    videoSrc: "../audio_workspace/music/emthuacota/emthuacota.mp4",
+    lyricSrc: "../audio_workspace/music/emthuacota/emthuacota.lrc"
   },
 
   {
     id: 23,
-    title: "Nhạc Tết Miền Tây Remix",
-    artist: "Pinky Vanh x Hoa Vũ, H2K,...",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/nhactetmientayremix/cover.jpg",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/nhactetmientayremix/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/nhactetmientayremix/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/nhactetmientayremix/4.mp4",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/nhactetmientayremix/1.lrc"
+    title: "hoa",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/hoa/hoa.jpg",
+    audioSrc: "../audio_workspace/music/hoa/hoa.mp3",
+    instrumentalSrc: "../audio_workspace/music/hoa/hoa_beat.mp3",
+    videoSrc: "../audio_workspace/music/hoa/hoa.mp4",
+    lyricSrc: "../audio_workspace/music/hoa/hoa.lrc"
   },
 
   {
     id: 24,
-    title: "Họa Sĩ Tồi",
-    artist: "Thái Học x Đạt Max",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/hoasitoi/cover.jpg",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/hoasitoi/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/hoasitoi/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/hoasitoi/4.mp4",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/hoasitoi/1.lrc"
+    title: "hoasitoi",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/hoasitoi/hoasitoi.jpg",
+    audioSrc: "../audio_workspace/music/hoasitoi/hoasitoi.mp3",
+    instrumentalSrc: "../audio_workspace/music/hoasitoi/hoasitoi_beat.mp3",
+    videoSrc: "../audio_workspace/music/hoasitoi/hoasitoi.mp4",
+    lyricSrc: "../audio_workspace/music/hoasitoi/hoasitoi.lrc"
   },
 
   {
     id: 25,
-    title: "Thiệp Hồng Sai Tên",
-    artist: "Mochii Cover",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/thiephongsaiten/cover.jpg",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/thiephongsaiten/1.lrc",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/thiephongsaiten/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/thiephongsaiten/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/thiephongsaiten/4.mp4"
+    title: "hoivongoaithanh",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/hoivongoaithanh/hoivongoaithanh.jpg",
+    audioSrc: "../audio_workspace/music/hoivongoaithanh/hoivongoaithanh.mp3",
+    instrumentalSrc: "../audio_workspace/music/hoivongoaithanh/hoivongoaithanh_beat.mp3",
+    videoSrc: "../audio_workspace/music/hoivongoaithanh/hoivongoaithanh.mp4",
+    lyricSrc: "../audio_workspace/music/hoivongoaithanh/hoivongoaithanh.lrc"
   },
 
   {
     id: 26,
-    title: "Em Thua Cô Ta",
-    artist: "Ca Sĩ Giấu Mặt Cover",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/emthuacota/cover.jpg",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/emthuacota/1.lrc",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/emthuacota/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/emthuacota/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/emthuacota/4.mp4"
+    title: "khatduyen",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/khatduyen/khatduyen.jpg",
+    audioSrc: "../audio_workspace/music/khatduyen/khatduyen.mp3",
+    instrumentalSrc: "../audio_workspace/music/khatduyen/khatduyen_beat.mp3",
+    videoSrc: "../audio_workspace/music/khatduyen/khatduyen.mp4",
+    lyricSrc: "../audio_workspace/music/khatduyen/khatduyen.lrc"
   },
 
   {
     id: 27,
-    title: "WITH YOU (NGẪU HỨNG)",
-    artist: "HOAPROX, NICK STRAND & MIO",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/withyou-ngauhung/cover.jpg",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/withyou-ngauhung/1.lrc",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/withyou-ngauhung/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/withyou-ngauhung/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/withyou-ngauhung/4.mp4"
+    title: "khoalybiet",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/khoalybiet/khoalybiet.jpg",
+    audioSrc: "../audio_workspace/music/khoalybiet/khoalybiet.mp3",
+    instrumentalSrc: "../audio_workspace/music/khoalybiet/khoalybiet_beat.mp3",
+    videoSrc: "../audio_workspace/music/khoalybiet/khoalybiet.mp4",
+    lyricSrc: "../audio_workspace/music/khoalybiet/khoalybiet.lrc"
   },
 
   {
     id: 28,
-    title: "Tình Yêu Không Có Lỗi",
-    artist: "Mochii",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/tinhyeukhongcoloi/cover.jpg",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/tinhyeukhongcoloi/1.lrc",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/tinhyeukhongcoloi/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/tinhyeukhongcoloi/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/tinhyeukhongcoloi/4.mp4"
+    title: "lengangtroi",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/lengangtroi/lengangtroi.jpg",
+    audioSrc: "../audio_workspace/music/lengangtroi/lengangtroi.mp3",
+    instrumentalSrc: "../audio_workspace/music/lengangtroi/lengangtroi_beat.mp3",
+    videoSrc: "../audio_workspace/music/lengangtroi/lengangtroi.mp4",
+    lyricSrc: "../audio_workspace/music/lengangtroi/lengangtroi.lrc"
   },
 
   {
     id: 29,
-    title: "10 Mất 1 Còn Không",
-    artist: "Lê Gia Bảo, BMZ",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/10mat1con0/cover.jpg",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/10mat1con0/1.lrc",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/10mat1con0/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/10mat1con0/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/10mat1con0/4.mp4"
+    title: "mailacodaucuaanh",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/mailacodaucuaanh/mailacodaucuaanh.jpg",
+    audioSrc: "../audio_workspace/music/mailacodaucuaanh/mailacodaucuaanh.mp3",
+    instrumentalSrc: "../audio_workspace/music/mailacodaucuaanh/mailacodaucuaanh_beat.mp3",
+    videoSrc: "../audio_workspace/music/mailacodaucuaanh/mailacodaucuaanh.mp4",
+    lyricSrc: "../audio_workspace/music/mailacodaucuaanh/mailacodaucuaanh.lrc"
   },
 
   {
     id: 30,
-    title: "Rời Remix",
-    artist: "Linh Hương Luz",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/roi/cover.jpg",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/roi/1.lrc",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/roi/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/roi/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/roi/4.mp4"
+    title: "manhba",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/manhba/manhba.jpg",
+    audioSrc: "../audio_workspace/music/manhba/manhba.mp3",
+    instrumentalSrc: "../audio_workspace/music/manhba/manhba_beat.mp3",
+    videoSrc: "../audio_workspace/music/manhba/manhba.mp4",
+    lyricSrc: "../audio_workspace/music/manhba/manhba.lrc"
   },
 
   {
     id: 31,
-    title: "Mãi Là Cô Dâu Của Anh",
-    artist: "Mochii Cover",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/mailacodaucuaanh/cover.jpg",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/mailacodaucuaanh/1.lrc",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/mailacodaucuaanh/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/mailacodaucuaanh/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/mailacodaucuaanh/4.mp4"
+    title: "manhtinhsaidoi",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/manhtinhsaidoi/manhtinhsaidoi.jpg",
+    audioSrc: "../audio_workspace/music/manhtinhsaidoi/manhtinhsaidoi.mp3",
+    instrumentalSrc: "../audio_workspace/music/manhtinhsaidoi/manhtinhsaidoi_beat.mp3",
+    videoSrc: "../audio_workspace/music/manhtinhsaidoi/manhtinhsaidoi.mp4",
+    lyricSrc: "../audio_workspace/music/manhtinhsaidoi/manhtinhsaidoi.lrc"
   },
 
   {
     id: 32,
-    title: "Chẳng Thể Cảm Hóa",
-    artist: "Thái Học Cover",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/changthecamhoa/cover.jpg",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/changthecamhoa/1.lrc",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/changthecamhoa/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/changthecamhoa/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/changthecamhoa/4.mp4"
+    title: "mashup6in1",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/mashup6in1/mashup6in1.jpg",
+    audioSrc: "../audio_workspace/music/mashup6in1/mashup6in1.mp3",
+    instrumentalSrc: "../audio_workspace/music/mashup6in1/mashup6in1_beat.mp3",
+    videoSrc: "../audio_workspace/music/mashup6in1/mashup6in1.mp4",
+    lyricSrc: "../audio_workspace/music/mashup6in1/mashup6in1.lrc"
   },
 
   {
     id: 33,
-    title: "Hoa",
-    artist: "Tú Na Cover",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/hoa/cover.jpg",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/hoa/1.lrc",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/hoa/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/hoa/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/hoa/4.mp4"
+    title: "nguoilatungthuong",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/nguoilatungthuong/nguoilatungthuong.jpg",
+    audioSrc: "../audio_workspace/music/nguoilatungthuong/nguoilatungthuong.mp3",
+    instrumentalSrc: "../audio_workspace/music/nguoilatungthuong/nguoilatungthuong_beat.mp3",
+    videoSrc: "../audio_workspace/music/nguoilatungthuong/nguoilatungthuong.mp4",
+    lyricSrc: "../audio_workspace/music/nguoilatungthuong/nguoilatungthuong.lrc"
   },
 
   {
     id: 34,
-    title: "Chờ Bao Lâu",
-    artist: "Út Nhị Mino, Hào JK",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/chobaolau/cover.jpg",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/chobaolau/1.lrc",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/chobaolau/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/chobaolau/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/chobaolau/4.mp4"
+    title: "nhactetmientayremix",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/nhactetmientayremix/nhactetmientayremix.jpg",
+    audioSrc: "../audio_workspace/music/nhactetmientayremix/nhactetmientayremix.mp3",
+    instrumentalSrc: "../audio_workspace/music/nhactetmientayremix/nhactetmientayremix_beat.mp3",
+    videoSrc: "../audio_workspace/music/nhactetmientayremix/nhactetmientayremix.mp4",
+    lyricSrc: "../audio_workspace/music/nhactetmientayremix/nhactetmientayremix.lrc"
   },
 
   {
     id: 35,
-    title: "Bắt Con Bướm Vàng",
-    artist: "DanhK",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/batconbuomvang/cover.jpg",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/batconbuomvang/1.lrc",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/batconbuomvang/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/batconbuomvang/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/batconbuomvang/4.mp4"
+    title: "noidautimthayem",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/noidautimthayem/noidautimthayem.jpg",
+    audioSrc: "../audio_workspace/music/noidautimthayem/noidautimthayem.mp3",
+    instrumentalSrc: "../audio_workspace/music/noidautimthayem/noidautimthayem_beat.mp3",
+    videoSrc: "../audio_workspace/music/noidautimthayem/noidautimthayem.mp4",
+    lyricSrc: "../audio_workspace/music/noidautimthayem/noidautimthayem.lrc"
   },
 
   {
     id: 36,
-    title: "Đi Về Quê",
-    artist: "Út Nhị Mino",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/diveque/cover.jpg",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/diveque/1.lrc",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/diveque/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/diveque/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/diveque/4.mp4"
+    title: "o-zone-dragostea-din-tei-RumunCover",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/o-zone-dragostea-din-tei-RumunCover/o-zone-dragostea-din-tei-RumunCover.jpg",
+    audioSrc: "../audio_workspace/music/o-zone-dragostea-din-tei-RumunCover/o-zone-dragostea-din-tei-RumunCover.mp3",
+    instrumentalSrc: "../audio_workspace/music/o-zone-dragostea-din-tei-RumunCover/o-zone-dragostea-din-tei-RumunCover_beat.mp3",
+    videoSrc: "../audio_workspace/music/o-zone-dragostea-din-tei-RumunCover/o-zone-dragostea-din-tei-RumunCover.mp4",
+    lyricSrc: "../audio_workspace/music/o-zone-dragostea-din-tei-RumunCover/o-zone-dragostea-din-tei-RumunCover.lrc"
   },
 
   {
     id: 37,
-    title: "Có Em Anh Thắng Đời",
-    artist: "Hanna Cẩm Tiên",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/coemanhthangdoi/cover.jpg",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/coemanhthangdoi/1.lrc",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/coemanhthangdoi/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/coemanhthangdoi/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/coemanhthangdoi/4.mp4"
+    title: "phongsuongtuu",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/phongsuongtuu/phongsuongtuu.jpg",
+    audioSrc: "../audio_workspace/music/phongsuongtuu/phongsuongtuu.mp3",
+    instrumentalSrc: "../audio_workspace/music/phongsuongtuu/phongsuongtuu_beat.mp3",
+    videoSrc: "../audio_workspace/music/phongsuongtuu/phongsuongtuu.mp4",
+    lyricSrc: "../audio_workspace/music/phongsuongtuu/phongsuongtuu.lrc"
   },
 
   {
     id: 38,
-    title: "Sự Ưu Tiên Của Em",
-    artist: "Lê Gia Bảo x Thái Học",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/suuutiencuaem/cover.jpg",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/suuutiencuaem/1.lrc",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/suuutiencuaem/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/suuutiencuaem/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/suuutiencuaem/4.mp4"
+    title: "roi",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/roi/roi.jpg",
+    audioSrc: "../audio_workspace/music/roi/roi.mp3",
+    instrumentalSrc: "../audio_workspace/music/roi/roi_beat.mp3",
+    videoSrc: "../audio_workspace/music/roi/roi.mp4",
+    lyricSrc: "../audio_workspace/music/roi/roi.lrc"
   },
 
   {
     id: 39,
-    title: "Tết Này Kết Đôi",
-    artist: "Pinky Vanh x Hoa Vũ",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/tenayketdoi/cover.jpg",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/tenayketdoi/1.lrc",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/tenayketdoi/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/tenayketdoi/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/tenayketdoi/4.mp4"
+    title: "roinangcailylen",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/roinangcailylen/roinangcailylen.jpg",
+    audioSrc: "../audio_workspace/music/roinangcailylen/roinangcailylen.mp3",
+    instrumentalSrc: "../audio_workspace/music/roinangcailylen/roinangcailylen_beat.mp3",
+    videoSrc: "../audio_workspace/music/roinangcailylen/roinangcailylen.mp4",
+    lyricSrc: "../audio_workspace/music/roinangcailylen/roinangcailylen.lrc"
   },
 
   {
     id: 40,
-    title: "Tết Này Có Nhau",
-    artist: "Pinky Vanh x Hoa Vũ",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/tetnayconhau/cover.jpg",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/tetnayconhau/1.lrc",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/tetnayconhau/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/tetnayconhau/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/tetnayconhau/4.mp4"
+    title: "soichihong",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/soichihong/soichihong.jpg",
+    audioSrc: "../audio_workspace/music/soichihong/soichihong.mp3",
+    instrumentalSrc: "../audio_workspace/music/soichihong/soichihong_beat.mp3",
+    videoSrc: "../audio_workspace/music/soichihong/soichihong.mp4",
+    lyricSrc: "../audio_workspace/music/soichihong/soichihong.lrc"
   },
 
   {
     id: 41,
-    title: "Cưới Tết",
-    artist: "Hồ Phi Nal",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/cuoitet/cover.jpg",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/cuoitet/1.lrc",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/cuoitet/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/cuoitet/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/cuoitet/4.mp4"
+    title: "soichihonghanacamtienxdanhkaofficalmusicvideoostcuoivochocha",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/soichihonghanacamtienxdanhkaofficalmusicvideoostcuoivochocha/soichihonghanacamtienxdanhkaofficalmusicvideoostcuoivochocha.jpg",
+    audioSrc: "../audio_workspace/music/soichihonghanacamtienxdanhkaofficalmusicvideoostcuoivochocha/soichihonghanacamtienxdanhkaofficalmusicvideoostcuoivochocha.mp3",
+    instrumentalSrc: "../audio_workspace/music/soichihonghanacamtienxdanhkaofficalmusicvideoostcuoivochocha/soichihonghanacamtienxdanhkaofficalmusicvideoostcuoivochocha_beat.mp3",
+    videoSrc: "../audio_workspace/music/soichihonghanacamtienxdanhkaofficalmusicvideoostcuoivochocha/soichihonghanacamtienxdanhkaofficalmusicvideoostcuoivochocha.mp4",
+    lyricSrc: "../audio_workspace/music/soichihonghanacamtienxdanhkaofficalmusicvideoostcuoivochocha/soichihonghanacamtienxdanhkaofficalmusicvideoostcuoivochocha.lrc"
   },
 
   {
     id: 42,
-    title: "Sợi Chỉ Hồng | Cưới Vợ Cho Cha OST",
-    artist: "Hanna Cẩm Tiên x Danhka",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/soichihong/cover.jpg",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/soichihong/1.lrc",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/soichihong/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/soichihong/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/soichihong/4.mp4"
+    title: "suuutiencuaem",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/suuutiencuaem/suuutiencuaem.jpg",
+    audioSrc: "../audio_workspace/music/suuutiencuaem/suuutiencuaem.mp3",
+    instrumentalSrc: "../audio_workspace/music/suuutiencuaem/suuutiencuaem_beat.mp3",
+    videoSrc: "../audio_workspace/music/suuutiencuaem/suuutiencuaem.mp4",
+    lyricSrc: "../audio_workspace/music/suuutiencuaem/suuutiencuaem.lrc"
   },
 
   {
     id: 43,
-    title: "Mãnh Tình Sai Đôi",
-    artist: "Mochii Cover",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/manhtinhsaidoi/cover.jpg",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/manhtinhsaidoi/1.lrc",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/manhtinhsaidoi/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/manhtinhsaidoi/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/manhtinhsaidoi/4.mp4"
+    title: "taisinh",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/taisinh/taisinh.jpg",
+    audioSrc: "../audio_workspace/music/taisinh/taisinh.mp3",
+    instrumentalSrc: "../audio_workspace/music/taisinh/taisinh_beat.mp3",
+    videoSrc: "../audio_workspace/music/taisinh/taisinh.mp4",
+    lyricSrc: "../audio_workspace/music/taisinh/taisinh.lrc"
   },
 
   {
     id: 44,
-    title: "Lệ Ngang Trời",
-    artist: "Ca Sĩ Giấu Mặt",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/lengangtroi/cover.jpg",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/lengangtroi/1.lrc",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/lengangtroi/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/lengangtroi/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/lengangtroi/4.mp4"
+    title: "tenayketdoi",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/tenayketdoi/tenayketdoi.jpg",
+    audioSrc: "../audio_workspace/music/tenayketdoi/tenayketdoi.mp3",
+    instrumentalSrc: "../audio_workspace/music/tenayketdoi/tenayketdoi_beat.mp3",
+    videoSrc: "../audio_workspace/music/tenayketdoi/tenayketdoi.mp4",
+    lyricSrc: "../audio_workspace/music/tenayketdoi/tenayketdoi.lrc"
   },
 
   {
     id: 45,
-    title: "Phong Sương Tửu",
-    artist: "Ca Sĩ Giấu Mặt",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/phongsuongtuu/cover.jpg",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/phongsuongtuu/1.lrc",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/phongsuongtuu/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/phongsuongtuu/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/phongsuongtuu/4.mp4"
+    title: "tetnayconhau",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/tetnayconhau/tetnayconhau.jpg",
+    audioSrc: "../audio_workspace/music/tetnayconhau/tetnayconhau.mp3",
+    instrumentalSrc: "../audio_workspace/music/tetnayconhau/tetnayconhau_beat.mp3",
+    videoSrc: "../audio_workspace/music/tetnayconhau/tetnayconhau.mp4",
+    lyricSrc: "../audio_workspace/music/tetnayconhau/tetnayconhau.lrc"
   },
 
   {
     id: 46,
-    title: "Rồi Nâng Cái Ly Lên",
-    artist: "Nal",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/roinangcailylen/cover.jpg",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/roinangcailylen/1.lrc",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/roinangcailylen/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/roinangcailylen/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/roinangcailylen/4.mp4"
+    title: "thefatratflyawayfeatanjulie",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/thefatratflyawayfeatanjulie/thefatratflyawayfeatanjulie.jpg",
+    audioSrc: "../audio_workspace/music/thefatratflyawayfeatanjulie/thefatratflyawayfeatanjulie.mp3",
+    instrumentalSrc: "../audio_workspace/music/thefatratflyawayfeatanjulie/thefatratflyawayfeatanjulie_beat.mp3",
+    videoSrc: "../audio_workspace/music/thefatratflyawayfeatanjulie/thefatratflyawayfeatanjulie.mp4",
+    lyricSrc: "../audio_workspace/music/thefatratflyawayfeatanjulie/thefatratflyawayfeatanjulie.lrc"
   },
 
   {
     id: 47,
-    title: "Xuân Vu Quy",
-    artist: "DanhKa",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/xuanvuquy/cover.jpg",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/xuanvuquy/1.lrc",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/xuanvuquy/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/xuanvuquy/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/xuanvuquy/4.mp4"
+    title: "thiephongsaiten",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/thiephongsaiten/thiephongsaiten.jpg",
+    audioSrc: "../audio_workspace/music/thiephongsaiten/thiephongsaiten.mp3",
+    instrumentalSrc: "../audio_workspace/music/thiephongsaiten/thiephongsaiten_beat.mp3",
+    videoSrc: "../audio_workspace/music/thiephongsaiten/thiephongsaiten.mp4",
+    lyricSrc: "../audio_workspace/music/thiephongsaiten/thiephongsaiten.lrc"
   },
 
   {
     id: 48,
-    title: "Tự Em Sai",
-    artist: "Linh Hương Luz",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/tuemsai/cover.jpg",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/tuemsai/1.lrc",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/tuemsai/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/tuemsai/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/tuemsai/4.mp4"
+    title: "thuongthithoi",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/thuongthithoi/thuongthithoi.jpg",
+    audioSrc: "../audio_workspace/music/thuongthithoi/thuongthithoi.mp3",
+    instrumentalSrc: "../audio_workspace/music/thuongthithoi/thuongthithoi_beat.mp3",
+    videoSrc: "../audio_workspace/music/thuongthithoi/thuongthithoi.mp4",
+    lyricSrc: "../audio_workspace/music/thuongthithoi/thuongthithoi.lrc"
   },
 
   {
     id: 49,
-    title: "Anh Vui",
-    artist: "Phạm Kỳ",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/anhvui/cover.jpg",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/anhvui/1.lrc",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/anhvui/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/anhvui/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/anhvui/4.mp4"
+    title: "tinhyeukhongcoloi",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/tinhyeukhongcoloi/tinhyeukhongcoloi.jpg",
+    audioSrc: "../audio_workspace/music/tinhyeukhongcoloi/tinhyeukhongcoloi.mp3",
+    instrumentalSrc: "../audio_workspace/music/tinhyeukhongcoloi/tinhyeukhongcoloi_beat.mp3",
+    videoSrc: "../audio_workspace/music/tinhyeukhongcoloi/tinhyeukhongcoloi.mp4",
+    lyricSrc: "../audio_workspace/music/tinhyeukhongcoloi/tinhyeukhongcoloi.lrc"
   },
 
   {
     id: 50,
-    title: "Bà Xã Của Anh",
-    artist: "Dương Ái Vy",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/baxacuaanh/cover.jpg",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/baxacuaanh/1.lrc",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/baxacuaanh/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/baxacuaanh/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/baxacuaanh/4.mp4"
+    title: "tralaithanhxuanchoem",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/tralaithanhxuanchoem/tralaithanhxuanchoem.jpg",
+    audioSrc: "../audio_workspace/music/tralaithanhxuanchoem/tralaithanhxuanchoem.mp3",
+    instrumentalSrc: "../audio_workspace/music/tralaithanhxuanchoem/tralaithanhxuanchoem_beat.mp3",
+    videoSrc: "../audio_workspace/music/tralaithanhxuanchoem/tralaithanhxuanchoem.mp4",
+    lyricSrc: "../audio_workspace/music/tralaithanhxuanchoem/tralaithanhxuanchoem.lrc"
   },
 
   {
     id: 51,
-    title: "Cưới Chính",
-    artist: "Nal",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/cuoichinh/cover.jpg",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/cuoichinh/1.lrc",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/cuoichinh/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/cuoichinh/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/cuoichinh/4.mp4"
+    title: "tuemsai",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/tuemsai/tuemsai.jpg",
+    audioSrc: "../audio_workspace/music/tuemsai/tuemsai.mp3",
+    instrumentalSrc: "../audio_workspace/music/tuemsai/tuemsai_beat.mp3",
+    videoSrc: "../audio_workspace/music/tuemsai/tuemsai.mp4",
+    lyricSrc: "../audio_workspace/music/tuemsai/tuemsai.lrc"
   },
 
   {
     id: 52,
-    title: "Em Nhắc Anh",
-    artist: "Nana Liu x HTM",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/emnhacanh/cover.jpg",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/emnhacanh/1.lrc",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/emnhacanh/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/emnhacanh/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/emnhacanh/4.mp4"
+    title: "vaygiu",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/vaygiu/vaygiu.jpg",
+    audioSrc: "../audio_workspace/music/vaygiu/vaygiu.mp3",
+    instrumentalSrc: "../audio_workspace/music/vaygiu/vaygiu_beat.mp3",
+    videoSrc: "../audio_workspace/music/vaygiu/vaygiu.mp4",
+    lyricSrc: "../audio_workspace/music/vaygiu/vaygiu.lrc"
   },
 
   {
     id: 53,
-    title: "Xuân Huy Hoàng",
-    artist: "Đạt Long Vinh",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/xuanhuyhoang/cover.jpg",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/xuanhuyhoang/1.lrc",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/xuanhuyhoang/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/xuanhuyhoang/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/xuanhuyhoang/4.mp4"
+    title: "vokichcuaem",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/vokichcuaem/vokichcuaem.jpg",
+    audioSrc: "../audio_workspace/music/vokichcuaem/vokichcuaem.mp3",
+    instrumentalSrc: "../audio_workspace/music/vokichcuaem/vokichcuaem_beat.mp3",
+    videoSrc: "../audio_workspace/music/vokichcuaem/vokichcuaem.mp4",
+    lyricSrc: "../audio_workspace/music/vokichcuaem/vokichcuaem.lrc"
   },
 
   {
     id: 54,
-    title: "Hỏi Vợ Ngoại Thành Lofi",
-    artist: "Thành Đạt",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/hoivongoaithanh/cover.jpg",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/hoivongoaithanh/1.lrc",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/hoivongoaithanh/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/hoivongoaithanh/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/hoivongoaithanh/4.mp4"
+    title: "weddingsongs",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/weddingsongs/weddingsongs.jpg",
+    audioSrc: "../audio_workspace/music/weddingsongs/weddingsongs.mp3",
+    instrumentalSrc: "../audio_workspace/music/weddingsongs/weddingsongs_beat.mp3",
+    videoSrc: "../audio_workspace/music/weddingsongs/weddingsongs.mp4",
+    lyricSrc: "../audio_workspace/music/weddingsongs/weddingsongs.lrc"
   },
 
   {
     id: 55,
-    title: "Khất Duyên",
-    artist: "Bùi Phi Long",
-    cover: "https://raw.githubusercontent.com/d4m-dev/media/main/music/khatduyen/cover.jpg",
-    lyricSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/khatduyen/1.lrc",
-    audioSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/khatduyen/2.mp3",
-    instrumentalSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/khatduyen/3.mp3",
-    videoSrc: "https://raw.githubusercontent.com/d4m-dev/media/main/music/khatduyen/4.mp4"
+    title: "withyou-ngauhung",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/withyou-ngauhung/withyou-ngauhung.jpg",
+    audioSrc: "../audio_workspace/music/withyou-ngauhung/withyou-ngauhung.mp3",
+    instrumentalSrc: "../audio_workspace/music/withyou-ngauhung/withyou-ngauhung_beat.mp3",
+    videoSrc: "../audio_workspace/music/withyou-ngauhung/withyou-ngauhung.mp4",
+    lyricSrc: "../audio_workspace/music/withyou-ngauhung/withyou-ngauhung.lrc"
+  },
+
+  {
+    id: 56,
+    title: "Xuân Huy Hoàng",
+    artist: "Đạt Long Vinh",
+    cover: "../audio_workspace/music/xuanhuyhoang/xuanhuyhoang.jpg",
+    audioSrc: "../audio_workspace/music/xuanhuyhoang/xuanhuyhoang.mp3",
+    instrumentalSrc: "../audio_workspace/music/xuanhuyhoang/xuanhuyhoang_beat.mp3",
+    videoSrc: "../audio_workspace/music/xuanhuyhoang/xuanhuyhoang.mp4",
+    lyricSrc: "../audio_workspace/music/xuanhuyhoang/xuanhuyhoang.lrc"
+  },
+
+  {
+    id: 57,
+    title: "Xuân Vu Quy",
+    artist: "DanhKa",
+    cover: "../audio_workspace/music/xuanvuquy/xuanvuquy.jpg",
+    audioSrc: "../audio_workspace/music/xuanvuquy/xuanvuquy.mp3",
+    instrumentalSrc: "../audio_workspace/music/xuanvuquy/xuanvuquy_beat.mp3",
+    videoSrc: "../audio_workspace/music/xuanvuquy/xuanvuquy.mp4",
+    lyricSrc: "../audio_workspace/music/xuanvuquy/xuanvuquy.lrc"
+  },
+
+  {
+    id: 58,
+    title: "yeuemnhungkhongvoitoi",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/yeuemnhungkhongvoitoi/yeuemnhungkhongvoitoi.jpg",
+    audioSrc: "../audio_workspace/music/yeuemnhungkhongvoitoi/yeuemnhungkhongvoitoi.mp3",
+    instrumentalSrc: "../audio_workspace/music/yeuemnhungkhongvoitoi/yeuemnhungkhongvoitoi_beat.mp3",
+    videoSrc: "../audio_workspace/music/yeuemnhungkhongvoitoi/yeuemnhungkhongvoitoi.mp4",
+    lyricSrc: "../audio_workspace/music/yeuemnhungkhongvoitoi/yeuemnhungkhongvoitoi.lrc"
   }
-];
+]

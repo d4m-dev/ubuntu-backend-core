@@ -14,7 +14,7 @@ from core.config import settings
 from core.database import init_db, db_manager
 from core.scheduler import ai_janitor_task
 
-from api import dashboard, websockets, chatbox, social, auth, widgets, projects, ai_admin, audio_engine, bio_premium, music, telegram_bot, astrology, ytdl
+from api import player, dashboard, websockets, chatbox, social, auth, widgets, projects, ai_admin, audio_engine, bio_premium, music, telegram_bot, astrology, ytdl
 
 from middlewares.logger_tracker import LoggerTrackerMiddleware
 from middlewares.rate_limit import RateLimitMiddleware
@@ -93,7 +93,7 @@ app.include_router(music.router)
 app.include_router(telegram_bot.router)
 app.include_router(astrology.router)
 app.include_router(ytdl.router)
-
+app.include_router(player.router)
 
 # ==========================================
 # 🚀 TỰ ĐỘNG NHẬN DIỆN ĐƯỜNG DẪN GỐC & TÀI NGUYÊN TĨNH
@@ -121,6 +121,11 @@ os.makedirs(SCRIPTS_DIR, exist_ok=True)
 app.mount("/scripts", StaticFiles(directory=SCRIPTS_DIR), name="scripts")
 
 app.mount("/static/telegram", StaticFiles(directory=os.path.join(WORKSPACE_DIR, "telegram")), name="telegram_audio")
+
+# 👇 BỔ SUNG MỚI: Mở cổng /media/music cho kho nhạc Music Pro Ultimate
+MUSIC_DIR = os.path.join(BASE_DIR, "audio_workspace", "music")
+os.makedirs(MUSIC_DIR, exist_ok=True)
+app.mount("/media/music", StaticFiles(directory=MUSIC_DIR), name="media_music")
 
 # ==========================================
 # ĐỊNH TUYẾN FRONTEND

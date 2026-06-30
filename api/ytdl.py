@@ -269,19 +269,14 @@ async def search_youtube(req: YTDLSearchRequest):
 
 @router.get("/trending")
 async def get_trending():
-    """Quét dữ liệu thịnh hành trực tiếp siêu bền bỉ (Bất tử)"""
+    """Quét dữ liệu thịnh hành trực tiếp siêu bền bỉ bằng từ khóa"""
     python_exec = os.path.expanduser("~/myenv/bin/python3")
-    playlist_url = "https://www.youtube.com/playlist?list=PLFgquLnL59alW3u_PUApeH7B2fP1c3PzS"
-    cmd = f'"{python_exec}" -m yt_dlp --dump-json --no-warnings --flat-playlist --playlist-end 40 "{playlist_url}"'
+    
+    # Bỏ qua Playlist, phi thẳng vào dùng ytsearch40 để tìm 40 video hot nhất
+    cmd = f'"{python_exec}" -m yt_dlp "ytsearch40:nhac tre thinh hanh moi nhat" --dump-json --no-warnings --flat-playlist'
     
     try:
         result = await asyncio.to_thread(subprocess.run, cmd, shell=True, capture_output=True, text=True)
-        
-        # Nếu Playlist bị YouTube chặn hoặc lỗi cấu trúc -> Chạy Fallback quét từ khóa Hot nhất
-        if result.returncode != 0 or not result.stdout.strip():
-            print("⚠️ Playlist Trending bị lỗi, chuyển sang cấu trúc phòng thủ quét từ khóa...")
-            cmd_fallback = f'"{python_exec}" -m yt_dlp "ytsearch40:nhac tre thinh hanh moi nhat" --dump-json --no-warnings --flat-playlist'
-            result = await asyncio.to_thread(subprocess.run, cmd_fallback, shell=True, capture_output=True, text=True)
 
         results = []
         for line in result.stdout.strip().split('\n'):
