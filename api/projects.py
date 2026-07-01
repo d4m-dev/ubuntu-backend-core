@@ -11,7 +11,8 @@ router = APIRouter(
     tags=["Project Hub"]
 )
 
-HOSTING_DIR = "/storage/emulated/0/coder/media/ubuntu-backend-core/hosted_projects"
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+HOSTING_DIR = os.path.join(BASE_DIR, "hosted_projects")
 
 def get_dir_size(path):
     total = 0
@@ -23,14 +24,12 @@ def get_dir_size(path):
     return total
 
 def format_size(size_bytes):
-    if size_bytes == 0: 
-        return "0 B"
+    if size_bytes == 0: return "0 B"
     size_name = ("B", "KB", "MB", "GB", "TB")
     i = int(math.floor(math.log(size_bytes, 1024)))
     p = math.pow(1024, i)
     return f"{round(size_bytes / p, 2)} {size_name[i]}"
 
-# 🌐 API công khai: Trả về danh sách dự án cho Hub hiển thị
 @router.get("/")
 async def scan_projects():
     os.makedirs(HOSTING_DIR, exist_ok=True)
@@ -40,7 +39,8 @@ async def scan_projects():
         folder_path = os.path.join(HOSTING_DIR, folder)
         if os.path.isdir(folder_path):
             size_str = format_size(get_dir_size(folder_path))
-            has_python = os.path.exists(os.path.join(folder_path, "index.py")) or os.path.exists(os.path.join(folder_path, "public", "index.py"))
+            has_python = os.path.exists(os.path.join(folder_path, "index.py")) or \
+                         os.path.exists(os.path.join(folder_path, "public", "index.py"))
             has_html = os.path.exists(os.path.join(folder_path, "index.html"))
             is_frozen = os.path.exists(os.path.join(folder_path, ".frozen"))
             
@@ -72,7 +72,6 @@ async def scan_projects():
             
     return {"status": "success", "count": len(projects), "projects": projects}
 
-# 🔒 Đã khóa bảo mật: Bật/Tắt dự án (Đóng băng)
 @router.post("/toggle/{project_name}", dependencies=[Depends(verify_token)])
 async def toggle_project_status(project_name: str):
     target_dir = os.path.join(HOSTING_DIR, project_name)
@@ -82,12 +81,11 @@ async def toggle_project_status(project_name: str):
     frozen_file = os.path.join(target_dir, ".frozen")
     if os.path.exists(frozen_file):
         os.remove(frozen_file)
-        return {"status": "success", "is_frozen": False, "message": f"▶️ Đã mở khóa dự án {project_name}"}
+        return {"status": "success", "is_frozen": False}
     else:
         with open(frozen_file, "w") as f: f.write("FROZEN_STATE")
-        return {"status": "success", "is_frozen": True, "message": f"❄️ Đã đóng băng dự án {project_name}"}
+        return {"status": "success", "is_frozen": True}
 
-# 🔒 Đã khóa bảo mật: Upload và giải nén dự án .ZIP
 @router.post("/upload", dependencies=[Depends(verify_token)])
 async def upload_project_zip(file: UploadFile = File(...)):
     if not file.filename.endswith('.zip'):
@@ -101,7 +99,7 @@ async def upload_project_zip(file: UploadFile = File(...)):
         with open(temp_zip, "wb") as buffer: shutil.copyfileobj(file.file, buffer)
         with zipfile.ZipFile(temp_zip, 'r') as zip_ref: zip_ref.extractall(extract_path)
         os.remove(temp_zip)
-        return {"status": "success", "message": f"✅ Đã triển khai dự án '{project_name}' thành công!"}
+        return {"status": "success", "message": "Triển khai thành công"}
     except Exception as e:
         if os.path.exists(temp_zip): os.remove(temp_zip)
         raise HTTPException(status_code=500, detail=f"Lỗi giải nén: {str(e)}")

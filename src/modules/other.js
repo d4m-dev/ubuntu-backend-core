@@ -314,6 +314,15 @@ window.MusicProModules.other = {
                 console.warn('Web Audio API không được hỗ trợ:', e);
             }
         }
+
+        // 👇 BỔ SUNG: Nếu đã có context nhưng đang bị trình duyệt treo (suspended), kích hoạt lại nó ngay
+        if (this.audioContext && this.audioContext.state === 'suspended') {
+            this.audioContext.resume().then(() => {
+                console.log("🔊 Spatial AudioContext đã được mở khóa thành công!");
+            }).catch(err => {
+                console.warn("Chưa thể kích hoạt AudioContext:", err);
+            });
+        }
     },
 
     /**

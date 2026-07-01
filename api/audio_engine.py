@@ -6,7 +6,8 @@ import asyncio
 import httpx
 from datetime import datetime
 from fastapi import APIRouter, UploadFile, File, Form, BackgroundTasks, HTTPException, Request
-from fastapi.responses import JSONResponse, StreamingResponse
+# 👇 BỔ SUNG: Import thêm FileResponse để ép tải file
+from fastapi.responses import JSONResponse, StreamingResponse, FileResponse
 
 router = APIRouter(
     prefix="/api/audio",
@@ -78,22 +79,25 @@ def process_audio_pipeline(file_path: str, clean_name: str, task_id: str, ext: s
 
     # GIAI ĐOẠN 1: TÁCH BEAT & VOCAL
     if separate_beat:
-        print(f"🎵 [Audio Engine] Đang bóc tách Beat/Vocal cho: {task_id}")
+        print(f"🎵 [Audio Engine] Đang bóc tách Beat/Vocal chuẩn Demucs cho: {task_id}")
         temp_demucs_dir = os.path.join(WORKSPACE_DIR, f"temp_demucs_{task_id}")
         os.makedirs(temp_demucs_dir, exist_ok=True)
         try:
-            cmd_demucs = f"OMP_NUM_THREADS=1 ~/myenv/bin/demucs -d cpu -j 1 --segment 5 --two-stems=vocals -o '{temp_demucs_dir}' '{file_path}'"
-            subprocess.run(cmd_demucs, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+            cmd_demucs = f"OMP_NUM_THREADS=1 ~/myenv/bin/demucs -d cpu -j 1 --segment 7 --two-stems=vocals -o '{temp_demucs_dir}' '{file_path}'"
+            subprocess.run(cmd_demucs, shell=True, check=True)
             raw_out_dir = os.path.join(temp_demucs_dir, "htdemucs", os.path.splitext(os.path.basename(file_path))[0])
             if os.path.exists(raw_out_dir):
                 vocal_wav = os.path.join(raw_out_dir, "vocals.wav")
                 beat_wav = os.path.join(raw_out_dir, "no_vocals.wav")
                 if os.path.exists(vocal_wav):
-                    subprocess.run(f"ffmpeg -y -i '{vocal_wav}' -b:a 192k '{vocal_output}'", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    subprocess.run(f"ffmpeg -y -i '{vocal_wav}' -b:a 192k '{vocal_output}'", shell=True)
                 if os.path.exists(beat_wav):
-                    subprocess.run(f"ffmpeg -y -i '{beat_wav}' -b:a 192k '{beat_output}'", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    subprocess.run(f"ffmpeg -y -i '{beat_wav}' -b:a 192k '{beat_output}'", shell=True)
+            else:
+                print(f"❌ Không tìm thấy thư mục kết quả tại: {raw_out_dir}")
+                
         except subprocess.CalledProcessError as e:
-            print(f"❌ Lỗi nội bộ tại Demucs: {e.stderr.decode('utf-8') if e.stderr else str(e)}")
+            print(f"❌ Lỗi nội bộ tại Demucs khi chạy lệnh.")
         finally:
             if os.path.exists(temp_demucs_dir):
                 shutil.rmtree(temp_demucs_dir)
@@ -139,7 +143,6 @@ def process_audio_pipeline(file_path: str, clean_name: str, task_id: str, ext: s
 
 @router.post("/extract")
 async def extract_audio_features(background_tasks: BackgroundTasks, file: UploadFile = File(...), custom_name: str = Form(None), separate_beat: bool = Form(True), extract_lyrics: bool = Form(True)):
-    # Luồng API này phục vụ cho upload file lẻ, sếp cứ giữ nguyên
     try:
         original_clean, ext = sanitize_folder_name(file.filename)
         final_name = custom_name.strip() if custom_name and custom_name.strip() else original_clean
@@ -155,10 +158,18 @@ async def extract_audio_features(background_tasks: BackgroundTasks, file: Upload
             
         background_tasks.add_task(process_audio_pipeline, saved_input_path, clean_name, task_id, ext, separate_beat, extract_lyrics)
         
+        expected_outputs = {}
+        if separate_beat:
+            expected_outputs["vocal"] = f"/api/audio/stream/{clean_name}/{task_id}_vocal.mp3"
+            expected_outputs["beat"] = f"/api/audio/stream/{clean_name}/{task_id}_beat.mp3"
+        if extract_lyrics:
+            expected_outputs["lyrics"] = f"/api/audio/stream/{clean_name}/{task_id}_lyrics.lrc" 
+        
         return JSONResponse(status_code=202, content={
             "status": "processing",
             "message": f"Đang xử lý ngầm: '{task_id}'",
-            "project_folder": f"{clean_name}/{task_id}"
+            "project_folder": f"{clean_name}/{task_id}",
+            "expected_outputs": expected_outputs 
         })
     except Exception as error:
         raise HTTPException(status_code=500, detail=f"Lỗi: {str(error)}")
@@ -186,6 +197,14 @@ async def stream_audio(project_name: str, file_name: str, request: Request):
         file_path = os.path.join(INPUT_DIR, project_name, file_name)
         if not os.path.exists(file_path):
             raise HTTPException(status_code=404, detail="Không tìm thấy file Audio yêu cầu.")
+
+    # 👇 BỔ SUNG: Ép trình duyệt TẢI XUỐNG thay vì mở file chữ (.txt, .lrc)
+    if file_name.endswith((".lrc", ".txt")):
+        return FileResponse(
+            path=file_path, 
+            media_type="text/plain; charset=utf-8",
+            filename=file_name 
+        )
 
     file_size = os.path.getsize(file_path)
     range_header = request.headers.get("Range")

@@ -1137,6 +1137,6 @@ body.layout-standard .track-thumb {
 .eq-controls { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 15px; margin-bottom: 10px; }
 .eq-slider { display: flex; flex-direction: column; align-items: center; gap: 8px; }
 .eq-slider label { font-size: 10px; color: var(--text-sub); white-space: nowrap; }
-.eq-slider input[type=range] { -webkit-appearance: slider-vertical; appearance: slider-vertical; width: 24px; height: 120px; background: var(--bg-secondary); border-radius: 8px; cursor: pointer; padding: 0; margin: 0; border: none; }
+.eq-slider input[type=range] {-webkit-appearance: none; appearance: none; writing-mode: vertical-lr; direction: rtl; width: 24px; height: 120px; background: var(--bg-secondary); border-radius: 8px; cursor: pointer; padding: 0; margin: 0; border: none;}
 .eq-slider input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; background: var(--primary); border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
 .eq-slider span { font-size: 11px; font-weight: 700; color: var(--primary); }

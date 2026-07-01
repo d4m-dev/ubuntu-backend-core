@@ -137,7 +137,6 @@ async def serve_hub():
     if os.path.exists(hub_path): return FileResponse(hub_path)
     return {"status": "error", "message": "Không tìm thấy hub.html"}
 
-# 🚀 ĐÃ BỔ SUNG: Mở luồng truy cập cho Cổng Đăng Nhập SSO
 @app.get("/auth.html")
 async def serve_auth():
     auth_path = os.path.join(PUBLIC_DIR, "auth.html")
@@ -205,9 +204,8 @@ async def serve_profile():
     if os.path.exists(profile_path): return FileResponse(profile_path)
     return {"status": "error", "message": "Không tìm thấy profile.html"}
 
-# 🚀 ĐÃ BỔ SUNG: Định tuyến giao diện cho Web Music Player
-@app.get("/music-player.html")
+@app.get("/test-tracks.html")
 async def serve_music_player():
-    player_path = os.path.join(PUBLIC_DIR, "music-player.html")
+    player_path = os.path.join(PUBLIC_DIR, "test-tracks.html")
     if os.path.exists(player_path): return FileResponse(player_path)
-    return {"status": "error", "message": "Không tìm thấy music-player.html"}
+    return {"status": "error", "message": "Không tìm thấy test-tracks.html"}

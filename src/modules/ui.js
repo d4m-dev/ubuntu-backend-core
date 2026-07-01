@@ -486,20 +486,29 @@ window.MusicProModules.ui = {
     },
 
     /**
-     * Helper to consistently style a range input's track.
+     * Helper to consistently style a range input's track (Horizontal Mode).
      */
     updateRangeInput(element) {
         if (!element) return;
+        
+        // 1. Reset toàn bộ thuộc tính dọc cũ về trạng thái nằm ngang chuẩn của trình duyệt
+        element.style.appearance = 'none';
+        element.style.webkitAppearance = 'none';
+        element.style.writingMode = 'horizontal-tb'; 
+        element.style.direction = 'ltr';
+
         const min = parseFloat(element.min) || 0;
         const max = parseFloat(element.max) || 100;
         const val = parseFloat(element.value) || 0;
         const percentage = ((val - min) / (max - min)) * 100;
         
-        // Use actual computed color value for consistency
+        // 2. Lấy thời gian thực màu chủ đạo hệ thống từ biến CSS --primary
         const color = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim() || '#2962ff';
         
-        // Reset background-size để gradient hiển thị đầy đủ (sửa lỗi xung đột với logic cũ)
+        // Reset background-size để lớp màu gradient hiển thị toàn diện
         element.style.backgroundSize = '100% 100%';
+        
+        // 3. Đổ màu đồng bộ từ TRÁI qua PHẢI cho cả thanh nhạc và thanh âm lượng nằm ngang
         element.style.backgroundImage = `linear-gradient(to right, ${color} 0%, ${color} ${percentage}%, var(--range-bg) ${percentage}%, var(--range-bg) 100%)`;
     },
 

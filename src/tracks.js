@@ -1,19 +1,19 @@
 window.TRACKS = [
   {
     id: 1,
-    title: "10Mat1Con0",
-    artist: "Unknown Artist",
+    title: "Mười Mất Một Còn Không",
+    artist: "Lê Gia Bảo",
     cover: "../audio_workspace/music/10mat1con0/10mat1con0.jpg",
     audioSrc: "../audio_workspace/music/10mat1con0/10mat1con0.mp3",
     instrumentalSrc: "../audio_workspace/music/10mat1con0/10mat1con0_beat.mp3",
     videoSrc: "../audio_workspace/music/10mat1con0/10mat1con0.mp4",
     lyricSrc: "../audio_workspace/music/10mat1con0/10mat1con0.lrc"
-  },  
-  
+  },
+
   {
     id: 2,
-    title: "aihongnhan",
-    artist: "Unknown Artist",
+    title: "Ải Hồng Nhan",
+    artist: "Cần Vinh x Lee Ken",
     cover: "../audio_workspace/music/aihongnhan/aihongnhan.jpg",
     audioSrc: "../audio_workspace/music/aihongnhan/aihongnhan.mp3",
     instrumentalSrc: "../audio_workspace/music/aihongnhan/aihongnhan_beat.mp3",
@@ -23,8 +23,8 @@ window.TRACKS = [
 
   {
     id: 3,
-    title: "alanwalkerfaded",
-    artist: "Unknown Artist",
+    title: "Faded",
+    artist: "Alan Walker",
     cover: "../audio_workspace/music/alanwalkerfaded/alanwalkerfaded.jpg",
     audioSrc: "../audio_workspace/music/alanwalkerfaded/alanwalkerfaded.mp3",
     instrumentalSrc: "../audio_workspace/music/alanwalkerfaded/alanwalkerfaded_beat.mp3",
@@ -34,8 +34,8 @@ window.TRACKS = [
 
   {
     id: 4,
-    title: "anhdautulucemdi",
-    artist: "Unknown Artist",
+    title: "Anh Đau Từ Lúc Em Đi",
+    artist: "Trần Mạnh Cường",
     cover: "../audio_workspace/music/anhdautulucemdi/anhdautulucemdi.jpg",
     audioSrc: "../audio_workspace/music/anhdautulucemdi/anhdautulucemdi.mp3",
     instrumentalSrc: "../audio_workspace/music/anhdautulucemdi/anhdautulucemdi_beat.mp3",
@@ -45,8 +45,8 @@ window.TRACKS = [
 
   {
     id: 5,
-    title: "anhthoinhannhuong",
-    artist: "Unknown Artist",
+    title: "Anh Thôi Nhân Nhượng",
+    artist: "Linh Hương Luz",
     cover: "../audio_workspace/music/anhthoinhannhuong/anhthoinhannhuong.jpg",
     audioSrc: "../audio_workspace/music/anhthoinhannhuong/anhthoinhannhuong.mp3",
     instrumentalSrc: "../audio_workspace/music/anhthoinhannhuong/anhthoinhannhuong_beat.mp3",
@@ -56,8 +56,8 @@ window.TRACKS = [
 
   {
     id: 6,
-    title: "anhvui",
-    artist: "Unknown Artist",
+    title: "Anh Vui",
+    artist: "Phạm Kỳ",
     cover: "../audio_workspace/music/anhvui/anhvui.jpg",
     audioSrc: "../audio_workspace/music/anhvui/anhvui.mp3",
     instrumentalSrc: "../audio_workspace/music/anhvui/anhvui_beat.mp3",
@@ -67,19 +67,8 @@ window.TRACKS = [
 
   {
     id: 7,
-    title: "bakieptinhmotkiepduyen",
-    artist: "Unknown Artist",
-    cover: "../audio_workspace/music/bakieptinhmotkiepduyen/bakieptinhmotkiepduyen.jpg",
-    audioSrc: "../audio_workspace/music/bakieptinhmotkiepduyen/bakieptinhmotkiepduyen.mp3",
-    instrumentalSrc: "../audio_workspace/music/bakieptinhmotkiepduyen/bakieptinhmotkiepduyen_beat.mp3",
-    videoSrc: "../audio_workspace/music/bakieptinhmotkiepduyen/bakieptinhmotkiepduyen.mp4",
-    lyricSrc: "../audio_workspace/music/bakieptinhmotkiepduyen/bakieptinhmotkiepduyen.lrc"
-  },
-
-  {
-    id: 8,
-    title: "batconbuomvang",
-    artist: "Unknown Artist",
+    title: "Bắt Con Bướm Vàng",
+    artist: "DanhKa",
     cover: "../audio_workspace/music/batconbuomvang/batconbuomvang.jpg",
     audioSrc: "../audio_workspace/music/batconbuomvang/batconbuomvang.mp3",
     instrumentalSrc: "../audio_workspace/music/batconbuomvang/batconbuomvang_beat.mp3",
@@ -88,31 +77,9 @@ window.TRACKS = [
   },
 
   {
-    id: 9,
-    title: "baxacuaanh",
-    artist: "Unknown Artist",
-    cover: "../audio_workspace/music/baxacuaanh/baxacuaanh.jpg",
-    audioSrc: "../audio_workspace/music/baxacuaanh/baxacuaanh.mp3",
-    instrumentalSrc: "../audio_workspace/music/baxacuaanh/baxacuaanh_beat.mp3",
-    videoSrc: "../audio_workspace/music/baxacuaanh/baxacuaanh.mp4",
-    lyricSrc: "../audio_workspace/music/baxacuaanh/baxacuaanh.lrc"
-  },
-
-  {
-    id: 10,
-    title: "cantinhnhuthe",
-    artist: "Unknown Artist",
-    cover: "../audio_workspace/music/cantinhnhuthe/cantinhnhuthe.jpg",
-    audioSrc: "../audio_workspace/music/cantinhnhuthe/cantinhnhuthe.mp3",
-    instrumentalSrc: "../audio_workspace/music/cantinhnhuthe/cantinhnhuthe_beat.mp3",
-    videoSrc: "../audio_workspace/music/cantinhnhuthe/cantinhnhuthe.mp4",
-    lyricSrc: "../audio_workspace/music/cantinhnhuthe/cantinhnhuthe.lrc"
-  },
-
-  {
-    id: 11,
-    title: "changthecamhoa",
-    artist: "Unknown Artist",
+    id: 8,
+    title: "Chẳng Thể Cảm Hóa",
+    artist: "Thái Học cover",
     cover: "../audio_workspace/music/changthecamhoa/changthecamhoa.jpg",
     audioSrc: "../audio_workspace/music/changthecamhoa/changthecamhoa.mp3",
     instrumentalSrc: "../audio_workspace/music/changthecamhoa/changthecamhoa_beat.mp3",
@@ -121,9 +88,9 @@ window.TRACKS = [
   },
 
   {
-    id: 12,
-    title: "chobaolau",
-    artist: "Unknown Artist",
+    id: 9,
+    title: "Chờ Bao Lâu",
+    artist: "Út Nhị",
     cover: "../audio_workspace/music/chobaolau/chobaolau.jpg",
     audioSrc: "../audio_workspace/music/chobaolau/chobaolau.mp3",
     instrumentalSrc: "../audio_workspace/music/chobaolau/chobaolau_beat.mp3",
@@ -132,7 +99,7 @@ window.TRACKS = [
   },
 
   {
-    id: 13,
+    id: 10,
     title: "coemanhthangdoi",
     artist: "Unknown Artist",
     cover: "../audio_workspace/music/coemanhthangdoi/coemanhthangdoi.jpg",
@@ -143,9 +110,9 @@ window.TRACKS = [
   },
 
   {
-    id: 14,
-    title: "cunhuvaymotvannam",
-    artist: "Unknown Artist",
+    id: 11,
+    title: "Chúng Ta Cứ Như Vậy Một Vạn Năm",
+    artist: "Hoàn Tiêu Vân",
     cover: "../audio_workspace/music/cunhuvaymotvannam/cunhuvaymotvannam.jpg",
     audioSrc: "../audio_workspace/music/cunhuvaymotvannam/cunhuvaymotvannam.mp3",
     instrumentalSrc: "../audio_workspace/music/cunhuvaymotvannam/cunhuvaymotvannam_beat.mp3",
@@ -154,9 +121,9 @@ window.TRACKS = [
   },
 
   {
-    id: 15,
-    title: "cuoichinh",
-    artist: "Unknown Artist",
+    id: 12,
+    title: "Cưới Chính",
+    artist: "Hồ Phi Nal",
     cover: "../audio_workspace/music/cuoichinh/cuoichinh.jpg",
     audioSrc: "../audio_workspace/music/cuoichinh/cuoichinh.mp3",
     instrumentalSrc: "../audio_workspace/music/cuoichinh/cuoichinh_beat.mp3",
@@ -165,9 +132,9 @@ window.TRACKS = [
   },
 
   {
-    id: 16,
-    title: "cuoitet",
-    artist: "Unknown Artist",
+    id: 13,
+    title: "Cưới Tết",
+    artist: "Hồ Phi Nal",
     cover: "../audio_workspace/music/cuoitet/cuoitet.jpg",
     audioSrc: "../audio_workspace/music/cuoitet/cuoitet.mp3",
     instrumentalSrc: "../audio_workspace/music/cuoitet/cuoitet_beat.mp3",
@@ -176,8 +143,8 @@ window.TRACKS = [
   },
 
   {
-    id: 17,
-    title: "daohoanac",
+    id: 14,
+    title: "Đào Hoa Nặc",
     artist: "Unknown Artist",
     cover: "../audio_workspace/music/daohoanac/daohoanac.jpg",
     audioSrc: "../audio_workspace/music/daohoanac/daohoanac.mp3",
@@ -187,20 +154,9 @@ window.TRACKS = [
   },
 
   {
-    id: 18,
-    title: "diadang",
-    artist: "Unknown Artist",
-    cover: "../audio_workspace/music/diadang/diadang.jpg",
-    audioSrc: "../audio_workspace/music/diadang/diadang.mp3",
-    instrumentalSrc: "../audio_workspace/music/diadang/diadang_beat.mp3",
-    videoSrc: "../audio_workspace/music/diadang/diadang.mp4",
-    lyricSrc: "../audio_workspace/music/diadang/diadang.lrc"
-  },
-
-  {
-    id: 19,
-    title: "diveque",
-    artist: "Unknown Artist",
+    id: 15,
+    title: "Đi Về Quê",
+    artist: "Út Nhị",
     cover: "../audio_workspace/music/diveque/diveque.jpg",
     audioSrc: "../audio_workspace/music/diveque/diveque.mp3",
     instrumentalSrc: "../audio_workspace/music/diveque/diveque_beat.mp3",
@@ -209,9 +165,9 @@ window.TRACKS = [
   },
 
   {
-    id: 20,
-    title: "elakhongthe",
-    artist: "Unknown Artist",
+    id: 16,
+    title: "E Là Không Thể",
+    artist: "Anh Quân",
     cover: "../audio_workspace/music/elakhongthe/elakhongthe.jpg",
     audioSrc: "../audio_workspace/music/elakhongthe/elakhongthe.mp3",
     instrumentalSrc: "../audio_workspace/music/elakhongthe/elakhongthe_beat.mp3",
@@ -220,20 +176,9 @@ window.TRACKS = [
   },
 
   {
-    id: 21,
-    title: "emnhacanh",
-    artist: "Unknown Artist",
-    cover: "../audio_workspace/music/emnhacanh/emnhacanh.jpg",
-    audioSrc: "../audio_workspace/music/emnhacanh/emnhacanh.mp3",
-    instrumentalSrc: "../audio_workspace/music/emnhacanh/emnhacanh_beat.mp3",
-    videoSrc: "../audio_workspace/music/emnhacanh/emnhacanh.mp4",
-    lyricSrc: "../audio_workspace/music/emnhacanh/emnhacanh.lrc"
-  },
-
-  {
-    id: 22,
-    title: "emthuacota",
-    artist: "Unknown Artist",
+    id: 17,
+    title: "Em Thua Cô Ta",
+    artist: "Min Quỳnh Anh",
     cover: "../audio_workspace/music/emthuacota/emthuacota.jpg",
     audioSrc: "../audio_workspace/music/emthuacota/emthuacota.mp3",
     instrumentalSrc: "../audio_workspace/music/emthuacota/emthuacota_beat.mp3",
@@ -242,9 +187,20 @@ window.TRACKS = [
   },
 
   {
-    id: 23,
-    title: "hoa",
-    artist: "Unknown Artist",
+    id: 18,
+    title: "Fly Away",
+    artist: "The Fat Rat",
+    cover: "../audio_workspace/music/flyaway/flyaway.jpg",
+    audioSrc: "../audio_workspace/music/flyaway/flyaway.mp3",
+    instrumentalSrc: "../audio_workspace/music/flyaway/flyaway_beat.mp3",
+    videoSrc: "../audio_workspace/music/flyaway/flyaway.mp4",
+    lyricSrc: "../audio_workspace/music/flyaway/flyaway.lrc"
+  },
+
+  {
+    id: 19,
+    title: "Hoa",
+    artist: "Tú Na",
     cover: "../audio_workspace/music/hoa/hoa.jpg",
     audioSrc: "../audio_workspace/music/hoa/hoa.mp3",
     instrumentalSrc: "../audio_workspace/music/hoa/hoa_beat.mp3",
@@ -253,20 +209,9 @@ window.TRACKS = [
   },
 
   {
-    id: 24,
-    title: "hoasitoi",
-    artist: "Unknown Artist",
-    cover: "../audio_workspace/music/hoasitoi/hoasitoi.jpg",
-    audioSrc: "../audio_workspace/music/hoasitoi/hoasitoi.mp3",
-    instrumentalSrc: "../audio_workspace/music/hoasitoi/hoasitoi_beat.mp3",
-    videoSrc: "../audio_workspace/music/hoasitoi/hoasitoi.mp4",
-    lyricSrc: "../audio_workspace/music/hoasitoi/hoasitoi.lrc"
-  },
-
-  {
-    id: 25,
-    title: "hoivongoaithanh",
-    artist: "Unknown Artist",
+    id: 20,
+    title: "Hỏi Vợ Ngoại Thành Lofi",
+    artist: "Thành Đạt",
     cover: "../audio_workspace/music/hoivongoaithanh/hoivongoaithanh.jpg",
     audioSrc: "../audio_workspace/music/hoivongoaithanh/hoivongoaithanh.mp3",
     instrumentalSrc: "../audio_workspace/music/hoivongoaithanh/hoivongoaithanh_beat.mp3",
@@ -275,9 +220,9 @@ window.TRACKS = [
   },
 
   {
-    id: 26,
-    title: "khatduyen",
-    artist: "Unknown Artist",
+    id: 21,
+    title: "Khất Duyên",
+    artist: "Bùi Phi Long",
     cover: "../audio_workspace/music/khatduyen/khatduyen.jpg",
     audioSrc: "../audio_workspace/music/khatduyen/khatduyen.mp3",
     instrumentalSrc: "../audio_workspace/music/khatduyen/khatduyen_beat.mp3",
@@ -286,9 +231,9 @@ window.TRACKS = [
   },
 
   {
-    id: 27,
-    title: "khoalybiet",
-    artist: "Unknown Artist",
+    id: 22,
+    title: "Khóa Ly Biệt",
+    artist: "Anh Tú",
     cover: "../audio_workspace/music/khoalybiet/khoalybiet.jpg",
     audioSrc: "../audio_workspace/music/khoalybiet/khoalybiet.mp3",
     instrumentalSrc: "../audio_workspace/music/khoalybiet/khoalybiet_beat.mp3",
@@ -297,9 +242,9 @@ window.TRACKS = [
   },
 
   {
-    id: 28,
-    title: "lengangtroi",
-    artist: "Unknown Artist",
+    id: 23,
+    title: "Lệ Ngang Trời",
+    artist: "Ca Sĩ Giấu Mặt",
     cover: "../audio_workspace/music/lengangtroi/lengangtroi.jpg",
     audioSrc: "../audio_workspace/music/lengangtroi/lengangtroi.mp3",
     instrumentalSrc: "../audio_workspace/music/lengangtroi/lengangtroi_beat.mp3",
@@ -308,9 +253,9 @@ window.TRACKS = [
   },
 
   {
-    id: 29,
-    title: "mailacodaucuaanh",
-    artist: "Unknown Artist",
+    id: 24,
+    title: "Mãi Là Cô Dâu Của Anh",
+    artist: "Mochiii",
     cover: "../audio_workspace/music/mailacodaucuaanh/mailacodaucuaanh.jpg",
     audioSrc: "../audio_workspace/music/mailacodaucuaanh/mailacodaucuaanh.mp3",
     instrumentalSrc: "../audio_workspace/music/mailacodaucuaanh/mailacodaucuaanh_beat.mp3",
@@ -319,8 +264,8 @@ window.TRACKS = [
   },
 
   {
-    id: 30,
-    title: "manhba",
+    id: 25,
+    title: "Mạnh Bà",
     artist: "Unknown Artist",
     cover: "../audio_workspace/music/manhba/manhba.jpg",
     audioSrc: "../audio_workspace/music/manhba/manhba.mp3",
@@ -330,9 +275,9 @@ window.TRACKS = [
   },
 
   {
-    id: 31,
-    title: "manhtinhsaidoi",
-    artist: "Unknown Artist",
+    id: 26,
+    title: "Mãnh Tình Sai Đôi",
+    artist: "Mochii Cover",
     cover: "../audio_workspace/music/manhtinhsaidoi/manhtinhsaidoi.jpg",
     audioSrc: "../audio_workspace/music/manhtinhsaidoi/manhtinhsaidoi.mp3",
     instrumentalSrc: "../audio_workspace/music/manhtinhsaidoi/manhtinhsaidoi_beat.mp3",
@@ -341,51 +286,7 @@ window.TRACKS = [
   },
 
   {
-    id: 32,
-    title: "mashup6in1",
-    artist: "Unknown Artist",
-    cover: "../audio_workspace/music/mashup6in1/mashup6in1.jpg",
-    audioSrc: "../audio_workspace/music/mashup6in1/mashup6in1.mp3",
-    instrumentalSrc: "../audio_workspace/music/mashup6in1/mashup6in1_beat.mp3",
-    videoSrc: "../audio_workspace/music/mashup6in1/mashup6in1.mp4",
-    lyricSrc: "../audio_workspace/music/mashup6in1/mashup6in1.lrc"
-  },
-
-  {
-    id: 33,
-    title: "nguoilatungthuong",
-    artist: "Unknown Artist",
-    cover: "../audio_workspace/music/nguoilatungthuong/nguoilatungthuong.jpg",
-    audioSrc: "../audio_workspace/music/nguoilatungthuong/nguoilatungthuong.mp3",
-    instrumentalSrc: "../audio_workspace/music/nguoilatungthuong/nguoilatungthuong_beat.mp3",
-    videoSrc: "../audio_workspace/music/nguoilatungthuong/nguoilatungthuong.mp4",
-    lyricSrc: "../audio_workspace/music/nguoilatungthuong/nguoilatungthuong.lrc"
-  },
-
-  {
-    id: 34,
-    title: "nhactetmientayremix",
-    artist: "Unknown Artist",
-    cover: "../audio_workspace/music/nhactetmientayremix/nhactetmientayremix.jpg",
-    audioSrc: "../audio_workspace/music/nhactetmientayremix/nhactetmientayremix.mp3",
-    instrumentalSrc: "../audio_workspace/music/nhactetmientayremix/nhactetmientayremix_beat.mp3",
-    videoSrc: "../audio_workspace/music/nhactetmientayremix/nhactetmientayremix.mp4",
-    lyricSrc: "../audio_workspace/music/nhactetmientayremix/nhactetmientayremix.lrc"
-  },
-
-  {
-    id: 35,
-    title: "noidautimthayem",
-    artist: "Unknown Artist",
-    cover: "../audio_workspace/music/noidautimthayem/noidautimthayem.jpg",
-    audioSrc: "../audio_workspace/music/noidautimthayem/noidautimthayem.mp3",
-    instrumentalSrc: "../audio_workspace/music/noidautimthayem/noidautimthayem_beat.mp3",
-    videoSrc: "../audio_workspace/music/noidautimthayem/noidautimthayem.mp4",
-    lyricSrc: "../audio_workspace/music/noidautimthayem/noidautimthayem.lrc"
-  },
-
-  {
-    id: 36,
+    id: 27,
     title: "o-zone-dragostea-din-tei-RumunCover",
     artist: "Unknown Artist",
     cover: "../audio_workspace/music/o-zone-dragostea-din-tei-RumunCover/o-zone-dragostea-din-tei-RumunCover.jpg",
@@ -396,9 +297,9 @@ window.TRACKS = [
   },
 
   {
-    id: 37,
-    title: "phongsuongtuu",
-    artist: "Unknown Artist",
+    id: 28,
+    title: "Phong Sương Tửu",
+    artist: "Ca Sĩ Giấu Mặt",
     cover: "../audio_workspace/music/phongsuongtuu/phongsuongtuu.jpg",
     audioSrc: "../audio_workspace/music/phongsuongtuu/phongsuongtuu.mp3",
     instrumentalSrc: "../audio_workspace/music/phongsuongtuu/phongsuongtuu_beat.mp3",
@@ -407,9 +308,9 @@ window.TRACKS = [
   },
 
   {
-    id: 38,
-    title: "roi",
-    artist: "Unknown Artist",
+    id: 29,
+    title: "Rời",
+    artist: "Linh Hương Luz",
     cover: "../audio_workspace/music/roi/roi.jpg",
     audioSrc: "../audio_workspace/music/roi/roi.mp3",
     instrumentalSrc: "../audio_workspace/music/roi/roi_beat.mp3",
@@ -418,9 +319,9 @@ window.TRACKS = [
   },
 
   {
-    id: 39,
-    title: "roinangcailylen",
-    artist: "Unknown Artist",
+    id: 30,
+    title: "Rồi Nâng Cái Ly Lên",
+    artist: "Nal",
     cover: "../audio_workspace/music/roinangcailylen/roinangcailylen.jpg",
     audioSrc: "../audio_workspace/music/roinangcailylen/roinangcailylen.mp3",
     instrumentalSrc: "../audio_workspace/music/roinangcailylen/roinangcailylen_beat.mp3",
@@ -429,9 +330,9 @@ window.TRACKS = [
   },
 
   {
-    id: 40,
-    title: "soichihong",
-    artist: "Unknown Artist",
+    id: 31,
+    title: "Sợi Chỉ Hồng | Cưới Vợ Cho Cha OST",
+    artist: "Hanna Cẩm Tiên x Danhka",
     cover: "../audio_workspace/music/soichihong/soichihong.jpg",
     audioSrc: "../audio_workspace/music/soichihong/soichihong.mp3",
     instrumentalSrc: "../audio_workspace/music/soichihong/soichihong_beat.mp3",
@@ -440,20 +341,9 @@ window.TRACKS = [
   },
 
   {
-    id: 41,
-    title: "soichihonghanacamtienxdanhkaofficalmusicvideoostcuoivochocha",
-    artist: "Unknown Artist",
-    cover: "../audio_workspace/music/soichihonghanacamtienxdanhkaofficalmusicvideoostcuoivochocha/soichihonghanacamtienxdanhkaofficalmusicvideoostcuoivochocha.jpg",
-    audioSrc: "../audio_workspace/music/soichihonghanacamtienxdanhkaofficalmusicvideoostcuoivochocha/soichihonghanacamtienxdanhkaofficalmusicvideoostcuoivochocha.mp3",
-    instrumentalSrc: "../audio_workspace/music/soichihonghanacamtienxdanhkaofficalmusicvideoostcuoivochocha/soichihonghanacamtienxdanhkaofficalmusicvideoostcuoivochocha_beat.mp3",
-    videoSrc: "../audio_workspace/music/soichihonghanacamtienxdanhkaofficalmusicvideoostcuoivochocha/soichihonghanacamtienxdanhkaofficalmusicvideoostcuoivochocha.mp4",
-    lyricSrc: "../audio_workspace/music/soichihonghanacamtienxdanhkaofficalmusicvideoostcuoivochocha/soichihonghanacamtienxdanhkaofficalmusicvideoostcuoivochocha.lrc"
-  },
-
-  {
-    id: 42,
-    title: "suuutiencuaem",
-    artist: "Unknown Artist",
+    id: 32,
+    title: "Sự Ưu Tiên Của Em",
+    artist: "Lê Gia Bảo x Thái Học",
     cover: "../audio_workspace/music/suuutiencuaem/suuutiencuaem.jpg",
     audioSrc: "../audio_workspace/music/suuutiencuaem/suuutiencuaem.mp3",
     instrumentalSrc: "../audio_workspace/music/suuutiencuaem/suuutiencuaem_beat.mp3",
@@ -462,20 +352,9 @@ window.TRACKS = [
   },
 
   {
-    id: 43,
-    title: "taisinh",
-    artist: "Unknown Artist",
-    cover: "../audio_workspace/music/taisinh/taisinh.jpg",
-    audioSrc: "../audio_workspace/music/taisinh/taisinh.mp3",
-    instrumentalSrc: "../audio_workspace/music/taisinh/taisinh_beat.mp3",
-    videoSrc: "../audio_workspace/music/taisinh/taisinh.mp4",
-    lyricSrc: "../audio_workspace/music/taisinh/taisinh.lrc"
-  },
-
-  {
-    id: 44,
-    title: "tenayketdoi",
-    artist: "Unknown Artist",
+    id: 33,
+    title: "Tết Này Kết Đôi",
+    artist: "Pinky Vanh x Hoa Vũ",
     cover: "../audio_workspace/music/tenayketdoi/tenayketdoi.jpg",
     audioSrc: "../audio_workspace/music/tenayketdoi/tenayketdoi.mp3",
     instrumentalSrc: "../audio_workspace/music/tenayketdoi/tenayketdoi_beat.mp3",
@@ -484,9 +363,9 @@ window.TRACKS = [
   },
 
   {
-    id: 45,
-    title: "tetnayconhau",
-    artist: "Unknown Artist",
+    id: 34,
+    title: "Tết Này Có Nhau",
+    artist: "Pinky Vanh x Hoa Vũ",
     cover: "../audio_workspace/music/tetnayconhau/tetnayconhau.jpg",
     audioSrc: "../audio_workspace/music/tetnayconhau/tetnayconhau.mp3",
     instrumentalSrc: "../audio_workspace/music/tetnayconhau/tetnayconhau_beat.mp3",
@@ -495,20 +374,9 @@ window.TRACKS = [
   },
 
   {
-    id: 46,
-    title: "thefatratflyawayfeatanjulie",
-    artist: "Unknown Artist",
-    cover: "../audio_workspace/music/thefatratflyawayfeatanjulie/thefatratflyawayfeatanjulie.jpg",
-    audioSrc: "../audio_workspace/music/thefatratflyawayfeatanjulie/thefatratflyawayfeatanjulie.mp3",
-    instrumentalSrc: "../audio_workspace/music/thefatratflyawayfeatanjulie/thefatratflyawayfeatanjulie_beat.mp3",
-    videoSrc: "../audio_workspace/music/thefatratflyawayfeatanjulie/thefatratflyawayfeatanjulie.mp4",
-    lyricSrc: "../audio_workspace/music/thefatratflyawayfeatanjulie/thefatratflyawayfeatanjulie.lrc"
-  },
-
-  {
-    id: 47,
-    title: "thiephongsaiten",
-    artist: "Unknown Artist",
+    id: 35,
+    title: "Thiệp Hồng Sai Tên",
+    artist: "Mochii Cover",
     cover: "../audio_workspace/music/thiephongsaiten/thiephongsaiten.jpg",
     audioSrc: "../audio_workspace/music/thiephongsaiten/thiephongsaiten.mp3",
     instrumentalSrc: "../audio_workspace/music/thiephongsaiten/thiephongsaiten_beat.mp3",
@@ -517,7 +385,7 @@ window.TRACKS = [
   },
 
   {
-    id: 48,
+    id: 36,
     title: "thuongthithoi",
     artist: "Unknown Artist",
     cover: "../audio_workspace/music/thuongthithoi/thuongthithoi.jpg",
@@ -528,7 +396,7 @@ window.TRACKS = [
   },
 
   {
-    id: 49,
+    id: 37,
     title: "tinhyeukhongcoloi",
     artist: "Unknown Artist",
     cover: "../audio_workspace/music/tinhyeukhongcoloi/tinhyeukhongcoloi.jpg",
@@ -539,7 +407,7 @@ window.TRACKS = [
   },
 
   {
-    id: 50,
+    id: 38,
     title: "tralaithanhxuanchoem",
     artist: "Unknown Artist",
     cover: "../audio_workspace/music/tralaithanhxuanchoem/tralaithanhxuanchoem.jpg",
@@ -550,7 +418,7 @@ window.TRACKS = [
   },
 
   {
-    id: 51,
+    id: 39,
     title: "tuemsai",
     artist: "Unknown Artist",
     cover: "../audio_workspace/music/tuemsai/tuemsai.jpg",
@@ -561,7 +429,7 @@ window.TRACKS = [
   },
 
   {
-    id: 52,
+    id: 40,
     title: "vaygiu",
     artist: "Unknown Artist",
     cover: "../audio_workspace/music/vaygiu/vaygiu.jpg",
@@ -572,7 +440,7 @@ window.TRACKS = [
   },
 
   {
-    id: 53,
+    id: 41,
     title: "vokichcuaem",
     artist: "Unknown Artist",
     cover: "../audio_workspace/music/vokichcuaem/vokichcuaem.jpg",
@@ -583,7 +451,7 @@ window.TRACKS = [
   },
 
   {
-    id: 54,
+    id: 42,
     title: "weddingsongs",
     artist: "Unknown Artist",
     cover: "../audio_workspace/music/weddingsongs/weddingsongs.jpg",
@@ -594,7 +462,7 @@ window.TRACKS = [
   },
 
   {
-    id: 55,
+    id: 43,
     title: "withyou-ngauhung",
     artist: "Unknown Artist",
     cover: "../audio_workspace/music/withyou-ngauhung/withyou-ngauhung.jpg",
@@ -605,7 +473,7 @@ window.TRACKS = [
   },
 
   {
-    id: 56,
+    id: 44,
     title: "Xuân Huy Hoàng",
     artist: "Đạt Long Vinh",
     cover: "../audio_workspace/music/xuanhuyhoang/xuanhuyhoang.jpg",
@@ -616,7 +484,7 @@ window.TRACKS = [
   },
 
   {
-    id: 57,
+    id: 45,
     title: "Xuân Vu Quy",
     artist: "DanhKa",
     cover: "../audio_workspace/music/xuanvuquy/xuanvuquy.jpg",
@@ -627,7 +495,7 @@ window.TRACKS = [
   },
 
   {
-    id: 58,
+    id: 46,
     title: "yeuemnhungkhongvoitoi",
     artist: "Unknown Artist",
     cover: "../audio_workspace/music/yeuemnhungkhongvoitoi/yeuemnhungkhongvoitoi.jpg",

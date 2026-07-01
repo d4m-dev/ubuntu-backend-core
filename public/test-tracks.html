@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tracks Tester | d4m-dev</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #0b0f19; color: white; min-height: 100vh; }
+        .glass-card {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        audio, video { width: 100%; margin-top: 0.5rem; border-radius: 0.5rem; outline: none; }
+        audio::-webkit-media-controls-panel { background-color: #1e293b; }
+        
+        /* Tùy chỉnh thanh cuộn cho khu vực hiển thị Lyric */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(59, 130, 246, 0.5); border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-900/20 via-[#0b0f19] to-[#0b0f19] p-4 md:p-8 font-sans antialiased">
+
+    <div class="max-w-5xl mx-auto relative z-10">
+        <header class="text-center mb-10">
+            <h1 class="text-3xl md:text-4xl font-black mb-2 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
+                <i class="fa-solid fa-vial-circle-check mr-2 text-blue-400"></i>Hệ Thống Kiểm Thử Media
+            </h1>
+            <p class="text-gray-400 font-mono text-sm border border-white/10 bg-black/20 inline-block px-4 py-1.5 rounded-full mt-2">
+                Đang nạp dữ liệu từ: <span class="text-green-400">src/tracks.js</span>
+            </p>
+        </header>
+
+        <div id="error-msg" class="hidden bg-red-500/10 border border-red-500/30 text-red-400 p-4 rounded-xl mb-6 text-center font-bold shadow-lg"></div>
+
+        <div id="tracks-container" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            </div>
+    </div>
+
+    <script src="src/tracks.js"></script>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const container = document.getElementById("tracks-container");
+            const errorMsg = document.getElementById("error-msg");
+
+            // Kiểm tra xem biến window.TRACKS có tồn tại không
+            if (typeof window.TRACKS === 'undefined' || !Array.isArray(window.TRACKS)) {
+                errorMsg.innerHTML = "<i class='fa-solid fa-triangle-exclamation mr-2'></i>Không tìm thấy window.TRACKS! Hãy kiểm tra lại đường dẫn file src/tracks.js.";
+                errorMsg.classList.remove("hidden");
+                return;
+            }
+
+            if (window.TRACKS.length === 0) {
+                errorMsg.innerHTML = "<i class='fa-solid fa-circle-info mr-2'></i>Dữ liệu window.TRACKS đang rỗng!";
+                errorMsg.classList.remove("hidden");
+                errorMsg.classList.replace("bg-red-500/10", "bg-yellow-500/10");
+                errorMsg.classList.replace("text-red-400", "text-yellow-400");
+                errorMsg.classList.replace("border-red-500/30", "border-yellow-500/30");
+                return;
+            }
+
+            // Quét qua mảng và render giao diện
+            window.TRACKS.forEach(track => {
+                const card = document.createElement("div");
+                card.className = "glass-card flex flex-col gap-4";
+
+                card.innerHTML = `
+                    <div class="flex items-center gap-4 border-b border-white/10 pb-4">
+                        <div class="relative group">
+                            <img src="${track.cover}" alt="Cover" class="w-20 h-20 rounded-lg object-cover bg-gray-800 border border-white/10" 
+                                 onerror="this.src='https://placehold.co/80x80/1e293b/white?text=Lỗi+Ảnh'">
+                            <div class="absolute inset-0 bg-black/60 rounded-lg opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-xs font-bold">Cover</div>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-bold text-white leading-tight">${track.title}</h2>
+                            <p class="text-blue-400 text-sm mt-1"><i class="fa-solid fa-microphone-lines mr-1"></i>${track.artist}</p>
+                            <span class="inline-block mt-2 bg-blue-500/20 text-blue-300 border border-blue-500/30 text-[10px] px-2 py-0.5 rounded font-mono uppercase tracking-wider">ID: ${track.id}</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-4">
+                        <div class="bg-black/30 p-3 rounded-lg border border-white/5 hover:border-blue-500/30 transition-colors">
+                            <label class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 block"><i class="fa-solid fa-music mr-1"></i>Nhạc Gốc (.mp3)</label>
+                            <audio controls preload="metadata">
+                                <source src="${track.audioSrc}" type="audio/mpeg">
+                                Trình duyệt không hỗ trợ Audio.
+                            </audio>
+                        </div>
+
+                        <div class="bg-black/30 p-3 rounded-lg border border-white/5 hover:border-purple-500/30 transition-colors">
+                            <label class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 block"><i class="fa-solid fa-drum mr-1"></i>Nhạc Beat (.mp3)</label>
+                            <audio controls preload="metadata">
+                                <source src="${track.instrumentalSrc}" type="audio/mpeg">
+                            </audio>
+                        </div>
+
+                        <div class="bg-black/30 p-3 rounded-lg border border-white/5 hover:border-pink-500/30 transition-colors">
+                            <label class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 block"><i class="fa-solid fa-video mr-1"></i>Video (.mp4)</label>
+                            <video controls preload="metadata" class="h-40 bg-black/50 object-contain w-full rounded border border-white/10"
+                                   onerror="this.parentElement.innerHTML += '<div class=\\'text-red-400 text-xs mt-2\\'><i class=\\'fa-solid fa-link-slash mr-1\\'></i>Video hỏng hoặc sai đường dẫn</div>'">
+                                <source src="${track.videoSrc}" type="video/mp4">
+                            </video>
+                        </div>
+
+                        <div class="bg-black/30 p-3 rounded-lg border border-white/5 hover:border-green-500/30 transition-colors">
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="text-xs font-bold text-gray-400 uppercase tracking-wider block"><i class="fa-solid fa-file-lines mr-1"></i>Lời bài hát (.lrc)</label>
+                                <button onclick="testLyric('${track.lyricSrc}', 'lyric-res-${track.id}')" class="text-[10px] uppercase font-bold tracking-wider bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded-md transition shadow-md border border-white/10 active:scale-95">
+                                    <i class="fa-solid fa-cloud-arrow-down mr-1"></i> Test Fetch
+                                </button>
+                            </div>
+                            <div id="lyric-res-${track.id}" class="custom-scrollbar h-32 overflow-y-auto bg-black/50 rounded-md p-3 text-xs font-mono text-gray-400 border border-white/5 whitespace-pre-wrap leading-relaxed">Chờ người dùng bấm Test Fetch...</div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        });
+
+        // Hàm giả lập tính năng kéo file .lrc về (AJAX)
+        async function testLyric(url, elementId) {
+            const el = document.getElementById(elementId);
+            el.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-blue-400"></i> Đang tải dữ liệu...';
+            el.className = "custom-scrollbar h-32 overflow-y-auto bg-black/50 rounded-md p-3 text-xs font-mono border whitespace-pre-wrap leading-relaxed border-blue-500/50 text-blue-300";
+            
+            try {
+                // Thêm timestamp để tránh bị trình duyệt cache file lrc cũ
+                const res = await fetch(url + '?t=' + new Date().getTime());
+                
+                if (!res.ok) throw new Error(`HTTP Error: ${res.status} (File không tồn tại)`);
+                
+                const text = await res.text();
+                el.textContent = text ? text : "File tồn tại nhưng không có dữ liệu (Rỗng)!";
+                el.className = "custom-scrollbar h-32 overflow-y-auto bg-black/50 rounded-md p-3 text-xs font-mono border whitespace-pre-wrap leading-relaxed border-green-500/30 text-green-300";
+                
+            } catch (err) {
+                el.innerHTML = `<span class="text-red-400 font-bold"><i class="fa-solid fa-triangle-exclamation text-lg mr-1 mb-1"></i> THẤT BẠI</span><br>Chi tiết lỗi: ${err.message}<br><br><span class="text-gray-500">Đường dẫn kiểm tra:</span><br>${url}`;
+                el.className = "custom-scrollbar h-32 overflow-y-auto bg-red-900/20 rounded-md p-3 text-xs font-mono border whitespace-pre-wrap leading-relaxed border-red-500/30 text-red-300";
+            }
+        }
+    </script>
+</body>
+</html>

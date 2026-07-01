@@ -1,21 +1,30 @@
 .DS_Store
+.continue
+.vscode
+
 Thumbs.db
 node_modules/
 .env
 logs/
 *.log
-.continue
-.vscode
+
 __pycache__/
 
 phpmyadmin/
 venv/
 myenv/
 
+inputs/
+outputs/
+pending/
+telegram/
+youtube/
+temp_demucs*/
+
 
 res/
 
-audio_workspace/
+
 yt-dlp/
 
 cloudflare.log

@@ -1,4 +1,3 @@
-
 class MusicPro {
     constructor() {
         const savedVol = localStorage.getItem('volume');
@@ -128,8 +127,27 @@ class MusicPro {
         };
         
         // Initialize Audio Context logic
-        this.initAudioEffects();
         this.init();
+
+        // Bẫy kích hoạt âm thanh khi người dùng tương tác lần đầu
+        const unlockAudioEngine = () => {
+            // Lần đầu tiên sếp chạm vào màn hình, nó mới bắt đầu nạp AudioContext
+            if (typeof this.initAudioEffects === 'function') {
+                this.initAudioEffects();
+            }
+            if (typeof this.initAudioContext === 'function') {
+                this.initAudioContext();
+            }
+            
+            // Xóa bẫy ngay lập tức để không bị gọi lặp lại
+            document.removeEventListener('click', unlockAudioEngine);
+            document.removeEventListener('touchstart', unlockAudioEngine);
+            console.log("🔊 Cỗ máy âm thanh đã được đánh thức bằng tương tác!");
+        };
+
+        // Gài bẫy vào trình duyệt
+        document.addEventListener('click', unlockAudioEngine);
+        document.addEventListener('touchstart', unlockAudioEngine);
     }
 }
 
