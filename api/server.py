@@ -14,7 +14,7 @@ from core.config import settings
 from core.database import init_db, db_manager
 from core.scheduler import ai_janitor_task
 
-from api import player, dashboard, websockets, chatbox, social, auth, widgets, projects, ai_admin, audio_engine, bio_premium, music, telegram_bot, astrology, ytdl
+from api import player, dashboard, upload, websockets, chatbox, social, auth, widgets, projects, ai_admin, audio_engine, bio_premium, music, telegram_bot, astrology, ytdl
 
 from middlewares.logger_tracker import LoggerTrackerMiddleware
 from middlewares.rate_limit import RateLimitMiddleware
@@ -80,7 +80,8 @@ app.add_middleware(RateLimitMiddleware)
 
 # Đăng ký các module API
 app.include_router(auth.router)        
-app.include_router(dashboard.router)   
+app.include_router(dashboard.router)
+app.include_router(upload.router)
 app.include_router(websockets.router)  
 app.include_router(chatbox.router)     
 app.include_router(social.router)      
@@ -149,6 +150,15 @@ async def serve_dashboard():
     index_path = os.path.join(PUBLIC_DIR, "index.html")
     if os.path.exists(index_path): return FileResponse(index_path)
     return {"status": "error", "message": "Không tìm thấy index.html"}
+
+@app.get("/admin/upload")
+@app.get("/admin/upload/")
+async def serve_upload_page():
+    upload_path = os.path.join(PUBLIC_DIR, "admin-upload.html")
+    if os.path.exists(upload_path): 
+        return FileResponse(upload_path)
+    return {"status": "error", "message": "Không tìm thấy giao diện upload"}
+
 
 @app.get("/audio-test.html")
 async def serve_audio_test():
