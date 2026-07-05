@@ -1,5 +1,6 @@
 import sqlite3
 import os
+import logging
 import mysql.connector
 from mysql.connector import pooling
 from core.config import settings
@@ -7,7 +8,9 @@ from core.config import settings
 # ==========================================
 # --- PHẦN 1: SQLITE CHO ACCESS LOGS ---
 # ==========================================
-DB_PATH = "/storage/emulated/0/coder/media/ubuntu-backend-core/database/logs.db"
+# 🚀 TỐI ƯU: Tự động tìm đường dẫn gốc bất chấp sếp chạy trên Termux hay VPS
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DB_PATH = os.path.join(BASE_DIR, "database", "logs.db")
 
 def init_db():
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
@@ -37,7 +40,7 @@ def log_request(ip, method, path, status_code):
         conn.commit()
         conn.close()
     except Exception as e:
-        print(f"⚠️ Lỗi ghi log SQLite: {e}")
+        logging.error(f"Lỗi ghi log SQLite: {e}")
 
 def get_request_stats():
     try:
@@ -58,7 +61,6 @@ def get_request_stats():
         return {"timeline": []}
 
 def get_raw_logs(limit=30):
-    """Trích xuất nhật ký dạng chuỗi văn bản thô cho AI đọc hiểu"""
     try:
         conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
@@ -74,23 +76,22 @@ def get_raw_logs(limit=30):
 
 
 # ==========================================
-# --- PHẦN 2: MARIADB CHO SOCIAL SERVICES & GAME ---
+# --- PHẦN 2: MARIADB CHO HỆ SINH THÁI D4M ---
 # ==========================================
 class DbManager:
-    """Quản lý Connection Pool"""
+    """Quản lý Connection Pool chuẩn Clean Architecture"""
     _instance = None
 
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super(DbManager, cls).__new__(cls)
-            cls._instance._init_pool()
+            cls._instance.pool = None
         return cls._instance
 
     def _init_pool(self):
-        self.pool = None
         try:
             self.pool = pooling.MySQLConnectionPool(
-                pool_name="social_hub_pool",
+                pool_name="d4m_ecosystem_pool",
                 pool_size=10, 
                 pool_reset_session=True,
                 host=settings.DB_HOST,
@@ -101,10 +102,9 @@ class DbManager:
             )
             print("✅ DB Connection Pool đã được khởi tạo thành công!")
         except Exception as e:
-            print(f"⚠️ Khởi tạo MariaDB Pool thất bại (Sẽ thử lại sau): {e}")
+            logging.error(f"⚠️ Khởi tạo MariaDB Pool thất bại (Sẽ thử lại sau): {e}")
 
     def connect(self):
-        """Hàm được gọi từ api/server.py để khởi chạy/kiểm tra pool kết nối"""
         if self.pool is None:
             self._init_pool()
         else:
@@ -112,23 +112,34 @@ class DbManager:
                 conn = self.pool.get_connection()
                 conn.close()
                 print("✅ MariaDB Connection Pool hoạt động bình thường!")
-            except Exception as e:
-                print(f"⚠️ Cảnh báo kết nối Pool: {e}")
+            except Exception:
                 self._init_pool()
 
     def init_social_tables(self):
-        """Khởi tạo cấu trúc các bảng cho mạng xã hội nếu chưa tồn tại"""
+        """
+        Khởi tạo cấu trúc các bảng cho hệ sinh thái.
+        🚀 ĐÃ FIX: Đồng bộ hoàn toàn với logic SSO Auth!
+        """
         conn = None
         cursor = None
         try:
             conn = self.get_connection()
             cursor = conn.cursor()
             
+            # Bảng Users (Bắt buộc phải có chữ 's' và đầy đủ các trường của SSO)
             cursor.execute('''
-                CREATE TABLE IF NOT EXISTS user (
+                CREATE TABLE IF NOT EXISTS users (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     username VARCHAR(100) NOT NULL UNIQUE,
                     password_hash VARCHAR(255) NOT NULL,
+                    full_name VARCHAR(150),
+                    email VARCHAR(150) UNIQUE,
+                    phone VARCHAR(20),
+                    dob DATE,
+                    address TEXT,
+                    avatar_url VARCHAR(255),
+                    is_verified BOOLEAN DEFAULT FALSE,
+                    otp_code VARCHAR(10),
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             ''')
@@ -139,7 +150,7 @@ class DbManager:
                     user_id INT NOT NULL,
                     content TEXT,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
+                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
                 )
             ''')
             
@@ -155,27 +166,27 @@ class DbManager:
             ''')
             
             conn.commit()
-            print("✅ Đã kiểm tra và khởi tạo thành công các bảng: user, post, media!")
+            print("✅ Đã khởi tạo và đồng bộ thành công các bảng: users, post, media!")
             
         except Exception as e:
-            print(f"⚠️ Lỗi khi khởi tạo bảng Social: {e}")
+            logging.error(f"Lỗi khi khởi tạo bảng hệ thống: {e}")
             if conn: conn.rollback()
         finally:
             if cursor: cursor.close()
             if conn: conn.close()
 
     def get_connection(self):
+        if self.pool is None:
+            self._init_pool()
         if self.pool:
             return self.pool.get_connection()
-        self._init_pool()
-        if self.pool:
-            return self.pool.get_connection()
-        raise Exception("Connection pool chưa được khởi tạo hoặc CSDL đang sập!")
+        raise Exception("Connection pool chưa được khởi tạo hoặc CSDL MariaDB đang sập!")
 
 
+# --- Các class DAO (Data Access Object) phụ trợ ---
 class DbExecutor:
     def __init__(self):
-        self.db = DbManager()
+        self.db = db_manager
 
     def select_as_list_dict(self, sql, params=None):
         conn = None
@@ -186,16 +197,15 @@ class DbExecutor:
             cursor.execute(sql, params or ())
             return cursor.fetchall()
         except Exception as e:
-            print(f"⚠️ DbExecutor EXCEPTION: {e}")
+            logging.error(f"DbExecutor EXCEPTION: {e}")
             return []
         finally:
             if cursor: cursor.close()
             if conn: conn.close()
 
-
 class DbInserter:
     def __init__(self):
-        self.db = DbManager()
+        self.db = db_manager
 
     def insert(self, sql, params=None):
         conn = None
@@ -207,17 +217,16 @@ class DbInserter:
             conn.commit()
             return cursor.lastrowid
         except Exception as e:
-            print(f"⚠️ DbInserter EXCEPTION: {e}")
+            logging.error(f"DbInserter EXCEPTION: {e}")
             if conn: conn.rollback()
             return None
         finally:
             if cursor: cursor.close()
             if conn: conn.close()
 
-
 class DbUpdater:
     def __init__(self):
-        self.db = DbManager()
+        self.db = db_manager
 
     def update(self, sql, params=None):
         conn = None
@@ -229,13 +238,14 @@ class DbUpdater:
             conn.commit()
             return cursor.rowcount
         except Exception as e:
-            print(f"⚠️ DbUpdater EXCEPTION: {e}")
+            logging.error(f"DbUpdater EXCEPTION: {e}")
             if conn: conn.rollback()
             return -1
         finally:
             if cursor: cursor.close()
             if conn: conn.close()
 
+# Khởi tạo Singleton cho toàn hệ thống
 db_manager = DbManager()
 db_executor = DbExecutor()
 db_inserter = DbInserter()
