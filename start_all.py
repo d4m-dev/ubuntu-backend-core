@@ -3,12 +3,12 @@ import threading
 import time
 import sys
 import socket
+import os
 
 def stream_output(process, prefix, color_code):
     """Đọc và in log từ tiến trình ra màn hình theo thời gian thực kèm màu sắc"""
     reset_color = "\033[0m"
     try:
-        # Vì đã đổi sang Text Mode nên không cần b'' (binary) và decode nữa
         for line in iter(process.stdout.readline, ''):
             text = line.strip()
             if text:
@@ -37,12 +37,20 @@ def main():
     print("🚀 ĐANG KHỞI ĐỘNG HỆ SINH THÁI D4M DEV 🚀")
     print("========================================\n")
 
-    backend_cmd = "bash /sdcard/ubuntu-backend-core/scripts/auto_start.sh"
+    CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+    AUTO_START_SCRIPT = os.path.join(CURRENT_DIR, "scripts", "auto_start.sh")
+
+    # Kiểm tra xem file script có thực sự tồn tại trước khi chạy để tránh lỗi ngầm
+    if not os.path.exists(AUTO_START_SCRIPT):
+        print(f"❌ [LỖI BAỎ MẬT] Không tìm thấy file cấu hình tại: {AUTO_START_SCRIPT}")
+        sys.exit(1)
+
+    backend_cmd = f"bash {AUTO_START_SCRIPT}"
     tunnel_cmd = "cloudflared tunnel run --url http://127.0.0.1:16868 d4m-tunnel"
 
     try:
-        # 1. Kích hoạt Backend (Sửa text=True để xóa cảnh báo RuntimeWarning)
-        print("▶️  [HỆ THỐNG] Đang đánh thức Backend Core (Port 16868)...")
+        # 1. Kích hoạt Backend
+        print("▶️ [HỆ THỐNG] Đang đánh thức Backend Core (Port 16868)...")
         backend_process = subprocess.Popen(
             backend_cmd, shell=True, 
             stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
@@ -51,7 +59,6 @@ def main():
         
         # 2. Cho Trinh sát đi kiểm tra cổng 16868
         print("⏳ Đang lắng nghe tín hiệu từ Backend...")
-        
         threading.Thread(target=stream_output, args=(backend_process, "[💻 BACKEND]", "\033[1;32m"), daemon=True).start()
 
         if not wait_for_port(16868):
@@ -61,7 +68,7 @@ def main():
 
         print("✅ [HỆ THỐNG] Backend đã hoạt động! Lập tức khởi chạy Tunnel...")
         
-        # 3. Kích hoạt Tunnel (Sửa text=True)
+        # 3. Kích hoạt Tunnel
         tunnel_process = subprocess.Popen(
             tunnel_cmd, shell=True, 
             stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
@@ -71,7 +78,7 @@ def main():
         print("\n✅ TẤT CẢ ĐÃ SẴN SÀNG! ĐANG TRUYỀN DỮ LIỆU...\n")
         print("-" * 50)
 
-        threading.Thread(target=stream_output, args=(tunnel_process, "[☁️  TUNNEL] ", "\033[1;36m"), daemon=True).start()
+        threading.Thread(target=stream_output, args=(tunnel_process, "[☁️ TUNNEL] ", "\033[1;36m"), daemon=True).start()
 
         while True:
             time.sleep(1)
@@ -79,15 +86,12 @@ def main():
     except KeyboardInterrupt:
         print("\n\n🛑 [HỆ THỐNG] Nhận lệnh dừng từ Chủ tịch!")
         print("⏳ Đang dọn dẹp và tắt các dịch vụ ngầm...")
-        
         try:
             backend_process.terminate()
             tunnel_process.terminate()
         except:
             pass
-            
         subprocess.run("pkill -f 'cloudflared'", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        
         print("✅ [HỆ THỐNG] Đã tắt an toàn. Hẹn gặp lại sếp! hẹ hẹ")
         sys.exit(0)
 
