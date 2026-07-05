@@ -76,40 +76,53 @@ def run_admin_audio_pipeline(full_file_path: str, safe_title: str, ext: str, ori
         
         target_dir = os.path.join(MUSIC_DIR, safe_title)
         
+        # 1. Dọn dẹp và đổi tên LRC
         old_lyrics = os.path.join(target_dir, f"{safe_title}_lyrics.lrc")
         new_lyrics = os.path.join(target_dir, f"{safe_title}.lrc")
         if os.path.exists(old_lyrics):
             if os.path.exists(new_lyrics): os.remove(new_lyrics)
             os.rename(old_lyrics, new_lyrics)
-            
+
+        # 2. Xử lý MP3 nếu nguồn là Video
         if ext == ".mp4":
             old_converted = os.path.join(target_dir, f"{safe_title}_converted.mp3")
             main_mp3 = os.path.join(target_dir, f"{safe_title}.mp3")
             if os.path.exists(old_converted):
                 if os.path.exists(main_mp3): os.remove(main_mp3)
                 os.rename(old_converted, main_mp3)
-                
+
+        # 3. Dọn dẹp Vocal và Flag rác
         old_vocal = os.path.join(target_dir, f"{safe_title}_vocal.mp3")
         if os.path.exists(old_vocal): os.remove(old_vocal)
-            
         flag_file = os.path.join(target_dir, f"{safe_title}_completed.txt")
         if os.path.exists(flag_file): os.remove(flag_file)
-        
+
         # ==========================================
-        # 🚀 TÍCH HỢP BƯỚC CUỐI: ĐÓNG GÓI METADATA
+        # 🚀 4. ĐÓNG GÓI METADATA & BẢO KÊ MP4 GỐC
         # ==========================================
         final_mp3 = os.path.join(target_dir, f"{safe_title}.mp3")
         final_beat = os.path.join(target_dir, f"{safe_title}_beat.mp3")
         cover_jpg = os.path.join(target_dir, f"{safe_title}.jpg")
         
+        # Nhúng Tag MP3
         if os.path.exists(final_mp3):
             embed_metadata(final_mp3, original_title, uploader, cover_jpg)
         if os.path.exists(final_beat):
             embed_metadata(final_beat, f"{original_title} (Beat)", uploader, cover_jpg)
-            
+
+        # 👉 [NÂNG CẤP]: BẢO KÊ FILE MP4
+        # Đảm bảo file MP4 gốc đã tải về bằng yt-dlp không bị trôi đi đâu
+        final_mp4 = os.path.join(target_dir, f"{safe_title}.mp4")
+        if ext == ".mp4" and full_file_path != final_mp4:
+            if os.path.exists(full_file_path):
+                # Copy đè file tải về vào đúng chuẩn format của 5 tài nguyên
+                import shutil
+                shutil.copy2(full_file_path, final_mp4) 
+
         print(f"✅ [AI Pipeline] Đã hoàn thành trọn vẹn combo 5 tài nguyên cho: {safe_title}")
     except Exception as e:
         print(f"❌ [AI Pipeline Lỗi]: {str(e)}")
+
 
 class YTDLInfoRequest(BaseModel):
     url: str

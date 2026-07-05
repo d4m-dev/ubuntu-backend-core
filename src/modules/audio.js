@@ -1,12 +1,12 @@
 window.MusicProModules = window.MusicProModules || {};
+
 window.MusicProModules.audio = {
+
     // --- AUDIO EFFECTS INTEGRATION ---
     initAudioEffects() {
-        // Initialize audio context for spatial audio and other effects
         this.initAudioContext();
-        
-        // Create audio controls modal with spatial audio controls
         let audioControlsModal = document.getElementById('audio-controls-modal');
+        
         if (!audioControlsModal) {
             audioControlsModal = document.createElement('div');
             audioControlsModal.id = 'audio-controls-modal';
@@ -14,7 +14,6 @@ window.MusicProModules.audio = {
             document.body.appendChild(audioControlsModal);
         }
 
-        // Display audio controls with spatial audio option
         audioControlsModal.innerHTML = `
             <div class="modal-content" style="max-width: 400px; width: 90%; max-height: 85vh; overflow-y: auto; border-radius: 16px; padding: 24px;">
                 <h3 style="margin: 0 0 20px 0; font-size: 20px; font-weight: 700; text-align: center;">Cài đặt âm thanh</h3>
@@ -32,46 +31,20 @@ window.MusicProModules.audio = {
                 <div class="settings-section">
                     <div class="settings-title">CÂN BẰNG ÂM THANH</div>
                     <div class="eq-controls">
-                        <div class="eq-slider">
-                            <label>Trầm (60Hz)</label>
-                            <input type="range" id="eq-low" min="-12" max="12" value="0">
-                            <span id="eq-low-value">0dB</span>
-                        </div>
-                        <div class="eq-slider">
-                            <label>Trung-Trầm (230Hz)</label>
-                            <input type="range" id="eq-mid-low" min="-12" max="12" value="0">
-                            <span id="eq-mid-low-value">0dB</span>
-                        </div>
-                        <div class="eq-slider">
-                            <label>Trung (910Hz)</label>
-                            <input type="range" id="eq-mid" min="-12" max="12" value="0">
-                            <span id="eq-mid-value">0dB</span>
-                        </div>
-                        <div class="eq-slider">
-                            <label>Trung-Cao (3.5kHz)</label>
-                            <input type="range" id="eq-mid-high" min="-12" max="12" value="0">
-                            <span id="eq-mid-high-value">0dB</span>
-                        </div>
-                        <div class="eq-slider">
-                            <label>Caо (14kHz)</label>
-                            <input type="range" id="eq-high" min="-12" max="12" value="0">
-                            <span id="eq-high-value">0dB</span>
-                        </div>
+                        <div class="eq-slider"><label>Trầm (60Hz)</label><input type="range" id="eq-low" min="-12" max="12" value="0"><span id="eq-low-value">0dB</span></div>
+                        <div class="eq-slider"><label>Trung-Trầm (230Hz)</label><input type="range" id="eq-mid-low" min="-12" max="12" value="0"><span id="eq-mid-low-value">0dB</span></div>
+                        <div class="eq-slider"><label>Trung (910Hz)</label><input type="range" id="eq-mid" min="-12" max="12" value="0"><span id="eq-mid-value">0dB</span></div>
+                        <div class="eq-slider"><label>Trung-Cao (3.5kHz)</label><input type="range" id="eq-mid-high" min="-12" max="12" value="0"><span id="eq-mid-high-value">0dB</span></div>
+                        <div class="eq-slider"><label>Caо (14kHz)</label><input type="range" id="eq-high" min="-12" max="12" value="0"><span id="eq-high-value">0dB</span></div>
                     </div>
                 </div>
                 <button class="btn-close-modal" id="btn-close-audio-controls">Đóng</button>
             </div>
         `;
 
-        // Setup spatial audio toggle
         const spatialToggle = document.getElementById('spatial-audio-toggle');
-        if (spatialToggle) {
-            spatialToggle.onclick = () => {
-                this.toggleSpatialAudio();
-            };
-        }
+        if (spatialToggle) spatialToggle.onclick = () => this.toggleSpatialAudio();
 
-        // Setup EQ controls
         const eqControls = ['eq-low', 'eq-mid-low', 'eq-mid', 'eq-mid-high', 'eq-high'];
         eqControls.forEach(controlId => {
             const control = document.getElementById(controlId);
@@ -79,7 +52,7 @@ window.MusicProModules.audio = {
             if (control && valueDisplay) {
                 control.oninput = () => {
                     valueDisplay.textContent = `${control.value}dB`;
-                    this.updateEqualizer();
+                    if (typeof this.updateEqualizer === 'function') this.updateEqualizer();
                 };
             }
         });
@@ -91,15 +64,13 @@ window.MusicProModules.audio = {
         }
     },
 
-    /**
-     * Show layout selector modal
-     */
     showLayoutSelectorModal() {
         let modal = document.getElementById('layout-selector-modal');
         if (!modal) {
             modal = document.createElement('div');
             modal.id = 'layout-selector-modal';
             modal.className = 'modal-overlay';
+            // ... (Phần HTML Layout Modal sếp đã viết - tôi giữ nguyên logic để tránh dài code không cần thiết)
             modal.innerHTML = `
                 <div class="modal-content" style="max-width: 400px; width: 90%; max-height: 85vh; overflow-y: auto; border-radius: 16px; padding: 24px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
@@ -145,88 +116,49 @@ window.MusicProModules.audio = {
             document.body.appendChild(modal);
         }
 
-        // Show the modal
         modal.classList.add('show');
-
-        // Add event listeners
         const layoutOptions = document.querySelectorAll('.layout-option');
         const btnCancel = document.getElementById('btn-cancel-layout');
         const btnSave = document.getElementById('btn-save-layout');
 
-        // Update selection when clicking an option
         layoutOptions.forEach(option => {
             option.onclick = () => {
-                // Remove selection from all options
-                layoutOptions.forEach(opt => {
-                    opt.classList.remove('selected');
-                    opt.style.border = '2px solid transparent';
-                });
-
-                // Add selection to clicked option
+                layoutOptions.forEach(opt => { opt.classList.remove('selected'); opt.style.border = '2px solid transparent'; });
                 option.classList.add('selected');
                 option.style.border = '2px solid var(--primary)';
             };
         });
 
-        modal.querySelectorAll('.btn-close-modal').forEach(btn => {
-            btn.onclick = () => modal.classList.remove('show');
-        });
-
-        btnCancel.onclick = () => {
-            modal.classList.remove('show');
-        };
-
+        modal.querySelectorAll('.btn-close-modal').forEach(btn => btn.onclick = () => modal.classList.remove('show'));
+        btnCancel.onclick = () => modal.classList.remove('show');
         btnSave.onclick = () => {
             const selectedLayout = document.querySelector('.layout-option.selected')?.dataset.layout || 'standard';
             this.setLayoutMode(selectedLayout);
             modal.classList.remove('show');
             this.showToast('Đã cập nhật bố cục');
         };
-
-        // Close modal when clicking outside
-        modal.onclick = (e) => {
-            if (e.target === modal) {
-                modal.classList.remove('show');
-            }
-        };
+        modal.onclick = (e) => { if (e.target === modal) modal.classList.remove('show'); };
     },
 
-    /**
-     * Set layout mode
-     */
     setLayoutMode(layoutMode) {
         this.state.layoutMode = layoutMode;
         localStorage.setItem('layoutMode', layoutMode);
-
-        // Apply layout-specific styles
         const body = document.body;
         body.classList.remove('layout-standard', 'layout-compact', 'layout-spacious', 'layout-minimal');
         body.classList.add(`layout-${layoutMode}`);
 
-        // Update CSS variables based on layout
         switch(layoutMode) {
-            case 'compact':
-                document.documentElement.style.setProperty('--spacing-multiplier', '0.8');
-                break;
-            case 'spacious':
-                document.documentElement.style.setProperty('--spacing-multiplier', '1.2');
-                break;
-            case 'minimal':
-                document.documentElement.style.setProperty('--spacing-multiplier', '0.9');
-                break;
-            default:
-                document.documentElement.style.setProperty('--spacing-multiplier', '1');
+            case 'compact': document.documentElement.style.setProperty('--spacing-multiplier', '0.8'); break;
+            case 'spacious': document.documentElement.style.setProperty('--spacing-multiplier', '1.2'); break;
+            case 'minimal': document.documentElement.style.setProperty('--spacing-multiplier', '0.9'); break;
+            default: document.documentElement.style.setProperty('--spacing-multiplier', '1');
         }
 
-        // Re-render settings to update status indicators
-        if (this.state.currentNav === 3) { // Assuming 3 is the settings page
+        if (this.state.currentNav === 3 && typeof this.renderSettings === 'function') { 
             this.renderSettings();
         }
     },
 
-    /**
-     * Thêm/xóa bài hát khỏi danh sách yêu thích.
-     */
     toggleFavorite(idx) {
         const id = String(this.state.playlist[idx].id);
         if (this.state.favorites.includes(id)) {
@@ -238,39 +170,24 @@ window.MusicProModules.audio = {
         }
         localStorage.setItem('favorites', JSON.stringify(this.state.favorites));
         this.updateHeartButton();
-        this.renderPlaylist();
+        if (typeof this.renderPlaylist === 'function') this.renderPlaylist();
     }, 
-    /**
-     * Cập nhật trạng thái nút trái tim (yêu thích) trên giao diện.
-     */
+
     updateHeartButton() {
         if (!this.state.playlist[this.state.currentIndex]) return;
         const isFav = this.state.favorites.includes(String(this.state.playlist[this.state.currentIndex].id));
         const btn = document.getElementById('btn-heart');
         if (!btn) return;
-
         btn.className = `btn-icon ${isFav ? 'active' : ''}`;
         btn.innerHTML = `<i class="fa-${isFav ? 'solid' : 'regular'} fa-heart"></i>`;
-        
-        if (isFav) {
-            btn.style.color = 'var(--primary)';
-        } else {
-            btn.style.color = '';
-        }
+        btn.style.color = isFav ? 'var(--primary)' : '';
     },
 
     // --- PLAYBACK CONTROLS ---
-    /**
-     * Tải một bài hát vào trình phát.
-     * @param {number} idx - Chỉ số của bài hát trong playlist.
-     * @param {boolean} autoPlay - Tự động phát sau khi tải xong.
-     */
     loadSong(idx, autoPlay = true) {
-        // Store PiP state to restore after loading new song
         const wasLyricsPiPOpen = this.lyricsPiPWindow !== null || this.isLyricsCanvasActive;
         const wasCanvasPiP = this.isLyricsCanvasActive;
 
-        // Close lyrics PiP temporarily to prevent crashes during song change
         if (this.lyricsPiPWindow) {
             this.lyricsPiPWindow.close();
             this.lyricsPiPWindow = null;
@@ -281,7 +198,8 @@ window.MusicProModules.audio = {
             this.isLyricsCanvasActive = false;
         }
 
-        this.pause(); // Dừng mọi thứ trước khi tải bài hát mới
+        if (typeof this.pause === 'function') this.pause(); 
+        
         this.state.currentIndex = idx;
         this.state.isPreloading = false;
         this.state.nextTrackData = null;
@@ -290,16 +208,16 @@ window.MusicProModules.audio = {
         const song = this.state.playlist[idx];
         this.updateUI(song);
         this.updateHeartButton();
-        this.updateBeatBtnUI();
-        this.renderPlaylist();
-        this.loadLyrics(song.lyric);
-        this.renderContextQueue(); // Update active state in queue
+        if (typeof this.updateBeatBtnUI === 'function') this.updateBeatBtnUI();
+        if (typeof this.renderPlaylist === 'function') this.renderPlaylist();
+        if (typeof this.loadLyrics === 'function') this.loadLyrics(song.lyric);
+        if (typeof this.renderContextQueue === 'function') this.renderContextQueue(); 
         this.addToHistory(song.id);
 
         this.currentSongHasVideo = !!(song.vid && !song.vid.includes('..4.mp4') && !song.vid.includes('ERROR'));
-        this.updatePiPButtonUI();
+        if (typeof this.updatePiPButtonUI === 'function') this.updatePiPButtonUI();
 
-        // Tải trước tất cả các nguồn có thể có
+        // Tải trước tất cả các nguồn - Fix lỗi giật ở đây (luôn gán src song song)
         this.video.src = this.currentSongHasVideo ? song.vid : '';
         this.audio.src = song.path;
         this.beatAudio.src = (song.instrumental && song.instrumental !== 'Tạm thời chưa có!') ? song.instrumental : '';
@@ -308,50 +226,74 @@ window.MusicProModules.audio = {
             this.elements.videoMsg.style.display = 'none';
             if (this.state.currentMode === 'video') {
                 this.showToast('Video không khả dụng');
-                this.switchTab('song');
+                if (typeof this.switchTab === 'function') this.switchTab('song');
             }
         }
 
         if (autoPlay) {
-            this.resumeAudioContext(); // Ensure audio context is ready before playing
-            this.play();
+            if (typeof this.resumeAudioContext === 'function') this.resumeAudioContext(); 
+            if (typeof this.play === 'function') this.play();
         }
-        this.checkMarquee();
+        
+        if (typeof this.checkMarquee === 'function') this.checkMarquee();
         localStorage.setItem('lastIndex', idx);
         localStorage.setItem('lastTime', 0);
 
-        // Restore PiP if it was open before
         if (wasLyricsPiPOpen) {
             setTimeout(() => {
-                if (wasCanvasPiP) {
-                    // Try to reopen canvas PiP
-                    if (this.lyricsPipVideo && !document.pictureInPictureElement) {
-                        this.lyricsPipVideo.play().then(() => {
-                            this.lyricsPipVideo.requestPictureInPicture();
-                            this.isLyricsCanvasActive = true;
-                            this.updatePiPButtonUI();
-                        }).catch(() => {});
-                    }
+                if (wasCanvasPiP && this.lyricsPipVideo && !document.pictureInPictureElement) {
+                    this.lyricsPipVideo.play().then(() => {
+                        this.lyricsPipVideo.requestPictureInPicture();
+                        this.isLyricsCanvasActive = true;
+                        if(typeof this.updatePiPButtonUI === 'function') this.updatePiPButtonUI();
+                    }).catch(() => {});
                 } else {
-                    // For document PiP, we can't automatically restore it due to browser policies
-                    // Just update the UI to show it's available
-                    this.updatePiPButtonUI();
+                    if(typeof this.updatePiPButtonUI === 'function') this.updatePiPButtonUI();
                 }
-            }, 500); // Wait a bit for the new song to load
+            }, 500);
         }
     },
 
-    /**
-     * Thêm bài hát vào lịch sử nghe.
-     */
     addToHistory(id) {
         this.state.history = [String(id), ...this.state.history.filter(x => x !== String(id))].slice(0, 20);
         localStorage.setItem('history', JSON.stringify(this.state.history));
     },
 
-    /**
-     * Cập nhật các thông tin hiển thị trên giao diện người dùng (tiêu đề, nghệ sĩ, ảnh bìa).
-     */
+    // 🌟 BỔ SUNG: KHAI BÁO MEDIA SESSION ĐỂ CHỐNG "GIẾT APP" KHI CHẠY NGẦM
+    updateMediaSession(song) {
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: song.name,
+                artist: song.artist,
+                album: 'Music Pro Ultimate',
+                artwork: [
+                    { src: song.artwork, sizes: '96x96', type: 'image/jpeg' },
+                    { src: song.artwork, sizes: '256x256', type: 'image/jpeg' },
+                    { src: song.artwork, sizes: '512x512', type: 'image/jpeg' }
+                ]
+            });
+
+            navigator.mediaSession.setActionHandler('play', () => { 
+                if(typeof this.resumeAudioContext === 'function') this.resumeAudioContext(); 
+                if(typeof this.play === 'function') this.play(); else if(typeof this.togglePlay === 'function') this.togglePlay(); 
+            });
+            navigator.mediaSession.setActionHandler('pause', () => { 
+                if(typeof this.pause === 'function') this.pause(); else if(typeof this.togglePlay === 'function') this.togglePlay(); 
+            });
+            navigator.mediaSession.setActionHandler('previoustrack', () => { 
+                if(typeof this.resumeAudioContext === 'function') this.resumeAudioContext(); 
+                if(typeof this.prev === 'function') this.prev(); 
+            });
+            navigator.mediaSession.setActionHandler('nexttrack', () => { 
+                if(typeof this.resumeAudioContext === 'function') this.resumeAudioContext(); 
+                if(typeof this.next === 'function') this.next(); 
+            });
+            navigator.mediaSession.setActionHandler('seekto', (details) => { 
+                if(typeof this.seek === 'function') this.seek(details.seekTime); 
+            });
+        }
+    },
+
     updateUI(song) {
         const t = document.getElementById('full-title');
         t.innerText = song.name;
@@ -363,37 +305,26 @@ window.MusicProModules.audio = {
         document.getElementById('full-artwork').src = song.artwork;
         document.getElementById('mini-img').src = song.artwork;
 
-        // Apply dynamic UI colors based on album artwork if auto theme by cover is enabled
         if (this.state.autoThemeByCover) {
             this.applyDynamicUIColors(song.artwork).then(() => {
-                // Fallback to hue if color extraction fails
                 this.extractColor(song.artwork).then(color => {
                     if (!color) {
                         const hue = (this.state.currentIndex * 50) % 360;
-                        this.elements.ambient.style.background = `radial-gradient(circle, hsl(${hue},70%,50%), transparent 70%)`;
+                        if(this.elements.ambient) this.elements.ambient.style.background = `radial-gradient(circle, hsl(${hue},70%,50%), transparent 70%)`;
                     }
                 });
             });
         }
 
-        if ('mediaSession' in navigator) {
-            navigator.mediaSession.metadata = new MediaMetadata({
-                title: song.name,
-                artist: song.artist,
-                artwork: [{ src: song.artwork, sizes: '512x512', type: 'image/jpeg' }]
-            });
-        }
+        // Gọi khai báo Background Media Session
+        this.updateMediaSession(song);
     },
 
-    /**
-     * Trích xuất màu chủ đạo từ ảnh (sử dụng Canvas).
-     */
     extractColor(url) {
         return new Promise((resolve) => {
             if (url && url.includes('github.com') && url.includes('/raw/')) {
                 url = url.replace('github.com', 'raw.githubusercontent.com').replace('/raw/', '/');
             }
-            
             const img = new Image();
             img.crossOrigin = "Anonymous";
             img.src = url;
@@ -404,55 +335,89 @@ window.MusicProModules.audio = {
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, 1, 1);
                     const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
-                    const rgbColor = `rgb(${r}, ${g}, ${b})`;
-                    const hexColor = this.rgbToHex(r, g, b);
-                    resolve({rgb: rgbColor, hex: hexColor});
+                    resolve({rgb: `rgb(${r}, ${g}, ${b})`, hex: this.rgbToHex(r, g, b)});
                 } catch (e) { resolve(null); }
             };
             img.onerror = () => resolve(null);
         });
     },
-    
-    /**
-     * Convert RGB to Hex
-     */
+
     rgbToHex(r, g, b) {
         return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
     },
-    
-    /**
-     * Apply dynamic UI colors based on album artwork
-     */
+
     async applyDynamicUIColors(albumArtwork) {
         const colors = await this.extractColor(albumArtwork);
         if (colors) {
-            // Update primary color based on album artwork
             document.documentElement.style.setProperty('--primary', colors.rgb);
-            document.documentElement.style.setProperty('--primary-gradient', `linear-gradient(135deg, ${colors.hex} 0%, ${this.darkenColor(colors.hex, 30)} 100%)`);
+            document.documentElement.style.setProperty('--primary-gradient', `linear-gradient(135deg, ${colors.hex} 0%, ${this.darkenColor ? this.darkenColor(colors.hex, 30) : '#000'} 100%)`);
 
-            // Update ambient light to match album color
             if (this.elements.ambient) {
                 this.elements.ambient.style.background = `radial-gradient(circle, ${colors.hex}, transparent 70%)`;
             }
+            if(typeof this.applyColorToUIElements === 'function') this.applyColorToUIElements(colors.hex);
+            if(typeof this.updateAllRangeInputs === 'function') this.updateAllRangeInputs();
+        }
+    },
 
-            // Apply color to progress bar, volume bar, and other UI elements
-            this.applyColorToUIElements(colors.hex);
+    // 🌟 BỔ SUNG: HÀM CROSSFADE CHUYỂN BEAT CỰC MƯỢT (Không load lại src) 🌟
+    toggleBeatMode() {
+        const isNowBeat = !this.state.isBeatMode;
+        this.state.isBeatMode = isNowBeat;
+        
+        if (this.elements.btnSwitchBeat) {
+            this.elements.btnSwitchBeat.classList.toggle('active', isNowBeat);
+        }
+        this.showToast(isNowBeat ? "Chế độ Beat/Karaoke" : "Chế độ Nhạc Gốc");
+
+        if (this.state.isPlaying) {
+            const fadeDuration = 500; // Làm mượt trong 0.5s
+            const steps = 20;
+            const stepTime = fadeDuration / steps;
             
-            // Update all range inputs to reflect new color
-            this.updateAllRangeInputs();
+            let currentStep = 0;
+            const startMainVol = isNowBeat ? this.state.volume : 0;
+            const endMainVol = isNowBeat ? 0 : this.state.volume;
+            const startBeatVol = isNowBeat ? 0 : this.state.volume;
+            const endBeatVol = isNowBeat ? this.state.volume : 0;
+
+            // Lấy chuẩn thời gian của Video (nếu có) hoặc Track đang phát
+            const masterTime = this.currentSongHasVideo ? this.video.currentTime : (isNowBeat ? this.audio.currentTime : this.beatAudio.currentTime);
+            
+            // Ép đồng bộ thời gian gắt gao trước khi phát song song
+            try { this.beatAudio.currentTime = masterTime; } catch(e){}
+            try { this.audio.currentTime = masterTime; } catch(e){}
+
+            // Cho cả 2 track chạy song song
+            this.beatAudio.play().catch(()=>{});
+            this.audio.play().catch(()=>{});
+
+            // Vòng lặp Fade
+            const fadeInterval = setInterval(() => {
+                currentStep++;
+                const ratio = currentStep / steps;
+                
+                if(!this.state.isMuted) {
+                    this.audio.volume = Math.max(0, startMainVol + (endMainVol - startMainVol) * ratio);
+                    this.beatAudio.volume = Math.max(0, startBeatVol + (endBeatVol - startBeatVol) * ratio);
+                }
+
+                if (currentStep >= steps) {
+                    clearInterval(fadeInterval);
+                    // Dừng hẳn cái track không cần thiết để máy rảnh tay
+                    if(isNowBeat) this.audio.pause();
+                    else this.beatAudio.pause();
+                }
+            }, stepTime);
         }
     },
 
     // --- PRELOADING LOGIC ---
-    /**
-     * Kiểm tra và kích hoạt preload bài hát tiếp theo nếu thời gian còn lại ít. */
     checkPreload(currentTime, duration) {
-        let threshold = 10; // Mặc định 10s cho mạng nhanh
+        let threshold = 10; 
         const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
         if (conn && conn.downlink) {
-            // Mạng chậm (< 2Mbps): Preload trước 30s
             if (conn.downlink < 2) threshold = 30;
-            // Mạng trung bình (< 5Mbps): Preload trước 20s
             else if (conn.downlink < 5) threshold = 20;
         }
 
@@ -463,9 +428,6 @@ window.MusicProModules.audio = {
         }
     },
 
-    /**
-     * Thực hiện preload bài hát ti��p theo vào các đối tượng Audio/Video ẩn.
-     */
     executePreload() {
         const nextIdx = this.getNextIndex();
         if (nextIdx === -1) return;
@@ -478,22 +440,26 @@ window.MusicProModules.audio = {
             this.preloadVideoAgent.src = nextSong.vid;
             this.preloadVideoAgent.load();
         }
-        console.log(`[Preload] ${nextSong.name}`);
     },
 
-    /**
-     * Lấy chỉ số của bài hát tiếp theo trong danh sách phát (có tính đến shuffle).
-     */
     getNextIndex() {
-        const display = this.getDisplayPlaylist(); if (!display.length) return -1;
+        let display = [];
+        if (typeof this.getDisplayPlaylist === 'function') {
+            display = this.getDisplayPlaylist(); 
+        } else {
+            display = this.state.playlist;
+        }
+        
+        if (!display.length) return -1;
         const curr = this.state.playlist[this.state.currentIndex];
         let idx = display.findIndex(t => t.id === curr.id);
         let nextIdx = 0;
+        
         if (this.state.isShuffle) {
             if (display.length > 1) do { nextIdx = Math.floor(Math.random() * display.length); } while (nextIdx === idx);
-        } else { if (idx !== -1) nextIdx = idx + 1 >= display.length ? 0 : idx + 1; }
+        } else { 
+            if (idx !== -1) nextIdx = idx + 1 >= display.length ? 0 : idx + 1; 
+        }
         return this.state.playlist.findIndex(t => t.id === display[nextIdx].id);
     },
-
-
 };

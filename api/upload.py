@@ -1,8 +1,11 @@
 import os
+from fastapi import Request
 import shutil
 from typing import List, Optional
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends, Query
-from core.security import verify_token  # Đảm bảo đường dẫn này khớp với dự án của sếp
+from core.security import verify_token
+from fastapi.responses import FileResponse, StreamingResponse
+import mimetypes
 
 router = APIRouter(prefix="/api/admin", tags=["Admin Upload"])
 
@@ -14,31 +17,102 @@ IMAGES_WORKSPACE = os.path.join(BASE_DIR, "images_workspace")
 def get_file_extension(filename: str):
     return os.path.splitext(filename)[1]
 
-# ---------------------------------------------------------
-# API 1: Kiểm tra chi tiết thư mục và file tồn tại
-# ---------------------------------------------------------
+# =========================================================
+# 🔓 API TRỰC TIẾP TRẢ FILE: TÍCH HỢP STREAMING VIDEO CHUẨN
+# =========================================================
+@router.get("/preview/{folder_type}/{name}/{filename}")
+async def direct_preview_media(request: Request, folder_type: str, name: str, filename: str):
+    """
+    API nội bộ chuyên để Stream Media. 
+    Hỗ trợ phát ngắt quãng (Chunked Streaming) cho Video MP4.
+    """
+    if folder_type == "music":
+        path = os.path.join(AUDIO_WORKSPACE, name, filename)
+    elif folder_type == "image":
+        path = os.path.join(IMAGES_WORKSPACE, name, filename)
+    else:
+        raise HTTPException(status_code=400, detail="Loại thư mục không hợp lệ")
+        
+    if not os.path.exists(path):
+        raise HTTPException(status_code=404, detail="Bó tay, file không tồn tại trên ổ cứng!")
+
+    # Đoán chuẩn định dạng file (MIME type)
+    content_type, _ = mimetypes.guess_type(path)
+    content_type = content_type or "application/octet-stream"
+
+    # 🚀 TÍNH NĂNG PRO: Xử lý truyền phát Video MP4 theo từng đoạn (Range Requests)
+    if filename.endswith(".mp4"):
+        file_size = os.path.getsize(path)
+        range_header = request.headers.get("Range")
+
+        # Nếu trình duyệt yêu cầu tải từng khúc (Range)
+        if range_header:
+            byte_range = range_header.replace("bytes=", "").split("-")
+            start = int(byte_range[0])
+            end = int(byte_range[1]) if len(byte_range) > 1 and byte_range[1] else file_size - 1
+
+            chunk_size = (end - start) + 1
+
+            def file_iterator(file_path, start_byte, chunk_size):
+                with open(file_path, "rb") as f:
+                    f.seek(start_byte)
+                    bytes_read = 0
+                    while bytes_read < chunk_size:
+                        # Đọc mỗi lần 64KB để không làm nghẽn RAM server
+                        chunk = f.read(min(65536, chunk_size - bytes_read))
+                        if not chunk:
+                            break
+                        bytes_read += len(chunk)
+                        yield chunk
+
+            headers = {
+                "Content-Range": f"bytes {start}-{end}/{file_size}",
+                "Accept-Ranges": "bytes",
+                "Content-Length": str(chunk_size),
+                "Content-Type": content_type,
+            }
+            # Trả về mã 206 (Partial Content) cho trình duyệt biết
+            return StreamingResponse(file_iterator(path, start, chunk_size), headers=headers, status_code=206)
+
+    # Nếu là file Ảnh hoặc Audio nhẹ, dùng FileResponse bình thường để tối ưu tài nguyên
+    return FileResponse(path, media_type=content_type)
+
+
+# =========================================================
+# API CHECK THƯ MỤC (Cập nhật đường dẫn URL mới)
+# =========================================================
 @router.get("/check-folder", dependencies=[Depends(verify_token)])
 async def check_folder_exists(
     folder_type: str = Query(...), 
     name: str = Query(...)
 ):
-    """Kiểm tra xem thư mục nhạc/ảnh đã tồn tại chưa và soi chi tiết từng file bên trong"""
     file_status = {}
     
     if folder_type == "music":
         target_dir = os.path.join(AUDIO_WORKSPACE, name)
         exists = os.path.exists(target_dir) and os.path.isdir(target_dir)
         
-        # Nếu thư mục có tồn tại, quét xem bên trong có các file nào
         if exists:
-            file_status["audio"] = os.path.exists(os.path.join(target_dir, f"{name}.mp3"))
-            file_status["beat"] = os.path.exists(os.path.join(target_dir, f"{name}_beat.mp3"))
-            file_status["video"] = os.path.exists(os.path.join(target_dir, f"{name}.mp4"))
-            file_status["lyric"] = os.path.exists(os.path.join(target_dir, f"{name}.lrc"))
+            def check_file(ext, suffix=""):
+                file_name = f"{name}{suffix}{ext}"
+                path = os.path.join(target_dir, file_name)
+                if os.path.exists(path):
+                    # 👉 SỬ DỤNG API TRỰC TIẾP VỪA TẠO Ở TRÊN
+                    return {"exists": True, "url": f"/api/admin/preview/music/{name}/{file_name}"}
+                return {"exists": False}
             
-            # Ảnh bìa có thể là jpg, png, jpeg... nên phải kiểm tra mảng
-            cover_exists = any(os.path.exists(os.path.join(target_dir, f"{name}{ext}")) for ext in [".jpg", ".png", ".jpeg", ".webp"])
-            file_status["cover"] = cover_exists
+            file_status["audio"] = check_file(".mp3")
+            file_status["beat"] = check_file(".mp3", "_beat")
+            file_status["video"] = check_file(".mp4")
+            file_status["lyric"] = check_file(".lrc")
+            
+            cover_res = {"exists": False}
+            for ext in [".jpg", ".png", ".jpeg", ".webp"]:
+                res = check_file(ext)
+                if res["exists"]:
+                    cover_res = res
+                    break
+            file_status["cover"] = cover_res
             
     elif folder_type == "image":
         target_dir = os.path.join(IMAGES_WORKSPACE, name)
@@ -50,7 +124,7 @@ async def check_folder_exists(
         "status": "success", 
         "exists": exists, 
         "name": name, 
-        "files": file_status # Trả về tình trạng chi tiết 5 file
+        "files": file_status
     }
 
 

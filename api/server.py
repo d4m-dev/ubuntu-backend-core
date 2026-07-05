@@ -35,6 +35,17 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Ubuntu Backend Core", version="1.0.0", lifespan=lifespan)
 
+# ===========================
+# 🔓 KHAI BÁO CỔNG TÀI NGUYÊN
+# ===========================
+BASE_DIR_STATIC = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+MUSIC_DIR_STATIC = os.path.join(BASE_DIR_STATIC, "audio_workspace", "music")
+os.makedirs(MUSIC_DIR_STATIC, exist_ok=True)
+
+# Gắn cổng /media/music lên ưu tiên cao nhất
+app.mount("/media/music", StaticFiles(directory=MUSIC_DIR_STATIC), name="media_music")
+
+
 # ==========================================
 # 🔮 LỚP GÁC CỔNG: TIÊM BỘ NHẬN DIỆN HỆ THỐNG NỘI BỘ
 # ==========================================
@@ -123,10 +134,16 @@ app.mount("/scripts", StaticFiles(directory=SCRIPTS_DIR), name="scripts")
 
 app.mount("/static/telegram", StaticFiles(directory=os.path.join(WORKSPACE_DIR, "telegram")), name="telegram_audio")
 
-# 👇 BỔ SUNG MỚI: Mở cổng /media/music cho kho nhạc Music Pro Ultimate
-MUSIC_DIR = os.path.join(BASE_DIR, "audio_workspace", "music")
-os.makedirs(MUSIC_DIR, exist_ok=True)
-app.mount("/media/music", StaticFiles(directory=MUSIC_DIR), name="media_music")
+# ==========================================
+# 🔓 MỞ CỔNG PREVIEW CHO TRUNG TÂM UPLOAD ADMIN
+# ==========================================
+IMAGES_WORKSPACE = os.path.join(BASE_DIR, "images_workspace")
+os.makedirs(IMAGES_WORKSPACE, exist_ok=True)
+
+# Mở toang cửa cho trình duyệt truy cập thẳng vào ổ cứng để xem trước
+app.mount("/audio_workspace", StaticFiles(directory=os.path.join(BASE_DIR, "audio_workspace")), name="audio_workspace")
+app.mount("/images_workspace", StaticFiles(directory=IMAGES_WORKSPACE), name="images_workspace")
+
 
 # ==========================================
 # ĐỊNH TUYẾN FRONTEND

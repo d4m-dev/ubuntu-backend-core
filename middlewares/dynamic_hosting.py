@@ -10,7 +10,7 @@ except ImportError:
     WSGIMiddleware = None
 
 _flask_app_cache = {}
-HOSTING_DIR = "/storage/emulated/0/coder/media/ubuntu-backend-core/hosted_projects"
+HOSTING_DIR = "mnt/sdcard/ubuntu-backend-core/hosted_projects"
 
 class DynamicHostingMiddleware:
     def __init__(self, app):
