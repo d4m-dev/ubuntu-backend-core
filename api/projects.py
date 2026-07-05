@@ -41,15 +41,16 @@ async def scan_projects():
             size_str = format_size(get_dir_size(folder_path))
             has_python = os.path.exists(os.path.join(folder_path, "index.py")) or \
                          os.path.exists(os.path.join(folder_path, "public", "index.py"))
-            has_html = os.path.exists(os.path.join(folder_path, "index.html"))
+            has_html = os.path.exists(os.path.join(folder_path, "index.html")) or \
+                       os.path.exists(os.path.join(folder_path, folder, "index.html"))
             is_frozen = os.path.exists(os.path.join(folder_path, ".frozen"))
             
             thumbnail = None
             for ext in ["png", "jpg", "jpeg", "webp"]:
                 if os.path.exists(os.path.join(folder_path, f"preview.{ext}")):
-                    thumbnail = f"/{folder}/preview.{ext}"; break
+                    thumbnail = f"/projects/{folder}/preview.{ext}"; break
                 elif os.path.exists(os.path.join(folder_path, f"cover.{ext}")):
-                    thumbnail = f"/{folder}/cover.{ext}"; break
+                    thumbnail = f"/projects/{folder}/cover.{ext}"; break
             
             description = "Dự án mới triển khai. Chưa có mô tả."
             info_path = os.path.join(folder_path, "info.txt")
@@ -86,8 +87,9 @@ async def toggle_project_status(project_name: str):
         with open(frozen_file, "w") as f: f.write("FROZEN_STATE")
         return {"status": "success", "is_frozen": True}
 
+# 🚀 TỐI ƯU: Xóa "async" để giải nén chạy luồng phụ, web không bị giật lag
 @router.post("/upload", dependencies=[Depends(verify_token)])
-async def upload_project_zip(file: UploadFile = File(...)):
+def upload_project_zip(file: UploadFile = File(...)):
     if not file.filename.endswith('.zip'):
         raise HTTPException(status_code=400, detail="Chỉ hỗ trợ tải lên file .zip")
         

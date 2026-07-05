@@ -8,7 +8,6 @@ from contextlib import asynccontextmanager
 from core.telegram import telegram_polling_task
 import asyncio
 import os
-from api.music import router as music_router
 
 from core.config import settings
 from core.database import init_db, db_manager
@@ -38,13 +37,12 @@ app = FastAPI(title="Ubuntu Backend Core", version="1.0.0", lifespan=lifespan)
 # ===========================
 # 🔓 KHAI BÁO CỔNG TÀI NGUYÊN
 # ===========================
-BASE_DIR_STATIC = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-MUSIC_DIR_STATIC = os.path.join(BASE_DIR_STATIC, "audio_workspace", "music")
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+MUSIC_DIR_STATIC = os.path.join(BASE_DIR, "audio_workspace", "music")
 os.makedirs(MUSIC_DIR_STATIC, exist_ok=True)
 
 # Gắn cổng /media/music lên ưu tiên cao nhất
 app.mount("/media/music", StaticFiles(directory=MUSIC_DIR_STATIC), name="media_music")
-
 
 # ==========================================
 # 🔮 LỚP GÁC CỔNG: TIÊM BỘ NHẬN DIỆN HỆ THỐNG NỘI BỘ
@@ -57,7 +55,6 @@ class AutoBrandingMiddleware(BaseHTTPMiddleware):
             body_chunks = [chunk async for chunk in response.body_iterator]
             html_body = b"".join(body_chunks).decode("utf-8")
             
-            # 🖥️ Vì các dự án hosted đã được tách xử lý, luồng này chỉ phục vụ Ubuntu-backend hệ thống
             ubuntu_branding_injection = '''
     <link rel="icon" type="image/x-icon" href="/src/favicon/ubuntu-backend/favicon.ico?v=1">
     <link rel="icon" type="image/png" sizes="96x96" href="/src/favicon/ubuntu-backend/favicon-96x96.png?v=1">
@@ -83,13 +80,14 @@ class AutoBrandingMiddleware(BaseHTTPMiddleware):
         
         return response
 
+# Đăng ký Middlewares
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 app.add_middleware(AutoBrandingMiddleware)
 app.add_middleware(DynamicHostingMiddleware)
 app.add_middleware(LoggerTrackerMiddleware)  
 app.add_middleware(RateLimitMiddleware)      
 
-# Đăng ký các module API
+# Đăng ký Modules
 app.include_router(auth.router)        
 app.include_router(dashboard.router)
 app.include_router(upload.router)
@@ -110,129 +108,55 @@ app.include_router(player.router)
 # ==========================================
 # 🚀 TỰ ĐỘNG NHẬN DIỆN ĐƯỜNG DẪN GỐC & TÀI NGUYÊN TĨNH
 # ==========================================
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PUBLIC_DIR = os.path.join(BASE_DIR, "public")
 AUDIO_OUTPUT_DIR = os.path.join(BASE_DIR, "audio_workspace", "outputs")
 SCRIPTS_DIR = os.path.join(BASE_DIR, "scripts")
-
-# MỞ TOANG CỬA THƯ MỤC /src ĐỂ TRÌNH DUYỆT TỰ DO KÉO FAVICON & MANIFEST
 SRC_DIR = os.path.join(BASE_DIR, "src")
-os.makedirs(SRC_DIR, exist_ok=True)
-app.mount("/src", StaticFiles(directory=SRC_DIR), name="src")
-
-os.makedirs(os.path.join(PUBLIC_DIR, "js"), exist_ok=True)
-app.mount("/js", StaticFiles(directory=os.path.join(PUBLIC_DIR, "js")), name="js")
-
-os.makedirs(AUDIO_OUTPUT_DIR, exist_ok=True)
-app.mount("/audio-files", StaticFiles(directory=AUDIO_OUTPUT_DIR), name="audio_files")
-
-os.makedirs(os.path.join(PUBLIC_DIR, "images"), exist_ok=True)
-app.mount("/images", StaticFiles(directory=os.path.join(PUBLIC_DIR, "images")), name="images")
-
-os.makedirs(SCRIPTS_DIR, exist_ok=True)
-app.mount("/scripts", StaticFiles(directory=SCRIPTS_DIR), name="scripts")
-
-app.mount("/static/telegram", StaticFiles(directory=os.path.join(WORKSPACE_DIR, "telegram")), name="telegram_audio")
-
-# ==========================================
-# 🔓 MỞ CỔNG PREVIEW CHO TRUNG TÂM UPLOAD ADMIN
-# ==========================================
 IMAGES_WORKSPACE = os.path.join(BASE_DIR, "images_workspace")
-os.makedirs(IMAGES_WORKSPACE, exist_ok=True)
 
-# Mở toang cửa cho trình duyệt truy cập thẳng vào ổ cứng để xem trước
+for directory in [SRC_DIR, os.path.join(PUBLIC_DIR, "js"), os.path.join(PUBLIC_DIR, "images"), AUDIO_OUTPUT_DIR, SCRIPTS_DIR, IMAGES_WORKSPACE]:
+    os.makedirs(directory, exist_ok=True)
+
+app.mount("/src", StaticFiles(directory=SRC_DIR), name="src")
+app.mount("/js", StaticFiles(directory=os.path.join(PUBLIC_DIR, "js")), name="js")
+app.mount("/images", StaticFiles(directory=os.path.join(PUBLIC_DIR, "images")), name="images")
+app.mount("/audio-files", StaticFiles(directory=AUDIO_OUTPUT_DIR), name="audio_files")
+app.mount("/scripts", StaticFiles(directory=SCRIPTS_DIR), name="scripts")
+app.mount("/static/telegram", StaticFiles(directory=os.path.join(WORKSPACE_DIR, "telegram")), name="telegram_audio")
 app.mount("/audio_workspace", StaticFiles(directory=os.path.join(BASE_DIR, "audio_workspace")), name="audio_workspace")
 app.mount("/images_workspace", StaticFiles(directory=IMAGES_WORKSPACE), name="images_workspace")
 
 
 # ==========================================
-# ĐỊNH TUYẾN FRONTEND
+# 🚀 ĐỊNH TUYẾN FRONTEND (TỐI ƯU CỰC KỲ GỌN GÀNG)
 # ==========================================
-@app.get("/")
-@app.get("/hub.html")
-async def serve_hub():
-    hub_path = os.path.join(PUBLIC_DIR, "hub.html")
-    if os.path.exists(hub_path): return FileResponse(hub_path)
-    return {"status": "error", "message": "Không tìm thấy hub.html"}
+FRONTEND_PAGES = {
+    "/": "hub.html",
+    "/hub.html": "hub.html",
+    "/auth.html": "auth.html",
+    "/admin/dashboard": "index.html",
+    "/admin/dashboard/": "index.html",
+    "/admin/upload": "admin-upload.html",
+    "/admin/upload/": "admin-upload.html",
+    "/audio-test.html": "audio-test.html",
+    "/numerology.html": "numerology.html",
+    "/vocal-remove.html": "vocal-remove.html",
+    "/love-sync.html": "love-sync.html",
+    "/music-pro.html": "music-pro.html",
+    "/social-hub.html": "social-hub.html",
+    "/documentation.html": "documentation.html",
+    "/yt-downloader.html": "yt-downloader.html",
+    "/profile.html": "profile.html",
+    "/test-tracks.html": "test-tracks.html",
+}
 
-@app.get("/auth.html")
-async def serve_auth():
-    auth_path = os.path.join(PUBLIC_DIR, "auth.html")
-    if os.path.exists(auth_path): return FileResponse(auth_path)
-    return {"status": "error", "message": "Không tìm thấy auth.html"}
+def create_route(route_path, html_file):
+    @app.get(route_path)
+    async def serve_page():
+        file_path = os.path.join(PUBLIC_DIR, html_file)
+        if os.path.exists(file_path): 
+            return FileResponse(file_path)
+        return {"status": "error", "message": f"❌ Không tìm thấy {html_file}"}
 
-@app.get("/admin/dashboard")
-@app.get("/admin/dashboard/")
-async def serve_dashboard():
-    index_path = os.path.join(PUBLIC_DIR, "index.html")
-    if os.path.exists(index_path): return FileResponse(index_path)
-    return {"status": "error", "message": "Không tìm thấy index.html"}
-
-@app.get("/admin/upload")
-@app.get("/admin/upload/")
-async def serve_upload_page():
-    upload_path = os.path.join(PUBLIC_DIR, "admin-upload.html")
-    if os.path.exists(upload_path): 
-        return FileResponse(upload_path)
-    return {"status": "error", "message": "Không tìm thấy giao diện upload"}
-
-
-@app.get("/audio-test.html")
-async def serve_audio_test():
-    audio_path = os.path.join(PUBLIC_DIR, "audio-test.html")
-    if os.path.exists(audio_path): return FileResponse(audio_path)
-    return {"status": "error", "message": "Không tìm thấy audio-test.html"}
-
-@app.get("/numerology.html")
-async def serve_numerology():
-    numerology_path = os.path.join(PUBLIC_DIR, "numerology.html")
-    if os.path.exists(numerology_path): return FileResponse(numerology_path)
-    return {"status": "error", "message": "Không tìm thấy numerology.html"}
-
-@app.get("/vocal-remove.html")
-async def serve_music_test():
-    music_test_path = os.path.join(PUBLIC_DIR, "vocal-remove.html")
-    if os.path.exists(music_test_path): return FileResponse(music_test_path)
-    return {"status": "error", "message": "Không tìm thấy vocal-remove.html"}
-
-@app.get("/love-sync.html")
-async def serve_love_sync():
-    love_sync_path = os.path.join(PUBLIC_DIR, "love-sync.html")
-    if os.path.exists(love_sync_path): return FileResponse(love_sync_path)
-    return {"status": "error", "message": "Không tìm thấy love-sync.html"}
-
-@app.get("/music-pro.html")
-async def serve_music_pro():
-    music_pro_path = os.path.join(PUBLIC_DIR, "music-pro.html")
-    if os.path.exists(music_pro_path): return FileResponse(music_pro_path)
-    return {"status": "error", "message": "Không tìm thấy music-pro.html"}
-
-@app.get("/social-hub.html")
-async def serve_social_hub():
-    social_path = os.path.join(PUBLIC_DIR, "social-hub.html")
-    if os.path.exists(social_path): return FileResponse(social_path)
-    return {"status": "error", "message": "Không tìm thấy social-hub.html"}
-
-@app.get("/documentation.html")
-async def serve_documentation():
-    music_pro_path = os.path.join(PUBLIC_DIR, "documentation.html")
-    if os.path.exists(music_pro_path): return FileResponse(music_pro_path)
-    return {"status": "error", "message": "Không tìm thấy documentation.html"}
-
-@app.get("/yt-downloader.html")
-async def serve_yt_downloader():
-    html_path = os.path.join(PUBLIC_DIR, "yt-downloader.html")
-    if os.path.exists(html_path): return FileResponse(html_path)
-    return {"status": "error", "message": "Không tìm thấy yt-downloader.html"}
-
-@app.get("/profile.html")
-async def serve_profile():
-    profile_path = os.path.join(PUBLIC_DIR, "profile.html")
-    if os.path.exists(profile_path): return FileResponse(profile_path)
-    return {"status": "error", "message": "Không tìm thấy profile.html"}
-
-@app.get("/test-tracks.html")
-async def serve_music_player():
-    player_path = os.path.join(PUBLIC_DIR, "test-tracks.html")
-    if os.path.exists(player_path): return FileResponse(player_path)
-    return {"status": "error", "message": "Không tìm thấy test-tracks.html"}
+for route, filename in FRONTEND_PAGES.items():
+    create_route(route, filename)

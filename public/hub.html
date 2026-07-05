@@ -140,7 +140,7 @@
         }
 
         // ==========================================
-        // DỮ LIỆU VÀ HÀM VẼ CÁC CARD DỰ ÁN (GIỮ NGUYÊN)
+        // DỮ LIỆU VÀ HÀM VẼ CÁC CARD DỰ ÁN
         // ==========================================
         const coreApps = [
             { name: "Glass Town", path: "glass-town", desc: "Game Nông Trại & Tương tác 2.5D", icon: "fa-gamepad", color: "#e94560" },
@@ -163,6 +163,7 @@
             const grid = document.getElementById('project-grid');
             grid.innerHTML = '';
 
+            // 1. Render Core Apps
             coreApps.forEach(app => {
                 const techBadge = `<span class="bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2.5 py-1 rounded-md text-xs font-bold"><i class="fa-solid fa-microchip mr-1"></i>Core App</span>`;
                 const coverHtml = `<div class="h-36 w-full rounded-t-2xl flex items-center justify-center" style="background: linear-gradient(135deg, ${app.color}, #0b0f19)"><i class="fa-solid ${app.icon} text-5xl text-white/20"></i></div>`;
@@ -188,6 +189,7 @@
                 `;
             });
 
+            // 2. Render Hosted Projects từ API
             try {
                 const port = window.location.port ? `:${window.location.port}` : '';
                 const apiUrl = `${window.location.protocol}//${window.location.hostname}${port}/api/projects/`;
@@ -205,7 +207,11 @@
                     let techBadge = proj.has_python ? `<span class="bg-green-500/10 text-green-400 border border-green-500/20 px-2.5 py-1 rounded-md text-xs font-bold flex items-center"><span class="w-2 h-2 rounded-full bg-green-500 animate-pulse mr-1.5"></span>Python/Flask</span>` : `<span class="bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2.5 py-1 rounded-md text-xs font-bold"><i class="fa-brands fa-html5 mr-1"></i>HTML5</span>`;
                     let coverHtml = proj.thumbnail ? `<div class="h-36 w-full bg-cover bg-center rounded-t-2xl" style="background-image: url('${proj.thumbnail}')"></div>` : `<div class="h-36 w-full rounded-t-2xl flex items-center justify-center" style="background: linear-gradient(135deg, ${stringToColor(proj.name)}, #0b0f19)"><i class="fa-solid fa-code text-5xl text-white/10"></i></div>`;
                     const cardClass = proj.is_frozen ? 'frozen-card pointer-events-none' : '';
-                    const linkButton = proj.is_frozen ? `<button class="bg-gray-800 text-gray-400 text-sm font-bold py-2 px-4 rounded-xl cursor-not-allowed border border-gray-700">Đã Khóa</button>` : `<a href="/${proj.name}" target="_blank" class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white text-sm font-bold py-2 px-5 rounded-xl shadow-lg transition-all active:scale-95">Mở <i class="fa-solid fa-arrow-right ml-1"></i></a>`;
+                    
+                    // 🚀 ĐÃ FIX: Sửa lại href thêm /projects/ vào trước và /index.html vào cuối để trúng phóc Middleware
+                    const linkButton = proj.is_frozen 
+                        ? `<button class="bg-gray-800 text-gray-400 text-sm font-bold py-2 px-4 rounded-xl cursor-not-allowed border border-gray-700">Đã Khóa</button>` 
+                        : `<a href="/projects/${proj.name}/index.html" target="_blank" class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white text-sm font-bold py-2 px-5 rounded-xl shadow-lg transition-all active:scale-95">Mở <i class="fa-solid fa-arrow-right ml-1"></i></a>`;
 
                     grid.innerHTML += `
                         <div class="glass-card rounded-2xl flex flex-col relative group ${cardClass}">
