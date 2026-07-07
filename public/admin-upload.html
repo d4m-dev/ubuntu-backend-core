@@ -120,211 +120,237 @@
     </div>
 
     <script>
-        const d4m_token = localStorage.getItem('d4m_sso_token');
-        if (!d4m_token) {
-            alert("🔒 Khu vực quản trị viên! Vui lòng đăng nhập hệ sinh thái D4M.");
-            window.location.href = '/auth.html?redirect=/admin/upload';
+    // ==========================================
+    // 🚀 CHỐT CHẶN BẢO MẬT: CHỈ ADMIN MỚI ĐƯỢC VÀO
+    // ==========================================
+    function parseJwt(token) {
+        try {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            return JSON.parse(jsonPayload);
+        } catch (e) {
+            return null;
         }
+    }
 
-        function switchTab(tab) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(`tab-${tab}`).classList.add('active');
-            if(tab === 'music') {
-                document.getElementById('form-music').classList.remove('hidden');
-                document.getElementById('form-image').classList.add('hidden');
+    const d4m_token = localStorage.getItem('d4m_sso_token');
+    
+    if (!d4m_token) {
+        alert("🔒 Khu vực quản trị viên! Vui lòng đăng nhập hệ sinh thái D4M.");
+        window.location.href = '/auth?redirect=/admin/upload';
+    } else {
+        const payload = parseJwt(d4m_token);
+        // Kiểm tra xem có đúng là Admin không (role = 1)
+        if (!payload || Number(payload.role) !== 1) {
+            alert("⚠️ TRUY CẬP TRÁI PHÉP!\nSếp đang dùng tài khoản cấp User. Cổng Upload chỉ dành riêng cho Chủ Tịch (Admin).");
+            window.location.href = '/hub'; // Đá văng về trang Hub
+        }
+    }
+
+    // ==========================================
+    // 🚀 LOGIC UI VÀ GIAO TIẾP API 
+    // ==========================================
+    function switchTab(tab) {
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(`tab-${tab}`).classList.add('active');
+        if(tab === 'music') {
+            document.getElementById('form-music').classList.remove('hidden');
+            document.getElementById('form-image').classList.add('hidden');
+        } else {
+            document.getElementById('form-music').classList.add('hidden');
+            document.getElementById('form-image').classList.remove('hidden');
+        }
+    }
+
+    function showStatus(msg, type = 'success') {
+        const el = document.getElementById('status-msg');
+        el.className = `p-4 rounded-lg mb-6 font-bold text-center ${type === 'success' ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'}`;
+        el.innerHTML = msg;
+        el.classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setTimeout(() => el.classList.add('hidden'), 6000);
+    }
+
+    // ==================== TÍNH NĂNG PREVIEW ĐỈNH CAO ====================
+    let typingTimer;
+    const doneTypingInterval = 500; 
+
+    // Hàm dọn dẹp tắt hết đèn báo và DỪNG nhạc khi xóa chữ
+    function hideAllFileBadges() {
+        const fileTypes = ['audio', 'beat', 'video', 'cover', 'lyric'];
+        fileTypes.forEach(type => {
+            document.getElementById(`st-${type}`).classList.add('hidden');
+            const pv = document.getElementById(`pv-${type}`);
+            if (pv) {
+                pv.classList.add('hidden');
+                pv.innerHTML = ''; // Cực kỳ quan trọng: Xóa HTML để DỪNG phát nhạc nếu đang phát
+            }
+        });
+    }
+
+    // Hàm Tải và hiện Lời bài hát
+    async function previewLyric(url, boxId) {
+        const box = document.getElementById(boxId);
+        if (!box.classList.contains('hidden') && !box.innerHTML.includes('fa-spin')) {
+            box.classList.add('hidden'); // Nếu đang mở thì đóng lại
+            return;
+        }
+        box.classList.remove('hidden');
+        box.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-blue-400"></i> Đang tải lời bài hát...';
+        try {
+            // Thêm timestamp chống cache
+            const res = await fetch(url + '?t=' + new Date().getTime());
+            if(res.ok) {
+                const text = await res.text();
+                box.textContent = text || 'File lời bài hát tồn tại nhưng trống RỖNG!';
             } else {
-                document.getElementById('form-music').classList.add('hidden');
-                document.getElementById('form-image').classList.remove('hidden');
+                box.innerHTML = '<span class="text-red-400">Không thể tải file lrc.</span>';
             }
+        } catch (e) {
+            box.innerHTML = '<span class="text-red-400">Lỗi kết nối.</span>';
         }
+    }
 
-        function showStatus(msg, type = 'success') {
-            const el = document.getElementById('status-msg');
-            el.className = `p-4 rounded-lg mb-6 font-bold text-center ${type === 'success' ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'}`;
-            el.innerHTML = msg;
-            el.classList.remove('hidden');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            setTimeout(() => el.classList.add('hidden'), 6000);
-        }
-
-        // ==================== TÍNH NĂNG PREVIEW ĐỈNH CAO ====================
-        let typingTimer;
-        const doneTypingInterval = 500; 
-
-        // Hàm dọn dẹp tắt hết đèn báo và DỪNG nhạc khi xóa chữ
-        function hideAllFileBadges() {
-            const fileTypes = ['audio', 'beat', 'video', 'cover', 'lyric'];
-            fileTypes.forEach(type => {
-                document.getElementById(`st-${type}`).classList.add('hidden');
-                const pv = document.getElementById(`pv-${type}`);
-                if (pv) {
-                    pv.classList.add('hidden');
-                    pv.innerHTML = ''; // Cực kỳ quan trọng: Xóa HTML để DỪNG phát nhạc nếu đang phát
-                }
-            });
-        }
-
-        // Hàm Tải và hiện Lời bài hát
-        async function previewLyric(url, boxId) {
-            const box = document.getElementById(boxId);
-            if (!box.classList.contains('hidden') && !box.innerHTML.includes('fa-spin')) {
-                box.classList.add('hidden'); // Nếu đang mở thì đóng lại
-                return;
-            }
-            box.classList.remove('hidden');
-            box.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-blue-400"></i> Đang tải lời bài hát...';
-            try {
-                // Thêm timestamp chống cache
-                const res = await fetch(url + '?t=' + new Date().getTime());
-                if(res.ok) {
-                    const text = await res.text();
-                    box.textContent = text || 'File lời bài hát tồn tại nhưng trống RỖNG!';
-                } else {
-                    box.innerHTML = '<span class="text-red-400">Không thể tải file lrc.</span>';
-                }
-            } catch (e) {
-                box.innerHTML = '<span class="text-red-400">Lỗi kết nối.</span>';
-            }
-        }
-
-        async function checkFolderExistence(type, value) {
-            clearTimeout(typingTimer);
-            const warningEl = document.getElementById(`${type}-warning`);
-            const name = value.trim();
-            
-            if (!name) {
-                warningEl.classList.add('hidden');
-                hideAllFileBadges(); 
-                return;
-            }
-
-            warningEl.className = "text-sm font-bold mt-2 bg-blue-500/10 border border-blue-500/30 p-2 rounded-lg text-blue-400";
-            warningEl.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Đang tìm kiếm dữ liệu...';
-            warningEl.classList.remove('hidden');
+    async function checkFolderExistence(type, value) {
+        clearTimeout(typingTimer);
+        const warningEl = document.getElementById(`${type}-warning`);
+        const name = value.trim();
+        if (!name) {
+            warningEl.classList.add('hidden');
             hideAllFileBadges(); 
+            return;
+        }
 
-            typingTimer = setTimeout(async () => {
-                try {
-                    const res = await fetch(`/api/admin/check-folder?folder_type=${type}&name=${name}`, {
-                        headers: { 'Authorization': `Bearer ${d4m_token}` }
-                    });
-                    
-                    if (res.ok) {
-                        const data = await res.json();
-                        
-                        if (data.exists) {
-                            if(type === 'music') {
-                                warningEl.className = "text-sm text-yellow-500 font-bold mt-2 bg-yellow-500/10 border border-yellow-500/30 p-2 rounded-lg shadow-lg";
-                                warningEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-1"></i> Thư mục đã tồn tại! File tải lên sẽ bị <span class="text-red-400 uppercase">Ghi đè</span>.';
-                                
-                                // RENDER MEDIA PLAYER NẾU CÓ FILE
-                                if (data.files) {
-                                    const mappings = {
-                                        'audio': { type: 'audio' },
-                                        'beat': { type: 'audio' },
-                                        'video': { type: 'video' },
-                                        'cover': { type: 'image' },
-                                        'lyric': { type: 'lyric' }
-                                    };
+        warningEl.className = "text-sm font-bold mt-2 bg-blue-500/10 border border-blue-500/30 p-2 rounded-lg text-blue-400";
+        warningEl.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Đang tìm kiếm dữ liệu...';
+        warningEl.classList.remove('hidden');
+        hideAllFileBadges(); 
 
-                                    for (const [key, fileData] of Object.entries(data.files)) {
-                                        const badge = document.getElementById(`st-${key}`);
-                                        const pv = document.getElementById(`pv-${key}`);
-                                        badge.classList.remove('hidden');
+        typingTimer = setTimeout(async () => {
+            try {
+                const res = await fetch(`/api/admin/check-folder?folder_type=${type}&name=${name}`, {
+                    headers: { 'Authorization': `Bearer ${d4m_token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.exists) {
+                        if(type === 'music') {
+                            warningEl.className = "text-sm text-yellow-500 font-bold mt-2 bg-yellow-500/10 border border-yellow-500/30 p-2 rounded-lg shadow-lg";
+                            warningEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-1"></i> Thư mục đã tồn tại! File tải lên sẽ bị <span class="text-red-400 uppercase">Ghi đè</span>.';
+                            
+                            // RENDER MEDIA PLAYER NẾU CÓ FILE
+                            if (data.files) {
+                                const mappings = {
+                                    'audio': { type: 'audio' },
+                                    'beat': { type: 'audio' },
+                                    'video': { type: 'video' },
+                                    'cover': { type: 'image' },
+                                    'lyric': { type: 'lyric' }
+                                };
+
+                                for (const [key, fileData] of Object.entries(data.files)) {
+                                    const badge = document.getElementById(`st-${key}`);
+                                    const pv = document.getElementById(`pv-${key}`);
+                                    badge.classList.remove('hidden');
+                                    
+                                    // Cấu trúc mới từ Backend trả về là Object {exists: true, url: '...'}
+                                    if (fileData.exists) {
+                                        badge.className = "text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider bg-green-500/20 text-green-400 border border-green-500/30";
+                                        badge.innerHTML = '<i class="fa-solid fa-check"></i> Đã có';
                                         
-                                        // Cấu trúc mới từ Backend trả về là Object {exists: true, url: '...'}
-                                        if (fileData.exists) {
-                                            badge.className = "text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider bg-green-500/20 text-green-400 border border-green-500/30";
-                                            badge.innerHTML = '<i class="fa-solid fa-check"></i> Đã có';
-                                            
-                                            // Xử lý hiện khung Preview
-                                            pv.classList.remove('hidden');
-                                            const vURL = fileData.url + '?t=' + new Date().getTime(); // Chống cache file cũ
+                                        // Xử lý hiện khung Preview
+                                        pv.classList.remove('hidden');
+                                        const vURL = fileData.url + '?t=' + new Date().getTime(); // Chống cache file cũ
 
-                                            if (mappings[key].type === 'audio') {
-                                                pv.innerHTML = `<audio controls controlsList="nodownload" class="w-full h-8 outline-none"><source src="${vURL}" type="audio/mpeg"></audio>`;
-                                            } else if (mappings[key].type === 'video') {
-                                                pv.innerHTML = `<video controls controlsList="nodownload" class="h-24 w-full object-contain bg-black/40 rounded border border-white/5"><source src="${vURL}" type="video/mp4"></video>`;
-                                            } else if (mappings[key].type === 'image') {
-                                                pv.innerHTML = `<img src="${vURL}" class="h-20 w-auto rounded border border-white/10 shadow-md" alt="Cover Preview">`;
-                                            } else if (mappings[key].type === 'lyric') {
-                                                pv.innerHTML = `
-                                                    <button onclick="previewLyric('${vURL}', 'lyric-content-box')" class="w-full text-xs font-bold bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-2 rounded transition text-blue-300">
-                                                        <i class="fa-solid fa-book-open mr-1"></i> Xem thử Lời Bài Hát
-                                                    </button>
-                                                    <div id="lyric-content-box" class="hidden mt-2 p-3 bg-black/50 border border-white/5 rounded-md h-32 overflow-y-auto custom-scrollbar text-[11px] font-mono text-gray-300 whitespace-pre-wrap leading-relaxed shadow-inner"></div>
-                                                `;
-                                            }
-                                        } else {
-                                            badge.className = "text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider bg-gray-600/30 text-gray-400 border border-gray-600/50";
-                                            badge.innerHTML = '<i class="fa-solid fa-minus"></i> Chưa có';
+                                        if (mappings[key].type === 'audio') {
+                                            pv.innerHTML = `<audio controls controlsList="nodownload" class="w-full h-8 outline-none"><source src="${vURL}" type="audio/mpeg"></audio>`;
+                                        } else if (mappings[key].type === 'video') {
+                                            pv.innerHTML = `<video controls controlsList="nodownload" class="h-24 w-full object-contain bg-black/40 rounded border border-white/5"><source src="${vURL}" type="video/mp4"></video>`;
+                                        } else if (mappings[key].type === 'image') {
+                                            pv.innerHTML = `<img src="${vURL}" class="h-20 w-auto rounded border border-white/10 shadow-md" alt="Cover Preview">`;
+                                        } else if (mappings[key].type === 'lyric') {
+                                            pv.innerHTML = `
+                                            <button onclick="previewLyric('${vURL}', 'lyric-content-box')" class="w-full text-xs font-bold bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-2 rounded transition text-blue-300">
+                                                <i class="fa-solid fa-book-open mr-1"></i> Xem thử Lời Bài Hát
+                                            </button>
+                                            <div id="lyric-content-box" class="hidden mt-2 p-3 bg-black/50 border border-white/5 rounded-md h-32 overflow-y-auto custom-scrollbar text-[11px] font-mono text-gray-300 whitespace-pre-wrap leading-relaxed shadow-inner"></div>
+                                            `;
                                         }
+                                    } else {
+                                        badge.className = "text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider bg-gray-600/30 text-gray-400 border border-gray-600/50";
+                                        badge.innerHTML = '<i class="fa-solid fa-minus"></i> Chưa có';
                                     }
                                 }
-                            } else {
-                                warningEl.className = "text-sm text-blue-400 font-bold mt-2 bg-blue-500/10 border border-blue-500/30 p-2 rounded-lg shadow-lg";
-                                warningEl.innerHTML = '<i class="fa-solid fa-circle-info mr-1"></i> THÔNG BÁO: Thư viện đã có! Ảnh mới sẽ được <span class="text-green-400 uppercase">Cộng dồn</span>.';
                             }
                         } else {
-                            warningEl.className = "text-sm text-green-400 font-bold mt-2 bg-green-500/10 border border-green-500/30 p-2 rounded-lg";
-                            warningEl.innerHTML = '<i class="fa-solid fa-check-circle mr-1"></i> Hợp lệ: Thư mục mới hoàn toàn!';
-                            hideAllFileBadges(); 
+                            warningEl.className = "text-sm text-blue-400 font-bold mt-2 bg-blue-500/10 border border-blue-500/30 p-2 rounded-lg shadow-lg";
+                            warningEl.innerHTML = '<i class="fa-solid fa-circle-info mr-1"></i> THÔNG BÁO: Thư viện đã có! Ảnh mới sẽ được <span class="text-green-400 uppercase">Cộng dồn</span>.';
                         }
+                    } else {
+                        warningEl.className = "text-sm text-green-400 font-bold mt-2 bg-green-500/10 border border-green-500/30 p-2 rounded-lg";
+                        warningEl.innerHTML = '<i class="fa-solid fa-check-circle mr-1"></i> Hợp lệ: Thư mục mới hoàn toàn!';
+                        hideAllFileBadges(); 
                     }
-                } catch (e) {
-                    warningEl.className = "text-sm text-red-400 font-bold mt-2 bg-red-500/10 border border-red-500/30 p-2 rounded-lg";
-                    warningEl.innerHTML = '<i class="fa-solid fa-wifi mr-1"></i> Lỗi mất kết nối tới Backend.';
                 }
-            }, doneTypingInterval);
-        }
+            } catch (e) {
+                warningEl.className = "text-sm text-red-400 font-bold mt-2 bg-red-500/10 border border-red-500/30 p-2 rounded-lg";
+                warningEl.innerHTML = '<i class="fa-solid fa-wifi mr-1"></i> Lỗi mất kết nối tới Backend.';
+            }
+        }, doneTypingInterval);
+    }
 
-        // ... [Giữ nguyên hàm uploadMusic và uploadImages như cũ]
-        async function uploadMusic() {
-            const name = document.getElementById('music-name').value.trim();
-            if(!name) return showStatus('Vui lòng nhập tên bài hát!', 'error');
+    async function uploadMusic() {
+        const name = document.getElementById('music-name').value.trim();
+        if(!name) return showStatus('Vui lòng nhập tên bài hát!', 'error');
 
-            const formData = new FormData();
-            formData.append('base_name', name);
-            const files = {
-                'audio': document.getElementById('m-audio').files[0], 'beat': document.getElementById('m-beat').files[0],
-                'video': document.getElementById('m-video').files[0], 'cover': document.getElementById('m-cover').files[0],
-                'lyric': document.getElementById('m-lyric').files[0]
-            };
-            const hasFiles = Object.values(files).some(file => file !== undefined);
-            if (!hasFiles) return showStatus('Vui lòng chọn ít nhất 1 file để tải lên!', 'error');
-            for (const [key, file] of Object.entries(files)) if (file) formData.append(key, file);
+        const formData = new FormData();
+        formData.append('base_name', name);
+        const files = {
+            'audio': document.getElementById('m-audio').files[0], 'beat': document.getElementById('m-beat').files[0],
+            'video': document.getElementById('m-video').files[0], 'cover': document.getElementById('m-cover').files[0],
+            'lyric': document.getElementById('m-lyric').files[0]
+        };
+        const hasFiles = Object.values(files).some(file => file !== undefined);
+        if (!hasFiles) return showStatus('Vui lòng chọn ít nhất 1 file để tải lên!', 'error');
+        
+        for (const [key, file] of Object.entries(files)) if (file) formData.append(key, file);
 
-            try {
-                const res = await fetch('/api/admin/upload-music', { method: 'POST', headers: { 'Authorization': `Bearer ${d4m_token}` }, body: formData });
-                const data = await res.json();
-                if(res.ok) {
-                    showStatus('<i class="fa-solid fa-check-circle mr-2"></i>' + data.message, 'success');
-                    document.querySelectorAll('#form-music input[type="file"]').forEach(input => input.value = '');
-                    document.getElementById('music-name').value = '';
-                    document.getElementById('music-warning').classList.add('hidden');
-                    hideAllFileBadges();
-                } else showStatus('<i class="fa-solid fa-triangle-exclamation mr-2"></i>' + (data.detail || "Upload thất bại"), 'error');
-            } catch (e) { showStatus('<i class="fa-solid fa-triangle-exclamation mr-2"></i>Lỗi kết nối máy chủ', 'error'); }
-        }
+        try {
+            const res = await fetch('/api/admin/upload-music', { method: 'POST', headers: { 'Authorization': `Bearer ${d4m_token}` }, body: formData });
+            const data = await res.json();
+            if(res.ok) {
+                showStatus('<i class="fa-solid fa-check-circle mr-2"></i>' + data.message, 'success');
+                document.querySelectorAll('#form-music input[type="file"]').forEach(input => input.value = '');
+                document.getElementById('music-name').value = '';
+                document.getElementById('music-warning').classList.add('hidden');
+                hideAllFileBadges();
+            } else showStatus('<i class="fa-solid fa-triangle-exclamation mr-2"></i>' + (data.detail || "Upload thất bại"), 'error');
+        } catch (e) { showStatus('<i class="fa-solid fa-triangle-exclamation mr-2"></i>Lỗi kết nối máy chủ', 'error'); }
+    }
 
-        async function uploadImages() {
-            const folder = document.getElementById('image-folder').value.trim();
-            const files = document.getElementById('i-files').files;
-            if(!folder) return showStatus('Vui lòng nhập tên thư mục!', 'error');
-            if(files.length === 0) return showStatus('Vui lòng chọn ít nhất 1 ảnh!', 'error');
-            const formData = new FormData();
-            formData.append('folder_name', folder);
-            for(let i = 0; i < files.length; i++) formData.append('images', files[i]);
-            
-            try {
-                const res = await fetch('/api/admin/upload-images', { method: 'POST', headers: { 'Authorization': `Bearer ${d4m_token}` }, body: formData });
-                const data = await res.json();
-                if(res.ok) {
-                    showStatus('<i class="fa-solid fa-check-circle mr-2"></i>' + data.message, 'success');
-                    document.getElementById('i-files').value = '';
-                } else showStatus('<i class="fa-solid fa-triangle-exclamation mr-2"></i>' + (data.detail || "Upload thất bại"), 'error');
-            } catch (e) { showStatus('<i class="fa-solid fa-triangle-exclamation mr-2"></i>Lỗi kết nối máy chủ', 'error'); }
-        }
-    </script>
+    async function uploadImages() {
+        const folder = document.getElementById('image-folder').value.trim();
+        const files = document.getElementById('i-files').files;
+        if(!folder) return showStatus('Vui lòng nhập tên thư mục!', 'error');
+        if(files.length === 0) return showStatus('Vui lòng chọn ít nhất 1 ảnh!', 'error');
+        
+        const formData = new FormData();
+        formData.append('folder_name', folder);
+        for(let i = 0; i < files.length; i++) formData.append('images', files[i]);
+        
+        try {
+            const res = await fetch('/api/admin/upload-images', { method: 'POST', headers: { 'Authorization': `Bearer ${d4m_token}` }, body: formData });
+            const data = await res.json();
+            if(res.ok) {
+                showStatus('<i class="fa-solid fa-check-circle mr-2"></i>' + data.message, 'success');
+                document.getElementById('i-files').value = '';
+            } else showStatus('<i class="fa-solid fa-triangle-exclamation mr-2"></i>' + (data.detail || "Upload thất bại"), 'error');
+        } catch (e) { showStatus('<i class="fa-solid fa-triangle-exclamation mr-2"></i>Lỗi kết nối máy chủ', 'error'); }
+    }
+</script>
+
 </body>
 </html>
