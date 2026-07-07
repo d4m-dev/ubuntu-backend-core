@@ -24,7 +24,7 @@
             border: 1px solid rgba(255, 255, 255, 0.08);
             box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255,255,255,0.1);
         }
-        
+
         /* Hiệu ứng Input */
         .input-premium {
             background: rgba(0, 0, 0, 0.3);
@@ -68,7 +68,6 @@
 
     <main class="w-full max-w-[420px] relative z-10 mx-4">
         <div class="glass-panel p-10 rounded-[2.5rem]">
-            
             <div class="text-center mb-8">
                 <div class="w-16 h-16 mx-auto bg-gradient-to-br from-gray-800 to-black border border-gray-700 rounded-2xl flex items-center justify-center shadow-2xl mb-5 relative group overflow-hidden">
                     <div class="absolute inset-0 bg-gradient-to-tr from-blue-500/20 to-purple-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -87,6 +86,11 @@
                     <i class="fa-solid fa-lock absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm"></i>
                     <input type="password" id="loginPassword" required placeholder="Mật khẩu bảo mật" class="w-full pl-11 pr-4 py-3.5 input-premium rounded-xl text-white placeholder-gray-600 focus:outline-none">
                 </div>
+                
+                <div class="text-right">
+                    <a href="#" onclick="switchTab('forgot')" class="text-xs text-gray-400 hover:text-blue-400 transition-colors font-medium">Quên mật khẩu?</a>
+                </div>
+
                 <button type="submit" id="btnLoginSubmit" class="w-full py-4 mt-2 font-bold text-white bg-white/10 hover:bg-white/20 border border-white/10 rounded-xl transition-all shadow-lg active:scale-[0.98]">
                     Đăng Nhập Cổng Chính
                 </button>
@@ -98,7 +102,7 @@
             <form id="registerForm" class="space-y-4 hidden" onsubmit="handleRegister(event)">
                 <div class="grid grid-cols-2 gap-3">
                     <input type="text" id="regUsername" required placeholder="Tên đăng nhập" class="w-full px-4 py-3 input-premium rounded-xl text-white placeholder-gray-600 text-sm focus:outline-none">
-                    <input type="password" id="regPassword" required placeholder="Mật khẩu" class="w-full px-4 py-3 input-premium rounded-xl text-white placeholder-gray-600 text-sm focus:outline-none">
+                    <input type="password" id="regPassword" required minlength="6" placeholder="Mật khẩu (>6 ký tự)" class="w-full px-4 py-3 input-premium rounded-xl text-white placeholder-gray-600 text-sm focus:outline-none">
                 </div>
                 <input type="text" id="regFullName" required placeholder="Họ và Tên (Hiển thị)" class="w-full px-4 py-3 input-premium rounded-xl text-white placeholder-gray-600 text-sm focus:outline-none">
                 <input type="email" id="regEmail" required placeholder="Địa chỉ Email (Nhận mã OTP)" class="w-full px-4 py-3 input-premium rounded-xl text-white placeholder-gray-600 text-sm focus:outline-none">
@@ -134,15 +138,61 @@
                 </button>
             </form>
 
+            <form id="forgotForm" class="space-y-4 hidden" onsubmit="handleForgotPasswordRequest(event)">
+                <p class="text-sm text-gray-400 text-center mb-4 leading-relaxed">Nhập Email sếp đã đăng ký, hệ thống sẽ bắn một mã OTP khôi phục.</p>
+                <div class="relative">
+                    <i class="fa-solid fa-envelope absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm"></i>
+                    <input type="email" id="forgotEmail" required placeholder="Địa chỉ Email" class="w-full pl-11 pr-4 py-3.5 input-premium rounded-xl text-white placeholder-gray-600 focus:outline-none">
+                </div>
+                <button type="submit" id="btnForgotSubmit" class="w-full py-4 mt-2 font-bold text-white bg-white/10 hover:bg-white/20 border border-white/10 rounded-xl transition-all shadow-lg active:scale-[0.98]">
+                    Gửi Mã Khôi Phục
+                </button>
+                <div class="text-center pt-6 mt-6 border-t border-white/5">
+                    <a href="#" onclick="switchTab('login')" class="text-sm text-gray-500 hover:text-blue-400 font-semibold transition"><i class="fa-solid fa-arrow-left mr-1"></i> Quay lại đăng nhập</a>
+                </div>
+            </form>
+
+            <form id="resetForm" class="space-y-4 hidden" onsubmit="handleResetPassword(event)">
+                <p class="text-sm text-gray-400 text-center mb-4 leading-relaxed">Nhập mã OTP vừa nhận và thiết lập mật khẩu mới.</p>
+                <div class="relative">
+                    <i class="fa-solid fa-key absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm"></i>
+                    <input type="text" id="resetOtp" required maxlength="6" placeholder="Mã OTP (6 số)" class="w-full pl-11 pr-4 py-3.5 input-premium rounded-xl text-white placeholder-gray-600 focus:outline-none tracking-[0.5em] font-bold text-center">
+                </div>
+                <div class="relative mt-3">
+                    <i class="fa-solid fa-lock absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm"></i>
+                    <input type="password" id="resetNewPassword" required minlength="6" placeholder="Mật khẩu mới (Tối thiểu 6 ký tự)" class="w-full pl-11 pr-4 py-3.5 input-premium rounded-xl text-white placeholder-gray-600 focus:outline-none">
+                </div>
+                <button type="submit" id="btnResetSubmit" class="w-full py-4 mt-2 font-bold text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 rounded-xl transition-all shadow-lg active:scale-[0.98]">
+                    Khôi Phục Mật Khẩu
+                </button>
+                <div class="text-center pt-6 mt-6 border-t border-white/5">
+                    <a href="#" onclick="switchTab('login')" class="text-sm text-gray-500 hover:text-blue-400 font-semibold transition"><i class="fa-solid fa-arrow-left mr-1"></i> Quay lại đăng nhập</a>
+                </div>
+            </form>
+
         </div>
     </main>
 
     <script>
-        const forms = { login: document.getElementById('loginForm'), register: document.getElementById('registerForm'), otp: document.getElementById('otpForm') };
-        const titles = { login: "D4M ID", register: "Khởi Tạo Định Danh", otp: "Xác Minh Bảo Mật" };
-        let tempEmail = "";
+        // 🚀 CẤU HÌNH GIAO DIỆN (TABS)
+        const forms = { 
+            login: document.getElementById('loginForm'), 
+            register: document.getElementById('registerForm'), 
+            otp: document.getElementById('otpForm'),
+            forgot: document.getElementById('forgotForm'),
+            reset: document.getElementById('resetForm')
+        };
+        const titles = { 
+            login: "D4M ID", 
+            register: "Khởi Tạo Định Danh", 
+            otp: "Xác Minh Bảo Mật",
+            forgot: "Quên Mật Khẩu",
+            reset: "Đặt Lại Mật Khẩu"
+        };
+        let tempEmail = ""; 
+        let resetEmailTemp = ""; // Biến lưu tạm Email để gọi API Reset Password
 
-        // Hiển thị Toast
+        // 🚀 HIỂN THỊ THÔNG BÁO TOAST
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -160,35 +210,32 @@
             }, 3000);
         }
 
-        // Chuyển Tab
+        // 🚀 HÀM CHUYỂN TAB CƠ BẢN
         function switchTab(tab) {
             Object.values(forms).forEach(f => f.classList.add('hidden'));
             forms[tab].classList.remove('hidden');
             document.getElementById('authTitle').innerText = titles[tab];
         }
 
-        // ================= XỬ LÝ LOGIC UI Ô NHẬP OTP 6 SỐ =================
+        // ================= XỬ LÝ LOGIC UI Ô NHẬP OTP (CỦA REGISTER) =================
         const otpInputs = document.querySelectorAll('.otp-box');
         const hiddenOtpInput = document.getElementById('otpCode');
 
         otpInputs.forEach((input, index) => {
-            // Tự động nhảy ô khi gõ
             input.addEventListener('input', (e) => {
-                e.target.value = e.target.value.replace(/[^0-9]/g, ''); // Chỉ cho nhập số
+                e.target.value = e.target.value.replace(/[^0-9]/g, '');
                 if (e.target.value !== '' && index < otpInputs.length - 1) {
                     otpInputs[index + 1].focus();
                 }
                 updateHiddenOtp();
             });
 
-            // Lùi ô khi bấm Backspace
             input.addEventListener('keydown', (e) => {
                 if (e.key === 'Backspace' && e.target.value === '' && index > 0) {
                     otpInputs[index - 1].focus();
                 }
             });
 
-            // Hỗ trợ Paste một cục 6 số
             input.addEventListener('paste', (e) => {
                 e.preventDefault();
                 const pastedData = e.clipboardData.getData('text').replace(/[^0-9]/g, '').slice(0, 6).split('');
@@ -208,6 +255,7 @@
         }
         // ===================================================================
 
+        // 🚀 LOGIC: ĐĂNG KÝ
         async function handleRegister(e) {
             e.preventDefault();
             const btn = document.getElementById('btnRegSubmit');
@@ -229,11 +277,10 @@
                     body: JSON.stringify(payload)
                 });
                 const data = await res.json();
-                
                 if (res.ok) {
                     showToast("Khởi tạo thành công! Sếp check Email nhé.");
                     switchTab('otp');
-                    setTimeout(() => otpInputs[0].focus(), 100); // Tự động focus ô OTP đầu tiên
+                    setTimeout(() => otpInputs[0].focus(), 100);
                 } else showToast(data.detail, 'error');
             } catch (err) { showToast("Lỗi kết nối máy chủ!", 'error'); }
             
@@ -241,9 +288,9 @@
             btn.disabled = false;
         }
 
+        // 🚀 LOGIC: XÁC THỰC OTP ĐĂNG KÝ
         async function handleVerifyOTP(e) {
             e.preventDefault();
-            
             if(hiddenOtpInput.value.length < 6) {
                 showToast("Sếp vui lòng nhập đủ 6 số OTP nhé!", "error");
                 return;
@@ -267,17 +314,16 @@
                     setTimeout(() => switchTab('login'), 1500);
                 } else {
                     showToast("Mã OTP sai hoặc đã hết hạn.", 'error');
-                    // Xóa trắng ô OTP để nhập lại
                     otpInputs.forEach(inp => inp.value = '');
                     updateHiddenOtp();
                     otpInputs[0].focus();
                 }
             } catch (err) { showToast("Lỗi kết nối máy chủ!", 'error'); }
-            
             btn.innerHTML = originalText;
             btn.disabled = false;
         }
 
+        // 🚀 LOGIC: ĐĂNG NHẬP
         async function handleUserLogin(e) {
             e.preventDefault();
             const btn = document.getElementById('btnLoginSubmit');
@@ -297,26 +343,95 @@
                     body: JSON.stringify(payload)
                 });
                 const data = await res.json();
-                
                 if (res.ok) {
                     localStorage.setItem('d4m_sso_token', data.access_token);
-                    
                     const urlParams = new URLSearchParams(window.location.search);
                     const redirectUrl = urlParams.get('redirect') || '/hub.html';
-                    
                     const finalUrl = redirectUrl + (redirectUrl.includes('?') ? '&' : '?') + 'login=success';
                     window.location.href = finalUrl;
                 } else {
                     showToast(data.detail, 'error');
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
                 }
             } catch (err) { 
                 showToast("Lỗi kết nối máy chủ!", 'error'); 
-                btn.innerHTML = originalText;
-                btn.disabled = false;
             }
+            btn.innerHTML = originalText;
+            btn.disabled = false;
         }
+
+        // ==========================================================
+        // 🚀 LUỒNG XỬ LÝ QUÊN MẬT KHẨU
+        // ==========================================================
+
+        // Yêu cầu gửi mã OTP Quên Mật Khẩu
+        async function handleForgotPasswordRequest(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnForgotSubmit');
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Đang xử lý...';
+            btn.disabled = true;
+
+            const emailInput = document.getElementById('forgotEmail').value;
+            
+            try {
+                const res = await fetch('/api/auth/forgot-password/request', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: emailInput })
+                });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    showToast("Đã gửi mã khôi phục! Sếp check Email nhé.");
+                    resetEmailTemp = emailInput; // Lưu lại email để dùng cho bước sau
+                    switchTab('reset'); // Chuyển sang giao diện nhập OTP + Pass mới
+                } else {
+                    showToast(data.detail, 'error');
+                }
+            } catch (err) { 
+                showToast("Lỗi kết nối máy chủ!", 'error'); 
+            }
+            
+            btn.innerHTML = 'Gửi Mã Khôi Phục';
+            btn.disabled = false;
+        }
+
+        // Xử lý đổi mật khẩu bằng OTP
+        async function handleResetPassword(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnResetSubmit');
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Đang cập nhật...';
+            btn.disabled = true;
+
+            const otpInput = document.getElementById('resetOtp').value;
+            const newPasswordInput = document.getElementById('resetNewPassword').value;
+
+            try {
+                const res = await fetch('/api/auth/forgot-password/reset', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        email: resetEmailTemp, 
+                        otp: otpInput, 
+                        new_password: newPasswordInput 
+                    })
+                });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    showToast("Khôi phục thành công! Đăng nhập ngay thôi.");
+                    // Reset thành công thì chuyển về trang Login sau 1.5 giây
+                    setTimeout(() => switchTab('login'), 1500);
+                } else {
+                    showToast(data.detail, 'error');
+                }
+            } catch (err) { 
+                showToast("Lỗi kết nối máy chủ!", 'error'); 
+            }
+            
+            btn.innerHTML = 'Khôi Phục Mật Khẩu';
+            btn.disabled = false;
+        }
+
     </script>
 </body>
 </html>

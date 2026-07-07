@@ -11,6 +11,9 @@ from fastapi.responses import FileResponse
 from urllib.parse import quote, unquote
 from mutagen.mp3 import MP3
 from mutagen.id3 import ID3, APIC, TIT2, TPE1, error
+from fastapi import Header
+import jwt
+
 
 # Import từ các module của sếp
 from api.audio_engine import WORKSPACE_DIR, process_audio_pipeline
@@ -132,7 +135,7 @@ class YTDLDownloadRequest(BaseModel):
     format: str
     quality: str
     title: str
-    x_auth: str = None 
+
 
 @router.post("/info")
 async def get_video_info(req: YTDLInfoRequest):
@@ -177,22 +180,33 @@ async def get_video_info(req: YTDLInfoRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/download")
-async def process_download(req: YTDLDownloadRequest, background_tasks: BackgroundTasks):
+async def process_download(req: YTDLDownloadRequest, background_tasks: BackgroundTasks, authorization: str = Header(None)):
     try:
-        is_admin = (req.x_auth == SECRET_KEY)
+        # 🚀 1. LẤY THÔNG TIN ROLE TỪ TOKEN ĐỂ CHECK ADMIN
+        is_admin = False
+        if authorization and authorization.startswith("Bearer "):
+            token = authorization.split(" ")[1]
+            try:
+                payload = jwt.decode(token, options={"verify_signature": False})
+                if payload.get("role") == 1:
+                    is_admin = True
+            except:
+                pass
+
         safe_title = sanitize_title(req.title)
         
+        # Nếu là Admin, lưu file gốc vào MUSIC_DIR để chuẩn bị chạy AI
         if is_admin:
             save_dir = os.path.join(MUSIC_DIR, safe_title)
             out_tmpl = os.path.join(save_dir, f"{safe_title}.%(ext)s")
+        # Nếu là User thường, lưu vào PENDING_DIR như khách vãng lai
         else:
             folder_guest = f"{safe_title}_{datetime.now().strftime('%H%M%S')}"
             save_dir = os.path.join(PENDING_DIR, folder_guest)
             out_tmpl = os.path.join(save_dir, f"d4m-dev_{safe_title}.%(ext)s")
-        
-        os.makedirs(save_dir, exist_ok=True)
+            os.makedirs(save_dir, exist_ok=True)
+            
         python_exec = os.path.expanduser("~/myenv/bin/python3")
-        
         thumbnail_cmd = "--write-thumbnail --convert-thumbnails jpg" if is_admin else ""
         yt_dlp_base = f'"{python_exec}" -m yt_dlp --concurrent-fragments 5 --no-warnings --no-playlist {thumbnail_cmd}'
 
@@ -207,16 +221,14 @@ async def process_download(req: YTDLDownloadRequest, background_tasks: Backgroun
         
         downloaded_file = None
         target_prefix = f"{safe_title}" if is_admin else f"d4m-dev_{safe_title}"
-        
         for f in os.listdir(save_dir):
             if f.startswith(target_prefix) and f.endswith(req.format):
                 downloaded_file = f
                 break
-        
         if not downloaded_file: raise Exception("Hệ thống tải thành công nhưng tệp không xuất hiện.")
-        
         full_file_path = os.path.join(save_dir, downloaded_file)
 
+        # 🚀 2. PHÂN LUỒNG XỬ LÝ (CHỈ ADMIN MỚI ĐƯỢC CHẠY PIPELINE 5 TÀI NGUYÊN)
         if is_admin:
             background_tasks.add_task(run_admin_audio_pipeline, full_file_path, safe_title, f".{req.format}", req.title, "YouTube Music")
             write_log("admin", safe_title, f"Sếp đã tải và bóc tách AI: {downloaded_file}")
@@ -234,15 +246,6 @@ async def process_download(req: YTDLDownloadRequest, background_tasks: Backgroun
         print(f"❌ [DOWNLOAD_ERROR]: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/file/{folder}/{filename}")
-async def serve_file(folder: str, filename: str):
-    real_folder = unquote(folder)
-    real_filename = unquote(filename)
-    for base_dir in [MUSIC_DIR, PENDING_DIR]:
-        file_path = os.path.join(base_dir, real_folder, real_filename)
-        if os.path.exists(file_path):
-            return FileResponse(file_path, media_type="application/octet-stream", filename=real_filename)
-    raise HTTPException(status_code=404, detail="File không tồn tại")
 
 # ==========================================
 # 🚀 SMART SEARCH & TRENDING ĐÃ SỬA LỖI TRẮNG BÓC

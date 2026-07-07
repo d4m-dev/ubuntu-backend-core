@@ -107,14 +107,14 @@ def setup_routers(app: FastAPI):
 
 def setup_frontend_routes(app: FastAPI):
     FRONTEND_PAGES = {
-        "/": "hub.html", "/hub.html": "hub.html", "/auth.html": "auth.html",
+        "/": "hub.html", "/hub": "hub.html", "/auth": "auth.html",
         "/admin/dashboard": "index.html", "/admin/dashboard/": "index.html",
         "/admin/upload": "admin-upload.html", "/admin/upload/": "admin-upload.html",
-        "/audio-test.html": "audio-test.html", "/numerology.html": "numerology.html",
-        "/vocal-remove.html": "vocal-remove.html", "/love-sync.html": "love-sync.html",
-        "/music-pro.html": "music-pro.html", "/social-hub.html": "social-hub.html",
-        "/documentation.html": "documentation.html", "/yt-downloader.html": "yt-downloader.html",
-        "/profile.html": "profile.html", "/test-tracks.html": "test-tracks.html",
+        "/audio-test": "audio-test.html", "/numerology": "numerology.html",
+        "/vocal-remove": "vocal-remove.html", "/love-sync": "love-sync.html",
+        "/music-pro": "music-pro.html", "/social-hub": "social-hub.html",
+        "/documentation": "documentation.html", "/yt-downloader": "yt-downloader.html",
+        "/profile": "profile.html", "/test-tracks": "test-tracks.html",
     }
     
     PUBLIC_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "public")
@@ -129,6 +129,12 @@ def setup_frontend_routes(app: FastAPI):
             
         app.get(route)(create_handler())
 
+    @app.get("/music-pro/{song_slug}")
+    async def serve_dynamic_music_pro(song_slug: str):
+        file_path = os.path.join(PUBLIC_DIR, "music-pro.html")
+        if os.path.exists(file_path): 
+            return FileResponse(file_path)
+        return JSONResponse(status_code=404, content={"status": "error", "message": "❌ Không tìm thấy Music Pro"})
 # ==========================================
 # 🚀 KÍCH HOẠT HỆ THỐNG
 # ==========================================

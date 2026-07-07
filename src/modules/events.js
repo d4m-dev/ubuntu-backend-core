@@ -129,7 +129,6 @@ window.MusicProModules.events = {
                 if (this.state.isPlaying && this.currentSongHasVideo && !this.state.isBeatMode && !document.pictureInPictureElement) {
                     this.isBackgroundFallback = true;
                     const t = this.video.currentTime;
-                    
                     this.audio.currentTime = t;
                     this.audio.volume = this.state.isMuted ? 0 : this.state.volume;
                     this.audio.play().catch(()=>{}); 
@@ -144,9 +143,7 @@ window.MusicProModules.events = {
                     if (this.isBackgroundFallback) {
                         this.isBackgroundFallback = false;
                         const t = this.audio.currentTime;
-                        
                         this.video.currentTime = t + 0.1; 
-                        
                         if(this.state.isPlaying) {
                             this.video.play().then(() => {
                                 this.audio.pause();
@@ -157,7 +154,6 @@ window.MusicProModules.events = {
                             this.audio.pause();
                         }
                     }
-                    
                     if (this.state.isPlaying && this.currentSongHasVideo && this.state.isBeatMode) {
                         const masterTime = this.video.currentTime;
                         if (Math.abs(this.beatAudio.currentTime - masterTime) > 0.5) {
@@ -192,13 +188,11 @@ window.MusicProModules.events = {
         this.video.ontimeupdate = () => {
             if (this.currentSongHasVideo) { 
                 const masterTime = this.video.currentTime;
-                
                 try { 
                     if (Math.abs(this.audio.currentTime - masterTime) > SYNC_THRESHOLD) {
                         this.audio.currentTime = masterTime; 
                     }
                 } catch(e) {}
-                
                 try { 
                     if (Math.abs(this.beatAudio.currentTime - masterTime) > SYNC_THRESHOLD) {
                         this.beatAudio.currentTime = masterTime;
@@ -329,7 +323,6 @@ window.MusicProModules.events = {
                 if (this.state.currentNav === 1 && typeof this.renderExplore === 'function') this.renderExplore();
                 else if (this.state.currentNav === 3 && typeof this.renderSettings === 'function') this.renderSettings();
                 else if (typeof this.renderPlaylist === 'function') this.renderPlaylist();
-                
                 setTimeout(() => {
                     this.elements.scrollContainer.scrollTop = currentScrollTop;
                 }, 0);
@@ -348,6 +341,7 @@ window.MusicProModules.events = {
         if (this.elements.btnOptions) {
             this.elements.btnOptions.onclick = (e) => { e.stopPropagation(); this.elements.optionsMenu.classList.toggle('show'); };
         }
+        
         document.addEventListener('click', (e) => { 
             if (this.elements.optionsMenu && this.elements.btnOptions && !this.elements.optionsMenu.contains(e.target) && !this.elements.btnOptions.contains(e.target)) {
                 this.elements.optionsMenu.classList.remove('show'); 
@@ -374,14 +368,36 @@ window.MusicProModules.events = {
 
         if (this.elements.btnCloseDl) this.elements.btnCloseDl.onclick = () => this.elements.dlModal.classList.remove('show');
         if (this.elements.dlModal) this.elements.dlModal.onclick = (e) => { if (e.target === this.elements.dlModal) this.elements.dlModal.classList.remove('show'); };
+        
         document.querySelectorAll('.dl-btn').forEach(btn => {
             btn.onclick = () => { if(typeof this.triggerDownload === 'function') this.triggerDownload(btn.dataset.type); }
         });
 
+        // 🌟 BẢN NÂNG CẤP: CHIA SẺ LINK SẠCH (CLEAN URL) 🌟
         const shareButtons = document.querySelectorAll('.btn-share');
         shareButtons.forEach(btn => {
-            btn.onclick = () => {
-                if(typeof this.shareCurrentSong === 'function') this.shareCurrentSong();
+            btn.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Lấy thông tin bài hát hiện tại
+                const currentSong = this.state.playlist[this.state.currentIndex];
+                
+                if (currentSong && currentSong.name) {
+                    // Gọi hàm Slugify đã cấy ở app.js
+                    const songSlug = this.createSlug ? this.createSlug(currentSong.name) : currentSong.id;
+                    const shareUrl = `${window.location.origin}/music-pro/${songSlug}`;
+                    
+                    const shareMessage = `Nghe bài "${currentSong.name}" bởi ${currentSong.artist || 'Artist'} trên Music Pro Ultimate:\n${shareUrl}`;
+                    
+                    navigator.clipboard.writeText(shareMessage).then(() => {
+                        if(typeof this.showToast === 'function') this.showToast(`Đã chép link bài: ${currentSong.name}`);
+                    }).catch(err => {
+                        if(typeof this.showToast === 'function') this.showToast("Lỗi chép link, vui lòng copy thủ công!", "error");
+                    });
+                } else {
+                    if(typeof this.showToast === 'function') this.showToast("Hãy chọn một bài hát trước khi chia sẻ!", "error");
+                }
             };
         });
 
@@ -398,8 +414,8 @@ window.MusicProModules.events = {
 
         if (themeToggleSwitch) {
             const effectiveTheme = this.state.theme === 'auto' 
-            ? window.matchMedia('(prefers-color-scheme: dark)').matches 
-            : this.state.theme !== 'light';
+                ? window.matchMedia('(prefers-color-scheme: dark)').matches 
+                : this.state.theme !== 'light';
             themeToggleSwitch.classList.toggle('active', effectiveTheme);
 
             themeToggleSwitch.onclick = () => {
@@ -418,8 +434,8 @@ window.MusicProModules.events = {
                 if (typeof this.updateAllRangeInputs === 'function') this.updateAllRangeInputs();
 
                 const newEffectiveTheme = this.state.theme === 'auto' 
-                ? window.matchMedia('(prefers-color-scheme: dark)').matches 
-                : this.state.theme !== 'light';
+                    ? window.matchMedia('(prefers-color-scheme: dark)').matches 
+                    : this.state.theme !== 'light';
                 themeToggleSwitch.classList.toggle('active', newEffectiveTheme);
             };
         }

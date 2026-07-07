@@ -126,7 +126,6 @@ class MusicPro {
                 if (typeof this.initAudioContext === 'function') this.initAudioContext();
                 if (typeof this.initAudioEffects === 'function') this.initAudioEffects();
             }
-            
             // Kích hoạt một âm thanh câm để hệ điều hành cấp phép "Chạy ngầm"
             const silentAudio = new Audio('data:audio/mp3;base64,//MkxAA....'); 
             silentAudio.volume = 0;
@@ -139,9 +138,70 @@ class MusicPro {
 
         document.addEventListener('click', unlockAudioEngine, { once: true, passive: true });
         document.addEventListener('touchstart', unlockAudioEngine, { once: true, passive: true });
+
+        // ==========================================
+        // 🚀 TÍCH HỢP LÕI DEEP LINK & AUTO PLAY
+        // ==========================================
+        this.createSlug = (text) => {
+            if (!text) return "";
+            return text.toString().toLowerCase()
+                .replace(/[àáạảãâầấậẩẫăằắặẳẵ]/g, "a")
+                .replace(/[èéẹẻẽêềếệểễ]/g, "e")
+                .replace(/[ìíịỉĩ]/g, "i")
+                .replace(/[òóọỏõôồốộổỗơờớợởỡ]/g, "o")
+                .replace(/[ùúụủũưừứựửữ]/g, "u")
+                .replace(/[ỳýỵỷỹ]/g, "y")
+                .replace(/đ/g, "d")
+                .replace(/\s+/g, '-')
+                .replace(/[^\w\-]+/g, '')
+                .replace(/\-\-+/g, '-')
+                .replace(/^-+/, '').replace(/-+$/, '');
+        };
+
+        // Đợi hệ thống đồng bộ danh sách nhạc từ API về mảng playlist
+        setTimeout(() => {
+            const path = window.location.pathname;
+            // Định vị xem URL hiện tại có đang chia sẻ bài hát không (/music-pro/ten-bai-hat)
+            if (path.includes('/music-pro/') && path.split('/').length > 2) {
+                const targetSlug = path.split('/').pop();
+                
+                if (this.state.playlist && this.state.playlist.length > 0) {
+                    let foundIndex = -1;
+                    // Quét mảng nhạc tìm bài khớp slug
+                    for (let i = 0; i < this.state.playlist.length; i++) {
+                        const song = this.state.playlist[i];
+                        const songSlug = this.createSlug(song.name);
+                        if (songSlug === targetSlug || songSlug.includes(targetSlug)) {
+                            foundIndex = i;
+                            break;
+                        }
+                    }
+
+                    // Nếu tìm thấy, lập tức kích nổ cỗ máy phát nhạc ngầm
+                    if (foundIndex !== -1) {
+                        unlockAudioEngine();
+                        
+                        setTimeout(() => {
+                            if (typeof this.loadTrack === 'function') {
+                                this.state.currentIndex = foundIndex;
+                                this.loadTrack(foundIndex);
+                                if (typeof this.play === 'function') this.play();
+                                
+                                if (typeof this.showToast === 'function') {
+                                    this.showToast(`▶️ Đang phát bài chia sẻ: ${this.state.playlist[foundIndex].name}`);
+                                }
+                            }
+                        }, 500);
+                    } else {
+                        if (typeof this.showToast === 'function') this.showToast("❌ Không tìm thấy bài hát này!", "error");
+                    }
+                }
+            }
+        }, 1200); // Trễ 1.2s đảm bảo load danh sách từ server ổn định hoàn toàn
     }
 }
 
+// Gắn toàn bộ các module chức năng vào Prototype của class chính
 Object.assign(MusicPro.prototype, window.MusicProModules.ui);
 Object.assign(MusicPro.prototype, window.MusicProModules.audio);
 Object.assign(MusicPro.prototype, window.MusicProModules.events);
@@ -149,4 +209,5 @@ Object.assign(MusicPro.prototype, window.MusicProModules.utils);
 Object.assign(MusicPro.prototype, window.MusicProModules.lyrics);
 Object.assign(MusicPro.prototype, window.MusicProModules.other);
 
+// Khởi tạo thực thể chạy ứng dụng toàn cục
 window.app = new MusicPro();

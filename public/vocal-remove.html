@@ -22,7 +22,18 @@
 </head>
 <body class="bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900/20 via-[#0b0f19] to-[#0b0f19] min-h-screen py-10">
     
-    <div class="max-w-3xl mx-auto px-4 relative z-10">
+    <div id="unauthorizedState" class="hidden flex-col items-center justify-center min-h-[80vh] text-center px-4 relative z-20">
+        <div class="w-24 h-24 bg-red-500/10 rounded-full flex items-center justify-center mb-6 border border-red-500/20 shadow-[0_0_30px_rgba(239,68,68,0.2)]">
+            <i class="fa-solid fa-lock text-5xl text-red-400"></i>
+        </div>
+        <h2 id="unauthTitle" class="text-3xl font-black text-white mb-4 tracking-wide">Truy cập bị từ chối</h2>
+        <p id="unauthDesc" class="text-gray-400 mb-8 max-w-md mx-auto leading-relaxed">Bạn không có quyền sử dụng tính năng này!<br>Vui lòng đăng nhập bằng thẻ định danh D4M ID.</p>
+        <button onclick="redirectToAuth()" class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold py-3.5 px-8 rounded-xl shadow-lg transition-all active:scale-95 flex items-center">
+            <i class="fa-solid fa-fingerprint mr-2 text-lg"></i> Đăng nhập D4M ID
+        </button>
+    </div>
+
+    <div id="appContent" class="max-w-3xl mx-auto px-4 relative z-10 hidden">
         <div class="text-center mb-10">
             <div class="w-16 h-16 mx-auto bg-blue-500/10 rounded-2xl flex items-center justify-center mb-4 border border-blue-500/20">
                 <i class="fa-solid fa-compact-disc text-3xl text-blue-400 animate-spin" style="animation-duration: 3s;"></i>
@@ -91,166 +102,243 @@
         <div id="resultBox" class="glass-panel p-6 mt-6 hidden border-t-4 border-t-green-500">
             <h3 class="font-black text-2xl mb-6 text-white text-center"><i class="fa-solid fa-circle-check text-green-400 mr-2"></i>ĐÃ XỬ LÝ THÀNH CÔNG</h3>
             <div id="outputLinks" class="space-y-4">
-                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        const fileInput = document.getElementById('audioFile');
-        const fileNameDisplay = document.getElementById('fileNameDisplay');
-        const customNameInput = document.getElementById('customName');
-        const fileIcon = document.getElementById('fileIcon');
-        const submitBtn = document.getElementById('submitBtn');
-        const btnIcon = document.getElementById('btnIcon');
-        const btnText = document.getElementById('btnText');
-        const progressFill = document.getElementById('progressFill');
-        
-        let pollingInterval = null;
-        let progressInterval = null;
-        let simulatedProgress = 0;
-
-        // Auto điền tên file
-        fileInput.addEventListener('change', function(e) {
-            if (this.files && this.files[0]) {
-                const file = this.files[0];
-                fileNameDisplay.textContent = file.name;
-                fileNameDisplay.classList.add('text-blue-400', 'font-bold');
-                fileIcon.className = "fa-solid fa-music text-4xl text-blue-400 mb-3";
-                const nameWithoutExt = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
-                customNameInput.value = nameWithoutExt;
-            }
-        });
-
-        // Xử lý Form
-        // Xử lý Form
-        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const file = fileInput.files[0];
-            if (!file) return alert("Vui lòng chọn file!");
-
-            // 1. KHÓA NÚT VÀ KHỞI ĐỘNG THANH TIẾN ĐỘ
-            submitBtn.disabled = true;
-            btnIcon.className = "fa-solid fa-radar_stroke fa-spin mr-2 text-xl";
-            document.getElementById('resultBox').classList.add('hidden');
-            
-            simulatedProgress = 0;
-            progressFill.style.width = '0%';
-            btnText.innerText = "ĐANG CHUẨN BỊ (0%)...";
-
-            // Thuật toán Tiến độ Thông minh (Tăng nhanh -> Chậm dần -> Dừng ở 95%)
-            progressInterval = setInterval(() => {
-                if (simulatedProgress < 50) {
-                    simulatedProgress += 1;
-                } else if (simulatedProgress < 85) {
-                    simulatedProgress += 0.3;
-                } else if (simulatedProgress < 95) {
-                    simulatedProgress += 0.05;
-                }
-
-                progressFill.style.width = `${simulatedProgress}%`;
-                btnText.innerText = `ĐANG XỬ LÝ AI (${Math.floor(simulatedProgress)}%)...`;
-            }, 500);
-
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('custom_name', customNameInput.value);
-            formData.append('separate_beat', document.getElementById('sepBeat').checked);
-            formData.append('extract_lyrics', document.getElementById('extLyrics').checked);
-
-            try {
-                // Đẩy file lên Backend
-                const response = await fetch('/api/audio/extract', {
-                    method: 'POST',
-                    body: formData,
-                    headers: localStorage.getItem("backend_token") ? {
-                        'Authorization': `Bearer ${localStorage.getItem("backend_token")}`
-                    } : {}
-                });
-
-                const result = await response.json();
-                
-                if (response.status === 202) {
-                    const projectFolder = result.project_folder;
-                    const expectedOutputs = result.expected_outputs; // <-- Lấy danh sách link dự kiến
-                    
-                    // 2. RADAR QUÉT TRẠNG THÁI SERVER MỖI 5 GIÂY
-                    pollingInterval = setInterval(async () => {
-                        try {
-                            const statusRes = await fetch(`/api/audio/status/${projectFolder}`);
-                            const statusData = await statusRes.json();
-                            
-                            // NẾU BACKEND XONG -> BƠM % LÊN 100 VÀ MỞ KẾT QUẢ
-                            if (statusData.status === "completed") {
-                                clearInterval(pollingInterval);
-                                clearInterval(progressInterval);
-                                
-                                simulatedProgress = 100;
-                                progressFill.style.width = '100%';
-                                btnText.innerText = "HOÀN THÀNH (100%)!";
-                                btnIcon.className = "fa-solid fa-check mr-2";
-                                
-                                // Đợi 1 giây để user nhìn thấy 100% rồi mới load nút tải với dữ liệu dự kiến
-                                setTimeout(() => {
-                                    renderSuccessUI(expectedOutputs); 
-                                }, 1000);
-                            }
-                        } catch (err) {
-                            console.error("Lỗi quét trạng thái:", err);
-                        }
-                    }, 5000);
-
-                } else {
-                    alert("Lỗi máy chủ: " + (result.message || result.detail));
-                    resetButton();
-                }
-            } catch (err) {
-                alert("Mất kết nối đến Backend: " + err.message);
-                resetButton();
-            }
-        });
-
-        // Hàm Reset Nút bấm
-        function resetButton() {
-            clearInterval(progressInterval);
-            clearInterval(pollingInterval);
-            submitBtn.disabled = false;
-            progressFill.style.width = '0%';
-            btnIcon.className = "fa-solid fa-wand-magic-sparkles mr-2";
-            btnText.innerText = "BẮT ĐẦU XỬ LÝ";
+        // ==========================================
+        // 🚀 KIỂM TRA QUYỀN TRUY CẬP (AUTH CHECKER)
+        // ==========================================
+        function redirectToAuth() {
+            window.location.href = `/auth?redirect=${window.location.pathname}`;
         }
 
-        // Hàm Render Kết quả
-        function renderSuccessUI(outputs) {
-            resetButton();
-            const resultBox = document.getElementById('resultBox');
-            const outputLinks = document.getElementById('outputLinks');
-            
-            resultBox.classList.remove('hidden');
-            outputLinks.innerHTML = '';
-            
-            if (outputs.vocal) {
-                outputLinks.innerHTML += `
-                    <div class="bg-blue-900/20 border border-blue-500/20 p-4 rounded-xl flex flex-col md:flex-row items-center justify-between gap-4">
-                        <div class="flex items-center text-blue-300 font-bold min-w-[120px]"><i class="fa-solid fa-microphone-lines text-2xl mr-3"></i> Giọng Hát</div>
-                        <audio controls class="w-full max-w-md" src="${outputs.vocal}"></audio>
-                        <a href="${outputs.vocal}" download class="w-full md:w-auto bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-lg text-sm font-bold text-center transition flex-shrink-0"><i class="fa-solid fa-download mr-1"></i> Tải MP3</a>
-                    </div>`;
+        // Hàm giải mã JWT Token để đọc chức vụ (Role) và Active
+        function parseJwt(token) {
+            try {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+                return JSON.parse(jsonPayload);
+            } catch (e) {
+                return null;
             }
-            if (outputs.beat) {
-                outputLinks.innerHTML += `
-                    <div class="bg-purple-900/20 border border-purple-500/20 p-4 rounded-xl flex flex-col md:flex-row items-center justify-between gap-4">
-                        <div class="flex items-center text-purple-300 font-bold min-w-[120px]"><i class="fa-solid fa-drum text-2xl mr-3"></i> Nhạc Beat</div>
-                        <audio controls class="w-full max-w-md" src="${outputs.beat}"></audio>
-                        <a href="${outputs.beat}" download class="w-full md:w-auto bg-purple-600 hover:bg-purple-500 text-white px-5 py-2.5 rounded-lg text-sm font-bold text-center transition flex-shrink-0"><i class="fa-solid fa-download mr-1"></i> Tải MP3</a>
-                    </div>`;
+        }
+
+        function checkAuthorization() {
+            const token = localStorage.getItem('d4m_sso_token');
+            const appContent = document.getElementById('appContent');
+            const unauthorizedState = document.getElementById('unauthorizedState');
+            const unauthTitle = document.getElementById('unauthTitle');
+            const unauthDesc = document.getElementById('unauthDesc');
+
+            // Hàm gom hiển thị màn hình khóa
+            const showLock = (title, desc) => {
+                if(unauthTitle && title) unauthTitle.innerText = title;
+                if(unauthDesc && desc) unauthDesc.innerHTML = desc;
+                unauthorizedState.classList.remove('hidden');
+                unauthorizedState.classList.add('flex');
+            };
+
+            // 1. Nếu không có token -> Yêu cầu đăng nhập
+            if (!token) {
+                showLock("Cần Đăng Nhập", "Sếp chưa mang thẻ định danh D4M ID.<br>Vui lòng đăng nhập vào hệ sinh thái để tiếp tục.");
+                return false;
             }
-            if (outputs.lyrics) {
-                outputLinks.innerHTML += `
-                    <div class="bg-green-900/20 border border-green-500/20 p-4 rounded-xl flex flex-col md:flex-row items-center justify-between gap-4">
-                        <div class="flex items-center text-green-300 font-bold min-w-[120px]"><i class="fa-solid fa-file-lines text-2xl mr-3"></i> Lời Bài Hát</div>
-                        <div class="text-gray-400 text-sm flex-1 truncate">File Text (.txt/.lrc) chứa lời được bóc tách từ Whisper AI</div>
-                        <a href="${outputs.lyrics}" download class="w-full md:w-auto bg-gray-700 hover:bg-gray-600 border border-green-500/30 text-white px-5 py-2.5 rounded-lg text-sm font-bold text-center transition flex-shrink-0"><i class="fa-solid fa-download mr-1"></i> Tải File Lời</a>
-                    </div>`;
+
+            const payload = parseJwt(token);
+            if (!payload) {
+                showLock("Lỗi Định Danh", "Thẻ D4M ID của sếp bị hỏng hoặc đã hết hạn.<br>Vui lòng đăng xuất và đăng nhập lại.");
+                return false;
+            }
+
+            // 🚀 2. ĐÂY LÀ CHỐT CHẶN ACTIVE
+            if (Number(payload.active) !== 1) {
+                showLock(
+                    "Tài Khoản Bị Đóng Băng", 
+                    "Tài khoản của sếp <b>chưa đăng ký</b>.<br>Vui lòng liên hệ Admin để kích hoạt tài khoản trước khi xài AI!"
+                );
+                return false;
+            }
+
+            // 3. TÙY CHỌN: NẾU MUỐN CHỈ ADMIN MỚI ĐƯỢC XÀI THÌ MỞ CODE DƯỚI LÊN
+            /*
+            if (Number(payload.role) !== 1) {
+                showLock(
+                    "Không Đủ Thẩm Quyền", 
+                    "Công cụ AI này tốn rất nhiều tài nguyên Server.<br>Chỉ có <b>Admin (Role = 1)</b> mới được phép sử dụng!"
+                );
+                return false;
+            }
+            */
+
+            // Vượt qua mọi chốt chặn -> Mở khóa giao diện AI
+            appContent.classList.remove('hidden');
+            return true;
+        }
+
+        // KÍCH HOẠT LÁ CHẮN NGAY KHI LOAD TRANG
+        const isAuthorized = checkAuthorization();
+
+        // ==========================================
+        // 🚀 LOGIC XỬ LÝ GIAO DIỆN (CHỈ CHẠY KHI ĐƯỢC CẤP QUYỀN)
+        // ==========================================
+        if (isAuthorized) {
+            const fileInput = document.getElementById('audioFile');
+            const fileNameDisplay = document.getElementById('fileNameDisplay');
+            const customNameInput = document.getElementById('customName');
+            const fileIcon = document.getElementById('fileIcon');
+            const submitBtn = document.getElementById('submitBtn');
+            const btnIcon = document.getElementById('btnIcon');
+            const btnText = document.getElementById('btnText');
+            const progressFill = document.getElementById('progressFill');
+            
+            let pollingInterval = null;
+            let progressInterval = null;
+            let simulatedProgress = 0;
+
+            // Auto điền tên file
+            fileInput.addEventListener('change', function(e) {
+                if (this.files && this.files[0]) {
+                    const file = this.files[0];
+                    fileNameDisplay.textContent = file.name;
+                    fileNameDisplay.classList.add('text-blue-400', 'font-bold');
+                    fileIcon.className = "fa-solid fa-music text-4xl text-blue-400 mb-3";
+                    const nameWithoutExt = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+                    customNameInput.value = nameWithoutExt;
+                }
+            });
+
+            // Xử lý Form
+            document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const file = fileInput.files[0];
+                if (!file) return alert("Vui lòng chọn file!");
+
+                // 1. KHÓA NÚT VÀ KHỞI ĐỘNG THANH TIẾN ĐỘ
+                submitBtn.disabled = true;
+                btnIcon.className = "fa-solid fa-radar_stroke fa-spin mr-2 text-xl";
+                document.getElementById('resultBox').classList.add('hidden');
+                
+                simulatedProgress = 0;
+                progressFill.style.width = '0%';
+                btnText.innerText = "ĐANG CHUẨN BỊ (0%)...";
+
+                progressInterval = setInterval(() => {
+                    if (simulatedProgress < 50) {
+                        simulatedProgress += 1;
+                    } else if (simulatedProgress < 85) {
+                        simulatedProgress += 0.3;
+                    } else if (simulatedProgress < 95) {
+                        simulatedProgress += 0.05;
+                    }
+
+                    progressFill.style.width = `${simulatedProgress}%`;
+                    btnText.innerText = `ĐANG XỬ LÝ AI (${Math.floor(simulatedProgress)}%)...`;
+                }, 500);
+
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('custom_name', customNameInput.value);
+                formData.append('separate_beat', document.getElementById('sepBeat').checked);
+                formData.append('extract_lyrics', document.getElementById('extLyrics').checked);
+
+                try {
+                    // Đẩy file lên Backend, nhớ gửi kèm Token!
+                    const response = await fetch('/api/audio/extract', {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem("d4m_sso_token")}`
+                        }
+                    });
+
+                    const result = await response.json();
+                    
+                    if (response.status === 202) {
+                        const projectFolder = result.project_folder;
+                        const expectedOutputs = result.expected_outputs;
+                        
+                        // 2. RADAR QUÉT TRẠNG THÁI SERVER MỖI 5 GIÂY
+                        pollingInterval = setInterval(async () => {
+                            try {
+                                const statusRes = await fetch(`/api/audio/status/${projectFolder}`);
+                                const statusData = await statusRes.json();
+                                
+                                if (statusData.status === "completed") {
+                                    clearInterval(pollingInterval);
+                                    clearInterval(progressInterval);
+                                    
+                                    simulatedProgress = 100;
+                                    progressFill.style.width = '100%';
+                                    btnText.innerText = "HOÀN THÀNH (100%)!";
+                                    btnIcon.className = "fa-solid fa-check mr-2";
+                                    
+                                    setTimeout(() => {
+                                        renderSuccessUI(expectedOutputs); 
+                                    }, 1000);
+                                }
+                            } catch (err) {
+                                console.error("Lỗi quét trạng thái:", err);
+                            }
+                        }, 5000);
+
+                    } else {
+                        alert("Lỗi máy chủ: " + (result.message || result.detail));
+                        resetButton();
+                    }
+                } catch (err) {
+                    alert("Mất kết nối đến Backend: " + err.message);
+                    resetButton();
+                }
+            });
+
+            // Hàm Reset Nút bấm
+            function resetButton() {
+                clearInterval(progressInterval);
+                clearInterval(pollingInterval);
+                submitBtn.disabled = false;
+                progressFill.style.width = '0%';
+                btnIcon.className = "fa-solid fa-wand-magic-sparkles mr-2";
+                btnText.innerText = "BẮT ĐẦU XỬ LÝ";
+            }
+
+            // Hàm Render Kết quả
+            function renderSuccessUI(outputs) {
+                resetButton();
+                const resultBox = document.getElementById('resultBox');
+                const outputLinks = document.getElementById('outputLinks');
+                
+                resultBox.classList.remove('hidden');
+                outputLinks.innerHTML = '';
+                
+                if (outputs.vocal) {
+                    outputLinks.innerHTML += `
+                        <div class="bg-blue-900/20 border border-blue-500/20 p-4 rounded-xl flex flex-col md:flex-row items-center justify-between gap-4">
+                            <div class="flex items-center text-blue-300 font-bold min-w-[120px]"><i class="fa-solid fa-microphone-lines text-2xl mr-3"></i> Giọng Hát</div>
+                            <audio controls class="w-full max-w-md" src="${outputs.vocal}"></audio>
+                            <a href="${outputs.vocal}" download class="w-full md:w-auto bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-lg text-sm font-bold text-center transition flex-shrink-0"><i class="fa-solid fa-download mr-1"></i> Tải MP3</a>
+                        </div>`;
+                }
+                if (outputs.beat) {
+                    outputLinks.innerHTML += `
+                        <div class="bg-purple-900/20 border border-purple-500/20 p-4 rounded-xl flex flex-col md:flex-row items-center justify-between gap-4">
+                            <div class="flex items-center text-purple-300 font-bold min-w-[120px]"><i class="fa-solid fa-drum text-2xl mr-3"></i> Nhạc Beat</div>
+                            <audio controls class="w-full max-w-md" src="${outputs.beat}"></audio>
+                            <a href="${outputs.beat}" download class="w-full md:w-auto bg-purple-600 hover:bg-purple-500 text-white px-5 py-2.5 rounded-lg text-sm font-bold text-center transition flex-shrink-0"><i class="fa-solid fa-download mr-1"></i> Tải MP3</a>
+                        </div>`;
+                }
+                if (outputs.lyrics) {
+                    outputLinks.innerHTML += `
+                        <div class="bg-green-900/20 border border-green-500/20 p-4 rounded-xl flex flex-col md:flex-row items-center justify-between gap-4">
+                            <div class="flex items-center text-green-300 font-bold min-w-[120px]"><i class="fa-solid fa-file-lines text-2xl mr-3"></i> Lời Bài Hát</div>
+                            <div class="text-gray-400 text-sm flex-1 truncate">File Text (.txt/.lrc) chứa lời được bóc tách từ Whisper AI</div>
+                            <a href="${outputs.lyrics}" download class="w-full md:w-auto bg-gray-700 hover:bg-gray-600 border border-green-500/30 text-white px-5 py-2.5 rounded-lg text-sm font-bold text-center transition flex-shrink-0"><i class="fa-solid fa-download mr-1"></i> Tải File Lời</a>
+                        </div>`;
+                }
             }
         }
     </script>

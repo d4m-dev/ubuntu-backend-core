@@ -13,11 +13,34 @@
         .frozen-card { opacity: 0.6; filter: grayscale(80%); }
         .toast-enter { animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        /* 🚀 HIỆU ỨNG MODAL MỚI */
+        #logoutModal { transition: opacity 0.3s ease, visibility 0.3s ease; }
+        .modal-content { transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); transform: scale(0.95); }
+        #logoutModal:not(.hidden) .modal-content { transform: scale(1); }
     </style>
 </head>
 <body class="bg-gradient-to-br from-[#0b0f19] via-slate-900 to-[#0b0f19] min-h-screen text-white font-sans antialiased flex flex-col">
 
     <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-3"></div>
+
+    <div id="logoutModal" class="fixed inset-0 z-[100] flex items-center justify-center hidden">
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="closeLogoutModal()"></div>
+        <div class="modal-content relative z-10 w-full max-w-sm mx-4 p-8 glass-card rounded-3xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+            <div class="text-center">
+                <div class="w-16 h-16 mx-auto bg-red-500/10 rounded-full flex items-center justify-center mb-5 border border-red-500/20">
+                    <i class="fa-solid fa-right-from-bracket text-3xl text-red-400"></i>
+                </div>
+                <h3 class="text-2xl font-black text-white mb-2">Đăng Xuất?</h3>
+                <p class="text-gray-400 text-sm mb-8 leading-relaxed">Sếp có chắc chắn muốn ngắt kết nối thẻ định danh D4M ID khỏi thiết bị này không?</p>
+                <div class="flex gap-3">
+                    <button onclick="closeLogoutModal()" class="flex-1 py-3 px-4 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl font-bold transition">Hủy bỏ</button>
+                    <button onclick="confirmLogout()" class="flex-1 py-3 px-4 bg-red-500/80 hover:bg-red-500 border border-red-500/50 text-white rounded-xl font-bold shadow-[0_0_15px_rgba(239,68,68,0.3)] transition">Xác Nhận</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <header class="py-12 text-center relative z-10 flex flex-col items-center">
         <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-3">
@@ -33,7 +56,7 @@
         </button>
 
         <div id="userProfileWidget" class="hidden flex items-center space-x-3 bg-white/5 border border-white/10 rounded-full pr-2 pl-1 py-1 backdrop-blur-md shadow-lg transition hover:bg-white/10">
-            <a href="/profile.html" class="flex items-center space-x-3 pr-4 pl-1 py-1 rounded-full cursor-pointer group">
+            <a href="/profile" class="flex items-center space-x-3 pr-4 pl-1 py-1 rounded-full cursor-pointer group">
                 <img id="headerAvatar" src="/src/favicon/ubuntu-backend/favicon-96x96.png" class="w-9 h-9 rounded-full border-2 border-blue-500/50 object-cover shadow-[0_0_10px_rgba(59,130,246,0.4)] group-hover:border-blue-400 transition-colors">
                 <div class="text-left">
                     <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-0.5">Xin chào,</p>
@@ -41,7 +64,7 @@
                 </div>
             </a>
             <div class="w-px h-6 bg-white/10"></div>
-            <button onclick="handleLogout()" class="w-8 h-8 rounded-full bg-red-500/10 hover:bg-red-500/30 text-red-400 flex items-center justify-center transition border border-red-500/20" title="Đăng xuất khỏi hệ sinh thái">
+            <button onclick="openLogoutModal()" class="w-8 h-8 rounded-full bg-red-500/10 hover:bg-red-500/30 text-red-400 flex items-center justify-center transition border border-red-500/20" title="Đăng xuất khỏi hệ sinh thái">
                 <i class="fa-solid fa-power-off text-xs"></i>
             </button>
         </div>
@@ -65,7 +88,7 @@
     <footer class="py-6 border-t border-white/5 bg-black/40 backdrop-blur-md relative z-10">
         <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center text-sm">
             <p class="text-gray-400 mb-4 md:mb-0">Crafted with <i class="fa-solid fa-bolt text-yellow-500 mx-1"></i> by <span class="font-bold text-white tracking-wide">d4m-dev</span></p>
-            <a href="/dashboard.html" class="group flex items-center space-x-2 bg-white/5 hover:bg-white/10 px-4 py-2 rounded-full transition-all border border-white/10">
+            <a href="/dashboard" class="group flex items-center space-x-2 bg-white/5 hover:bg-white/10 px-4 py-2 rounded-full transition-all border border-white/10">
                 <i class="fa-solid fa-shield-halved text-lg text-gray-400 group-hover:text-blue-400 transition-colors"></i>
                 <span class="font-medium text-gray-300 group-hover:text-white transition-colors">Admin Login</span>
             </a>
@@ -73,6 +96,25 @@
     </footer>
 
     <script>
+        // ==========================================
+        // 🚀 BỘ ĐIỀU KHIỂN MODAL ĐĂNG XUẤT MỚI
+        // ==========================================
+        function openLogoutModal() {
+            document.getElementById('logoutModal').classList.remove('hidden');
+        }
+
+        function closeLogoutModal() {
+            document.getElementById('logoutModal').classList.add('hidden');
+        }
+
+        function confirmLogout() {
+            localStorage.removeItem('d4m_sso_token');
+            closeLogoutModal(); // Đóng Modal đi
+            window.location.reload(); // F5 lại trang để Hub mất trạng thái đăng nhập
+        }
+        // ==========================================
+
+
         // 🚀 Hàm hiển thị Toast Notifications
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
@@ -101,23 +143,21 @@
 
             const token = localStorage.getItem('d4m_sso_token');
             if (token) {
-                // Đảo giao diện Header
                 document.getElementById('btnHeaderAuth').classList.add('hidden');
                 document.getElementById('userProfileWidget').classList.remove('hidden');
 
-                // Bắn API kéo thông tin người dùng từ Backend về
                 try {
                     const res = await fetch('/api/auth/profile/me', {
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
                     if (res.ok) {
                         const data = await res.json();
-                        // Cập nhật Avatar và Tên từ Database
                         document.getElementById('headerAvatar').src = data.data.avatar_url;
                         document.getElementById('headerUsername').innerText = data.data.full_name || data.data.username;
                     } else {
-                        // Nếu Token hết hạn hoặc sai, tự động đăng xuất
-                        handleLogout(false);
+                        // Nếu Token lỗi, ép thoát lặng lẽ không hiện thông báo
+                        localStorage.removeItem('d4m_sso_token');
+                        window.location.reload();
                     }
                 } catch (e) {
                     console.log("Không thể kết nối máy chủ để lấy Profile");
@@ -127,29 +167,21 @@
 
         // 🚀 HÀM ĐIỀU HƯỚNG ĐĂNG NHẬP
         function redirectToAuth() {
-            window.location.href = `/auth.html?redirect=${window.location.pathname}`;
+            window.location.href = `/auth?redirect=${window.location.pathname}`;
         }
 
-        // 🚀 HÀM XỬ LÝ ĐĂNG XUẤT (XÓA VÍ TOKEN)
-        function handleLogout(showMsg = true) {
-            localStorage.removeItem('d4m_sso_token');
-            if(showMsg) {
-                alert("Đã đăng xuất khỏi hệ sinh thái D4M.");
-            }
-            window.location.reload();
-        }
 
         // ==========================================
         // DỮ LIỆU VÀ HÀM VẼ CÁC CARD DỰ ÁN
         // ==========================================
         const coreApps = [
             { name: "Glass Town", path: "glass-town", desc: "Game Nông Trại & Tương tác 2.5D", icon: "fa-gamepad", color: "#e94560" },
-            { name: "Music Pro", path: "music-pro.html", desc: "Trình phát nhạc chuẩn Premium", icon: "fa-compact-disc", color: "#3b82f6" },
-            { name: "Love Sync", path: "love-sync.html", desc: "Đồng bộ và ghép đôi tình yêu", icon: "fa-heart", color: "#ec4899" },
-            { name: "Thần Số Học", path: "numerology.html", desc: "Phân tích vận mệnh và đường đời", icon: "fa-star-and-crescent", color: "#8b5cf6" },
-            { name: "Documentation", path: "documentation.html", desc: "Tài liệu hệ thống cốt lõi", icon: "fa-book", color: "#10b981" },
-            { name: "Remove Audio", path: "vocal-remove.html", desc: "Công cụ tách âm", icon: "fa-headphones", color: "#f59e0b" },
-            { name: "YouTube Downloader", path: "yt-downloader.html", desc: "Tải MP4/MP3 YouTube Pro", icon: "fa-youtube", color: "#ff0033" }
+            { name: "Music Pro", path: "music-pro", desc: "Trình phát nhạc chuẩn Premium", icon: "fa-compact-disc", color: "#3b82f6" },
+            { name: "Love Sync", path: "love-sync", desc: "Đồng bộ và ghép đôi tình yêu", icon: "fa-heart", color: "#ec4899" },
+            { name: "Thần Số Học", path: "numerology", desc: "Phân tích vận mệnh và đường đời", icon: "fa-star-and-crescent", color: "#8b5cf6" },
+            { name: "Documentation", path: "documentation", desc: "Tài liệu hệ thống cốt lõi", icon: "fa-book", color: "#10b981" },
+            { name: "Remove Audio", path: "vocal-remove", desc: "Công cụ tách âm", icon: "fa-headphones", color: "#f59e0b" },
+            { name: "YouTube Downloader", path: "yt-downloader", desc: "Tải MP4/MP3 YouTube Pro", icon: "fa-youtube", color: "#ff0033" }
         ];
 
         function stringToColor(str) {
@@ -163,39 +195,36 @@
             const grid = document.getElementById('project-grid');
             grid.innerHTML = '';
 
-            // 1. Render Core Apps
             coreApps.forEach(app => {
                 const techBadge = `<span class="bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2.5 py-1 rounded-md text-xs font-bold"><i class="fa-solid fa-microchip mr-1"></i>Core App</span>`;
                 const coverHtml = `<div class="h-36 w-full rounded-t-2xl flex items-center justify-center" style="background: linear-gradient(135deg, ${app.color}, #0b0f19)"><i class="fa-solid ${app.icon} text-5xl text-white/20"></i></div>`;
-
+                
                 grid.innerHTML += `
-                    <div class="glass-card rounded-2xl flex flex-col relative group">
-                        ${coverHtml}
-                        <div class="absolute top-4 left-4 bg-black/60 px-2.5 py-1 rounded-md backdrop-blur-md text-[10px] font-black uppercase tracking-wider text-purple-400 border border-purple-500/30">
-                            <i class="fa-solid fa-star mr-1"></i> Hệ thống
+                <div class="glass-card rounded-2xl flex flex-col relative group">
+                    ${coverHtml}
+                    <div class="absolute top-4 left-4 bg-black/60 px-2.5 py-1 rounded-md backdrop-blur-md text-[10px] font-black uppercase tracking-wider text-purple-400 border border-purple-500/30">
+                        <i class="fa-solid fa-star mr-1"></i> Hệ thống
+                    </div>
+                    <div class="p-6 flex flex-col flex-grow">
+                        <div class="flex justify-between items-start mb-3">
+                            <h3 class="text-xl font-bold text-white capitalize truncate pr-2">${app.name}</h3>
+                            ${techBadge}
                         </div>
-                        <div class="p-6 flex flex-col flex-grow">
-                            <div class="flex justify-between items-start mb-3">
-                                <h3 class="text-xl font-bold text-white capitalize truncate pr-2">${app.name}</h3>
-                                ${techBadge}
-                            </div>
-                            <p class="text-sm text-gray-400 flex-grow mb-5 line-clamp-2 leading-relaxed">${app.desc}</p>
-                            <div class="flex justify-between items-center mt-auto pt-4 border-t border-white/5">
-                                <span class="text-xs text-gray-500 font-mono bg-white/5 px-2 py-1 rounded">/${app.path}</span>
-                                <a href="/${app.path}" target="_blank" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-sm font-bold py-2 px-5 rounded-xl shadow-lg transition-all active:scale-95">Mở <i class="fa-solid fa-arrow-right ml-1"></i></a>
-                            </div>
+                        <p class="text-sm text-gray-400 flex-grow mb-5 line-clamp-2 leading-relaxed">${app.desc}</p>
+                        <div class="flex justify-between items-center mt-auto pt-4 border-t border-white/5">
+                            <span class="text-xs text-gray-500 font-mono bg-white/5 px-2 py-1 rounded">/${app.path}</span>
+                            <a href="/${app.path}" target="_blank" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-sm font-bold py-2 px-5 rounded-xl shadow-lg transition-all active:scale-95">Mở <i class="fa-solid fa-arrow-right ml-1"></i></a>
                         </div>
                     </div>
+                </div>
                 `;
             });
 
-            // 2. Render Hosted Projects từ API
             try {
                 const port = window.location.port ? `:${window.location.port}` : '';
                 const apiUrl = `${window.location.protocol}//${window.location.hostname}${port}/api/projects/`;
                 const response = await fetch(apiUrl);
                 const data = await response.json();
-                
                 document.getElementById('loading').classList.add('hidden');
 
                 if (data.projects.length === 0 && coreApps.length === 0) {
@@ -207,27 +236,25 @@
                     let techBadge = proj.has_python ? `<span class="bg-green-500/10 text-green-400 border border-green-500/20 px-2.5 py-1 rounded-md text-xs font-bold flex items-center"><span class="w-2 h-2 rounded-full bg-green-500 animate-pulse mr-1.5"></span>Python/Flask</span>` : `<span class="bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2.5 py-1 rounded-md text-xs font-bold"><i class="fa-brands fa-html5 mr-1"></i>HTML5</span>`;
                     let coverHtml = proj.thumbnail ? `<div class="h-36 w-full bg-cover bg-center rounded-t-2xl" style="background-image: url('${proj.thumbnail}')"></div>` : `<div class="h-36 w-full rounded-t-2xl flex items-center justify-center" style="background: linear-gradient(135deg, ${stringToColor(proj.name)}, #0b0f19)"><i class="fa-solid fa-code text-5xl text-white/10"></i></div>`;
                     const cardClass = proj.is_frozen ? 'frozen-card pointer-events-none' : '';
-                    
-                    // 🚀 ĐÃ FIX: Sửa lại href thêm /projects/ vào trước và /index.html vào cuối để trúng phóc Middleware
                     const linkButton = proj.is_frozen 
                         ? `<button class="bg-gray-800 text-gray-400 text-sm font-bold py-2 px-4 rounded-xl cursor-not-allowed border border-gray-700">Đã Khóa</button>` 
                         : `<a href="/projects/${proj.name}/index.html" target="_blank" class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white text-sm font-bold py-2 px-5 rounded-xl shadow-lg transition-all active:scale-95">Mở <i class="fa-solid fa-arrow-right ml-1"></i></a>`;
-
+                    
                     grid.innerHTML += `
-                        <div class="glass-card rounded-2xl flex flex-col relative group ${cardClass}">
-                            ${coverHtml}
-                            <div class="p-6 flex flex-col flex-grow">
-                                <div class="flex justify-between items-start mb-3">
-                                    <h3 class="text-xl font-bold text-white capitalize truncate pr-2">${proj.name.replace(/-/g, ' ')}</h3>
-                                    ${techBadge}
-                                </div>
-                                <p class="text-sm text-gray-400 flex-grow mb-5 line-clamp-2 leading-relaxed">${proj.description}</p>
-                                <div class="flex justify-between items-center mt-auto pt-4 border-t border-white/5">
-                                    <span class="text-xs text-gray-500 font-mono bg-white/5 px-2 py-1 rounded">${proj.size}</span>
-                                    ${linkButton}
-                                </div>
+                    <div class="glass-card rounded-2xl flex flex-col relative group ${cardClass}">
+                        ${coverHtml}
+                        <div class="p-6 flex flex-col flex-grow">
+                            <div class="flex justify-between items-start mb-3">
+                                <h3 class="text-xl font-bold text-white capitalize truncate pr-2">${proj.name.replace(/-/g, ' ')}</h3>
+                                ${techBadge}
+                            </div>
+                            <p class="text-sm text-gray-400 flex-grow mb-5 line-clamp-2 leading-relaxed">${proj.description}</p>
+                            <div class="flex justify-between items-center mt-auto pt-4 border-t border-white/5">
+                                <span class="text-xs text-gray-500 font-mono bg-white/5 px-2 py-1 rounded">${proj.size}</span>
+                                ${linkButton}
                             </div>
                         </div>
+                    </div>
                     `;
                 });
             } catch (err) { 
@@ -236,7 +263,6 @@
             }
         }
 
-        // Kích hoạt chuỗi hành động khi tải trang
         document.addEventListener('DOMContentLoaded', () => {
             checkLoginStatus();
             loadProjects();
