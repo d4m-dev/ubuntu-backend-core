@@ -21,7 +21,6 @@
         .glass-card { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--glass-border); border-radius: 1rem; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
         .glass-card:hover, .glass-card.active { background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.3); transform: translateY(-3px); box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.2); }
         
-        /* TERMINAL CYBERPUNK NÂNG CẤP */
         .terminal-wrapper { background: rgba(0, 0, 0, 0.85); border-radius: 0 0 1rem 1rem; display: flex; flex-direction: column; overflow: hidden; }
         .terminal-box { font-family: 'Fira Code', monospace; color: #4ade80; text-shadow: 0 0 8px rgba(74, 222, 128, 0.4); overflow-y: auto; scroll-behavior: smooth; }
         .mac-header { background: #1a1b26; border-radius: 1rem 1rem 0 0; padding: 12px 20px; display: flex; align-items: center; border-bottom: 1px solid #2d3748; }
@@ -36,6 +35,9 @@
         ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); } ::-webkit-scrollbar-thumb { background: rgba(59, 130, 246, 0.5); border-radius: 10px; } ::-webkit-scrollbar-thumb:hover { background: rgba(59, 130, 246, 0.8); }
         .glass-input { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 10px 15px; border-radius: 8px; outline: none; width: 100%; transition: all 0.3s; }
         .glass-input:focus { border-color: #3b82f6; box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); }
+        
+        /* Checkbox Custom CSS */
+        .cyber-check { accent-color: #3b82f6; width: 1.25rem; height: 1.25rem; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -99,7 +101,12 @@
                                 <span id="ctrlCron"><i class="fa-regular fa-clock mr-1"></i> Lịch: Trống</span>
                             </div>
                         </div>
-                        <div class="flex gap-3">
+                        <div class="flex items-center gap-4">
+                            <label id="manualAutoYesLabel" class="hidden flex items-center gap-2 cursor-pointer text-sm text-gray-400 hover:text-white transition">
+                                <input type="checkbox" id="manualAutoYes" class="cyber-check">
+                                <span title="Tự động truyền phím y cho các câu hỏi">Auto-Yes (-y)</span>
+                            </label>
+
                             <button id="btnPlayStop" onclick="toggleCurrentScript()" disabled class="px-6 py-2.5 rounded-lg font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center bg-gray-600 text-gray-300">
                                 <i class="fa-solid fa-play mr-2"></i> Khởi Động
                             </button>
@@ -144,7 +151,16 @@
                 <div>
                     <input type="text" id="cronInput" class="glass-input font-mono text-lg tracking-widest text-center" placeholder="* * * * *">
                 </div>
-                <div class="flex gap-3 pt-4 border-t border-white/10">
+                
+                <label class="flex items-center gap-3 cursor-pointer mt-4 p-4 bg-blue-500/10 rounded-xl border border-blue-500/20 hover:bg-blue-500/20 transition">
+                    <input type="checkbox" id="cronAutoYes" class="cyber-check">
+                    <div>
+                        <span class="block text-sm font-bold text-blue-300">Bật Auto-Yes (-y)</span>
+                        <span class="block text-[11px] text-gray-400 mt-1">Hệ thống sẽ tự động bỏ qua các bước hỏi xác nhận (y/n) khi chạy ngầm ban đêm.</span>
+                    </div>
+                </label>
+
+                <div class="flex gap-3 pt-4 border-t border-white/10 mt-2">
                     <button onclick="removeCron()" class="flex-1 py-3 bg-red-500/20 hover:bg-red-500/40 text-red-400 font-bold rounded-lg transition">Xóa Lịch</button>
                     <button onclick="saveCron()" class="flex-1 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg transition">Lưu Cài Đặt</button>
                 </div>
@@ -175,6 +191,8 @@
         let currentScript = null;
         let isRunning = false;
         let logInterval = null;
+        // Biến lưu trạng thái cấu hình của script hiện tại
+        let currentScriptConfig = { expr: "", auto_yes: false };
 
         async function fetchScripts() {
             try {
@@ -189,14 +207,20 @@
                     const isActiveClass = currentScript === sc.name ? 'active border-blue-500' : 'border-white/10';
                     const statusDot = isRun ? '<i class="status-dot status-running"></i>' : '<i class="status-dot status-stopped"></i>';
                     
-                    // Nếu đang cập nhật giao diện mà trúng Script đang chọn có sự thay đổi trạng thái, cập nhật lại biến
-                    if (currentScript === sc.name && isRunning !== isRun) {
+                    const cronBadge = sc.cron ? `<span class="text-[10px] bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded border border-blue-500/30"><i class="fa-solid fa-clock"></i> ${sc.cron}</span>` : '';
+
+                    if (currentScript === sc.name) {
                         isRunning = isRun;
+                        currentScriptConfig.expr = sc.raw_cron_expr || "";
+                        currentScriptConfig.auto_yes = sc.raw_auto_yes || false;
                         updateControlPanel(sc.cron);
                     }
 
+                    // Nhúng data-config vào element để click gọi ra được
+                    const configStr = encodeURIComponent(JSON.stringify({expr: sc.raw_cron_expr, auto_yes: sc.raw_auto_yes}));
+                    
                     listEl.innerHTML += `
-                        <div onclick="selectScript('${sc.name}', ${isRun}, '${sc.cron || ''}')" class="glass-card p-4 flex justify-between items-center ${isActiveClass}">
+                        <div onclick="selectScript('${sc.name}', ${isRun}, '${sc.cron || ''}', '${configStr}')" class="glass-card p-4 flex justify-between items-center ${isActiveClass}">
                             <div class="flex items-center gap-3">
                                 <i class="fa-brands fa-python text-2xl ${isRun ? 'text-green-400 drop-shadow-[0_0_8px_rgba(74,222,128,0.6)]' : 'text-blue-500'}"></i>
                                 <div>
@@ -204,6 +228,7 @@
                                     <div class="flex items-center gap-2 mt-1">${statusDot} <span class="text-[10px] uppercase text-gray-400">${isRun ? 'Running' : 'Ready'}</span></div>
                                 </div>
                             </div>
+                            ${cronBadge}
                         </div>
                     `;
                 });
@@ -218,30 +243,37 @@
             document.getElementById('ctrlStatus').innerHTML = isRunning 
                 ? `<i class="status-dot status-running mr-1"></i> Trạng thái: Đang chạy` 
                 : `<i class="status-dot status-stopped mr-1"></i> Trạng thái: Đã dừng`;
+            document.getElementById('ctrlCron').innerHTML = cronInfo 
+                ? `<i class="fa-regular fa-clock mr-1 text-blue-400"></i> Lịch: ${cronInfo}` 
+                : `<i class="fa-regular fa-clock mr-1"></i> Lịch: Trống`;
             
             const btnPlay = document.getElementById('btnPlayStop');
+            const manualLabel = document.getElementById('manualAutoYesLabel');
             btnPlay.disabled = false;
             document.getElementById('btnCron').disabled = false;
             
             if (isRunning) {
                 btnPlay.className = "px-6 py-2.5 rounded-lg font-bold transition-all flex items-center bg-red-600 hover:bg-red-500 text-white shadow-[0_0_15px_rgba(220,38,38,0.4)]";
                 btnPlay.innerHTML = `<i class="fa-solid fa-stop mr-2"></i> Buộc Dừng`;
-                
-                // 🚀 BẬT THANH NHẬP LỆNH
                 document.getElementById('terminalInputBox').classList.remove('hidden');
                 document.getElementById('terminalInput').focus();
+                manualLabel.classList.add('hidden'); // Ẩn ô tick khi đang chạy
             } else {
                 btnPlay.className = "px-6 py-2.5 rounded-lg font-bold transition-all flex items-center bg-green-600 hover:bg-green-500 text-white shadow-[0_0_15px_rgba(34,197,94,0.4)]";
                 btnPlay.innerHTML = `<i class="fa-solid fa-play mr-2"></i> Khởi Động`;
-                
-                // 🚀 TẮT THANH NHẬP LỆNH KHI SCRIPT ĐÃ DỪNG
                 document.getElementById('terminalInputBox').classList.add('hidden');
+                manualLabel.classList.remove('hidden'); // Hiện ô tick để cbi chạy
             }
         }
 
-        function selectScript(name, runState, cronInfo) {
+        function selectScript(name, runState, cronInfo, configStr) {
             currentScript = name;
             isRunning = runState;
+            
+            if (configStr) {
+                try { currentScriptConfig = JSON.parse(decodeURIComponent(configStr)); } catch(e){}
+            }
+
             updateControlPanel(cronInfo);
             fetchScripts(); 
 
@@ -254,10 +286,14 @@
         async function toggleCurrentScript() {
             if (!currentScript) return;
             const action = isRunning ? 'stop' : 'start';
+            const autoYes = document.getElementById('manualAutoYes').checked;
+            
             document.getElementById('btnPlayStop').innerHTML = `<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Gửi lệnh...`;
             
             try {
-                const res = await fetch(`/api/scripts/${action}/${currentScript}`, { method: 'POST', headers: API_HEADERS });
+                // Đính kèm cờ auto_yes nếu bấm nút Start
+                const url = action === 'start' ? `/api/scripts/start/${currentScript}?auto_yes=${autoYes}` : `/api/scripts/stop/${currentScript}`;
+                const res = await fetch(url, { method: 'POST', headers: API_HEADERS });
                 if(res.ok) {
                     isRunning = !isRunning;
                     updateControlPanel('');
@@ -277,7 +313,7 @@
                     let coloredLog = data.logs.replace(/ERROR|LỖI|⚠️|❌/g, '<span style="color:#ef4444; font-weight:bold;">$&</span>');
                     coloredLog = coloredLog.replace(/BẮT ĐẦU CHẠY/g, '<span style="color:#3b82f6; font-weight:bold;">$&</span>');
                     coloredLog = coloredLog.replace(/KẾT THÚC|✅/g, '<span style="color:#fbbf24; font-weight:bold;">$&</span>');
-                    coloredLog = coloredLog.replace(/👉/g, '<span style="color:#a855f7; font-weight:bold; font-size:16px;">$&</span>'); // Làm nổi bật dấu nhắc
+                    coloredLog = coloredLog.replace(/👉/g, '<span style="color:#a855f7; font-weight:bold; font-size:16px;">$&</span>');
 
                     if (coloredLog !== term.innerHTML) {
                         term.innerHTML = coloredLog || '> Chưa có dòng log nào được ghi...';
@@ -289,46 +325,52 @@
             } catch(e) {}
         }
 
-        // ==========================================
-        // 🚀 HÀM GỬI LỆNH VÀO TERMINAL
-        // ==========================================
         async function sendTerminalInput() {
             if (!currentScript || !isRunning) return;
             const inputEl = document.getElementById('terminalInput');
             const cmd = inputEl.value;
-            
-            // Xóa text ngay cho mượt và tạm khóa ô input
             inputEl.value = '';
             inputEl.disabled = true;
-            
             try {
-                await fetch(`/api/scripts/input/${currentScript}`, {
-                    method: 'POST',
-                    headers: API_HEADERS,
-                    body: JSON.stringify({ command: cmd })
-                });
-                fetchLogs(); // Ép cập nhật Log ngay lập tức để hiện chữ user vừa gõ
-            } catch (e) {
-                alert("Không thể gửi lệnh!");
-            }
-            
-            // Mở khóa lại ô input và trỏ chuột vào đó
+                await fetch(`/api/scripts/input/${currentScript}`, { method: 'POST', headers: API_HEADERS, body: JSON.stringify({ command: cmd }) });
+                fetchLogs(); 
+            } catch (e) { alert("Không thể gửi lệnh!"); }
             inputEl.disabled = false;
             inputEl.focus();
         }
 
-        // Lắng nghe sự kiện bấm phím Enter trong thanh nhập lệnh
         document.getElementById('terminalInput').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                sendTerminalInput();
-            }
+            if (e.key === 'Enter') { e.preventDefault(); sendTerminalInput(); }
         });
 
-        // Các hàm Modal Cron giữ nguyên
-        function openCronModal() { document.getElementById('cronModal').classList.remove('hidden'); setTimeout(() => { document.getElementById('cronModal').classList.remove('opacity-0'); document.getElementById('cronModalContent').classList.remove('scale-95'); }, 10); }
+        // ==========================================
+        // 🚀 CẬP NHẬT GIAO DIỆN CRON (CÓ AUTO-YES)
+        // ==========================================
+        function openCronModal() { 
+            document.getElementById('cronFileName').innerText = currentScript;
+            document.getElementById('cronInput').value = currentScriptConfig.expr || '';
+            document.getElementById('cronAutoYes').checked = currentScriptConfig.auto_yes || false;
+            
+            document.getElementById('cronModal').classList.remove('hidden'); 
+            setTimeout(() => { document.getElementById('cronModal').classList.remove('opacity-0'); document.getElementById('cronModalContent').classList.remove('scale-95'); }, 10); 
+        }
         function closeCronModal() { document.getElementById('cronModal').classList.add('opacity-0'); document.getElementById('cronModalContent').classList.add('scale-95'); setTimeout(() => document.getElementById('cronModal').classList.add('hidden'), 300); }
-        async function saveCron() { const e = document.getElementById('cronInput').value; if(e) { await fetch(`/api/scripts/schedule/${currentScript}`, { method:'POST', headers:API_HEADERS, body:JSON.stringify({cron_expr:e})}); closeCronModal(); fetchScripts(); } }
+        
+        async function saveCron() { 
+            const e = document.getElementById('cronInput').value; 
+            const y = document.getElementById('cronAutoYes').checked;
+            
+            if(e) { 
+                await fetch(`/api/scripts/schedule/${currentScript}`, { 
+                    method:'POST', 
+                    headers:API_HEADERS, 
+                    body:JSON.stringify({cron_expr: e, auto_yes: y})
+                }); 
+                closeCronModal(); 
+                fetchScripts(); 
+            } 
+        }
+        
         async function removeCron() { await fetch(`/api/scripts/unschedule/${currentScript}`, { method:'POST', headers:API_HEADERS }); closeCronModal(); fetchScripts(); }
     </script>
 </body>
