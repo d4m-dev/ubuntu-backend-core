@@ -11,7 +11,7 @@
         :root { --bg-color: #050505; --glass-bg: rgba(20, 20, 25, 0.6); --glass-border: rgba(255, 255, 255, 0.08); }
         body { background-color: var(--bg-color); color: white; font-family: 'Inter', sans-serif; overflow-x: hidden; min-height: 100vh; }
         
-        .orb { position: fixed; border-radius: 50%; filter: blur(100px); z-index: -1; animation: float 15s infinite alternate ease-in-out; opacity: 0.5; }
+        .orb { position: fixed; border-radius: 50%; filter: blur(100px); z-index: -1; animation: float 15s infinite alternate ease-in-out; opacity: 0.5; pointer-events: none; }
         .orb-1 { width: 400px; height: 400px; background: #3b82f6; top: -100px; left: -100px; }
         .orb-2 { width: 500px; height: 500px; background: #8b5cf6; bottom: -150px; right: -100px; animation-delay: -5s; }
         .orb-3 { width: 300px; height: 300px; background: #10b981; top: 40%; left: 30%; animation-delay: -10s; opacity: 0.3; }
@@ -35,9 +35,10 @@
         ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); } ::-webkit-scrollbar-thumb { background: rgba(59, 130, 246, 0.5); border-radius: 10px; } ::-webkit-scrollbar-thumb:hover { background: rgba(59, 130, 246, 0.8); }
         .glass-input { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 10px 15px; border-radius: 8px; outline: none; width: 100%; transition: all 0.3s; }
         .glass-input:focus { border-color: #3b82f6; box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); }
-        
-        /* Checkbox Custom CSS */
         .cyber-check { accent-color: #3b82f6; width: 1.25rem; height: 1.25rem; cursor: pointer; }
+
+        /* Style bổ sung cho Monthly Grid */
+        .day-label input:checked + span { background-color: #3b82f6; border-color: #60a5fa; color: white; box-shadow: 0 0 10px rgba(59,130,246,0.5); }
     </style>
 </head>
 <body>
@@ -79,7 +80,6 @@
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 overflow-hidden pb-4">
-            
             <div class="lg:col-span-4 glass p-5 flex flex-col h-full overflow-hidden">
                 <div class="flex justify-between items-center mb-5">
                     <h2 class="font-bold text-lg text-white"><i class="fa-solid fa-folder-tree text-blue-400 mr-2"></i> Scripts List</h2>
@@ -89,9 +89,8 @@
             </div>
 
             <div class="lg:col-span-8 flex flex-col gap-6 h-full overflow-hidden">
-                
                 <div class="glass p-5 shrink-0 relative overflow-hidden">
-                    <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl"></div>
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
                     <div class="flex flex-col md:flex-row justify-between items-center gap-4">
                         <div class="flex-1">
                             <h2 class="text-2xl font-black text-white mb-1" id="ctrlTitle">Chưa chọn Script</h2>
@@ -101,16 +100,15 @@
                                 <span id="ctrlCron"><i class="fa-regular fa-clock mr-1"></i> Lịch: Trống</span>
                             </div>
                         </div>
-                        <div class="flex items-center gap-4">
+                        <div class="flex items-center gap-4 relative z-10">
                             <label id="manualAutoYesLabel" class="hidden flex items-center gap-2 cursor-pointer text-sm text-gray-400 hover:text-white transition">
                                 <input type="checkbox" id="manualAutoYes" class="cyber-check">
                                 <span title="Tự động truyền phím y cho các câu hỏi">Auto-Yes (-y)</span>
                             </label>
-
                             <button id="btnPlayStop" onclick="toggleCurrentScript()" disabled class="px-6 py-2.5 rounded-lg font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center bg-gray-600 text-gray-300">
                                 <i class="fa-solid fa-play mr-2"></i> Khởi Động
                             </button>
-                            <button onclick="openCronModal()" id="btnCron" disabled class="px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-blue-400" title="Đặt lịch chạy"><i class="fa-solid fa-calendar-days"></i></button>
+                            <button onclick="openCronModal()" id="btnCron" disabled class="px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-blue-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed" title="Đặt lịch chạy"><i class="fa-solid fa-calendar-days"></i></button>
                         </div>
                     </div>
                 </div>
@@ -137,32 +135,113 @@
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
 
     <div id="cronModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
-        <div class="glass w-full max-w-md p-8 relative transform scale-95 transition-transform duration-300" id="cronModalContent">
+        <div class="glass w-full max-w-xl p-8 relative transform scale-95 transition-transform duration-300 max-h-[90vh] overflow-y-auto custom-scrollbar" id="cronModalContent">
             <button onclick="closeCronModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
-            <h3 class="text-2xl font-black text-white mb-2"><i class="fa-solid fa-stopwatch text-blue-400 mr-2"></i>Lên lịch tự động</h3>
-            <p class="text-sm text-gray-400 mb-6 font-mono">File: <span id="cronFileName" class="text-blue-300">script.py</span></p>
-            <div class="space-y-4">
+            
+            <div class="mb-6 border-b border-white/10 pb-4">
+                <h3 class="text-2xl font-black text-white"><i class="fa-solid fa-stopwatch text-blue-400 mr-2"></i>Cấu Hình Tự Động Hóa</h3>
+                <p class="text-sm text-gray-400 font-mono mt-1">Đang thiết lập cho: <span id="cronFileName" class="text-blue-300 font-bold">script.py</span></p>
+            </div>
+
+            <div class="space-y-5">
                 <div>
-                    <input type="text" id="cronInput" class="glass-input font-mono text-lg tracking-widest text-center" placeholder="* * * * *">
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-2">1. Chọn Chu Kỳ Lặp Lại</label>
+                    <select id="cronTypeSelect" class="glass-input text-sm font-bold text-blue-400 cursor-pointer" onchange="handleCronTypeChange()">
+                        <option value="daily">Hằng Ngày (Chạy cố định mốc giờ cố định)</option>
+                        <option value="interval">Hằng Giờ (Lặp lại sau mỗi X tiếng)</option>
+                        <option value="weekly">Hằng Tuần (Kích hoạt theo các Thứ trong tuần)</option>
+                        <option value="monthly">Hằng Tháng (Kích hoạt theo các Ngày trong tháng)</option>
+                        <option value="custom">Tùy Chỉnh Nâng Cao (Biểu thức Cron nguyên bản)</option>
+                    </select>
+                </div>
+
+                <div id="panel-interval" class="cron-sub-panel hidden bg-black/30 p-4 rounded-xl border border-white/5 space-y-3">
+                    <div class="flex items-center gap-3">
+                        <span class="text-sm text-gray-400">Lặp lại sau mỗi:</span>
+                        <input type="number" id="cronIntervalHours" min="1" max="23" value="3" class="glass-input font-mono w-24 text-center text-sm font-bold text-green-400" oninput="compileCronFromUI()">
+                        <span class="text-sm text-gray-400">tiếng</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="text-sm text-gray-400">Bắt đầu tại phút thứ:</span>
+                        <input type="number" id="cronIntervalMinute" min="0" max="59" value="0" class="glass-input font-mono w-24 text-center text-sm" oninput="compileCronFromUI()">
+                        <span class="text-xs text-gray-500">(Mặc định phút 0)</span>
+                    </div>
+                </div>
+
+                <div id="panel-daily" class="cron-sub-panel hidden bg-black/30 p-4 rounded-xl border border-white/5 flex items-center gap-4">
+                    <span class="text-sm text-gray-400">Thời gian kích hoạt:</span>
+                    <input type="time" id="cronDailyTime" value="02:00" class="glass-input font-mono w-40 text-center font-bold text-green-400" onchange="compileCronFromUI()">
+                </div>
+
+                <div id="panel-weekly" class="cron-sub-panel hidden bg-black/30 p-4 rounded-xl border border-white/5 space-y-4">
+                    <span class="block text-xs font-bold text-gray-400 uppercase">Chọn các Thứ trong tuần:</span>
+                    <div class="flex flex-wrap gap-2 text-xs font-mono">
+                        <label class="flex items-center gap-2 bg-white/5 px-3 py-2 rounded-lg border border-white/10 cursor-pointer hover:bg-white/10"><input type="checkbox" name="cronWeekDays" value="1" class="cyber-check" onchange="compileCronFromUI()"> Thứ 2</label>
+                        <label class="flex items-center gap-2 bg-white/5 px-3 py-2 rounded-lg border border-white/10 cursor-pointer hover:bg-white/10"><input type="checkbox" name="cronWeekDays" value="2" class="cyber-check" onchange="compileCronFromUI()"> Thứ 3</label>
+                        <label class="flex items-center gap-2 bg-white/5 px-3 py-2 rounded-lg border border-white/10 cursor-pointer hover:bg-white/10"><input type="checkbox" name="cronWeekDays" value="3" class="cyber-check" onchange="compileCronFromUI()"> Thứ 4</label>
+                        <label class="flex items-center gap-2 bg-white/5 px-3 py-2 rounded-lg border border-white/10 cursor-pointer hover:bg-white/10"><input type="checkbox" name="cronWeekDays" value="4" class="cyber-check" onchange="compileCronFromUI()"> Thứ 5</label>
+                        <label class="flex items-center gap-2 bg-white/5 px-3 py-2 rounded-lg border border-white/10 cursor-pointer hover:bg-white/10"><input type="checkbox" name="cronWeekDays" value="5" class="cyber-check" onchange="compileCronFromUI()"> Thứ 6</label>
+                        <label class="flex items-center gap-2 bg-white/5 px-3 py-2 rounded-lg border border-white/10 cursor-pointer hover:bg-white/10"><input type="checkbox" name="cronWeekDays" value="6" class="cyber-check" onchange="compileCronFromUI()"> Thứ 7</label>
+                        <label class="flex items-center gap-2 bg-white/5 px-3 py-2 rounded-lg border border-white/10 cursor-pointer hover:bg-white/10"><input type="checkbox" name="cronWeekDays" value="0" class="cyber-check" onchange="compileCronFromUI()"> Chủ Nhật</label>
+                    </div>
+                    <div class="flex items-center gap-4 pt-2 border-t border-white/5">
+                        <span class="text-sm text-gray-400">Mốc giờ kích hoạt:</span>
+                        <input type="time" id="cronWeeklyTime" value="02:00" class="glass-input font-mono w-40 text-center font-bold text-green-400" onchange="compileCronFromUI()">
+                    </div>
+                </div>
+
+                <div id="panel-monthly" class="cron-sub-panel hidden bg-black/30 p-4 rounded-xl border border-white/5 space-y-4">
+                    <span class="block text-xs font-bold text-gray-400 uppercase">Chọn các Ngày phát sóng trong tháng:</span>
+                    <div class="grid grid-cols-7 gap-2 font-mono text-xs text-center" id="cronMonthlyDaysGrid"></div>
+                    
+                    <div class="flex items-center gap-4 pt-3 border-t border-white/5">
+                        <span class="text-sm text-gray-400">Mốc giờ kích hoạt:</span>
+                        <input type="time" id="cronMonthlyTime" value="02:00" class="glass-input font-mono w-40 text-center font-bold text-green-400" onchange="compileCronFromUI()">
+                    </div>
+                </div>
+
+                <div id="panel-custom" class="cron-sub-panel hidden bg-black/30 p-4 rounded-xl border border-white/5">
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Biểu thức Cron (Mẹo: Có thể tự gõ thẳng nếu muốn)</label>
+                    <input type="text" id="cronInput" class="glass-input font-mono text-lg tracking-widest text-center text-yellow-400" placeholder="* * * * *">
+                </div>
+
+                <div class="bg-black/40 border border-white/5 rounded-xl p-4 space-y-3">
+                    <div class="flex justify-between items-center font-mono text-xs">
+                        <span class="text-gray-500">MÃ CRON HOÀN CHỈNH:</span>
+                        <span id="computedCronString" class="text-blue-400 font-bold bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">0 2 * * *</span>
+                    </div>
+                    <div>
+                        <p class="text-[11px] text-gray-500 font-bold uppercase mb-2">Dự báo vệ tinh - 3 Lần chạy tiếp theo:</p>
+                        <ul id="cronPreviewList" class="text-xs font-mono text-gray-300 space-y-1.5 pl-1">
+                            <li class="text-gray-500">Vui lòng hoàn thiện form...</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-2">2. Tham Số Dòng Lệnh (CLI Args)</label>
+                    <input type="text" id="cronArgsInput" class="glass-input font-mono text-sm" placeholder="VD: -m 'Auto Code Commit' (Không bắt buộc)">
                 </div>
                 
-                <label class="flex items-center gap-3 cursor-pointer mt-4 p-4 bg-blue-500/10 rounded-xl border border-blue-500/20 hover:bg-blue-500/20 transition">
-                    <input type="checkbox" id="cronAutoYes" class="cyber-check">
-                    <div>
-                        <span class="block text-sm font-bold text-blue-300">Bật Auto-Yes (-y)</span>
-                        <span class="block text-[11px] text-gray-400 mt-1">Hệ thống sẽ tự động bỏ qua các bước hỏi xác nhận (y/n) khi chạy ngầm ban đêm.</span>
-                    </div>
-                </label>
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-2">3. Hành Vi Bổ Sung</label>
+                    <label class="flex items-center gap-3 cursor-pointer p-4 bg-blue-500/10 rounded-xl border border-blue-500/20 hover:bg-blue-500/20 transition">
+                        <input type="checkbox" id="cronAutoYes" class="cyber-check">
+                        <div>
+                            <span class="block text-sm font-bold text-blue-300">Bật Auto-Yes (-y)</span>
+                            <span class="block text-[11px] text-gray-400 mt-1">Ép tiến trình ngầm tự động vượt qua các câu hỏi xác nhận.</span>
+                        </div>
+                    </label>
+                </div>
 
-                <div class="flex gap-3 pt-4 border-t border-white/10 mt-2">
-                    <button onclick="removeCron()" class="flex-1 py-3 bg-red-500/20 hover:bg-red-500/40 text-red-400 font-bold rounded-lg transition">Xóa Lịch</button>
-                    <button onclick="saveCron()" class="flex-1 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg transition">Lưu Cài Đặt</button>
+                <div class="flex gap-3 pt-2">
+                    <button onclick="removeCron()" class="flex-1 py-3 bg-red-500/10 hover:bg-red-500/30 text-red-400 font-bold rounded-lg border border-red-500/30 transition">Xóa Lịch Hiện Tại</button>
+                    <button onclick="saveCron()" class="flex-[2] py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg transition shadow-[0_0_15px_rgba(59,130,246,0.4)]"><i class="fa-solid fa-floppy-disk mr-2"></i> Lưu & Kích Hoạt</button>
                 </div>
             </div>
         </div>
@@ -186,13 +265,29 @@
             document.getElementById('mainApp').classList.remove('hidden');
             setTimeout(() => document.getElementById('mainApp').classList.remove('opacity-0'), 100);
             fetchScripts();
+            initMonthlyGrid(); // Khởi tạo lưới 31 ngày
         }
 
         let currentScript = null;
         let isRunning = false;
         let logInterval = null;
-        // Biến lưu trạng thái cấu hình của script hiện tại
-        let currentScriptConfig = { expr: "", auto_yes: false };
+        let currentScriptConfig = { expr: "", auto_yes: false, args: "" };
+
+        // Tạo lưới 31 ngày cho Hằng Tháng
+        function initMonthlyGrid() {
+            const grid = document.getElementById('cronMonthlyDaysGrid');
+            if(!grid) return;
+            grid.innerHTML = '';
+            for(let i=1; i<=31; i++) {
+                grid.innerHTML += `
+                    <label class="flex items-center justify-center gap-1 bg-white/5 p-1.5 rounded border border-white/5 cursor-pointer hover:bg-white/10 transition">
+                        <input type="checkbox" name="cronMonthDays" value="${i}" class="cyber-check scale-75" onchange="compileCronFromUI()">
+                        <span>${i}</span>
+                    </label>
+                `;
+            }
+        }
+        window.addEventListener('DOMContentLoaded', initMonthlyGrid);
 
         async function fetchScripts() {
             try {
@@ -206,18 +301,17 @@
                     const isRun = sc.status === 'running';
                     const isActiveClass = currentScript === sc.name ? 'active border-blue-500' : 'border-white/10';
                     const statusDot = isRun ? '<i class="status-dot status-running"></i>' : '<i class="status-dot status-stopped"></i>';
-                    
-                    const cronBadge = sc.cron ? `<span class="text-[10px] bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded border border-blue-500/30"><i class="fa-solid fa-clock"></i> ${sc.cron}</span>` : '';
+                    const cronBadge = sc.cron ? `<span class="text-[10px] bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded border border-blue-500/30"><i class="fa-solid fa-clock"></i> Cài Đặt</span>` : '';
 
                     if (currentScript === sc.name) {
                         isRunning = isRun;
                         currentScriptConfig.expr = sc.raw_cron_expr || "";
                         currentScriptConfig.auto_yes = sc.raw_auto_yes || false;
+                        currentScriptConfig.args = sc.raw_args || "";
                         updateControlPanel(sc.cron);
                     }
 
-                    // Nhúng data-config vào element để click gọi ra được
-                    const configStr = encodeURIComponent(JSON.stringify({expr: sc.raw_cron_expr, auto_yes: sc.raw_auto_yes}));
+                    const configStr = encodeURIComponent(JSON.stringify({expr: sc.raw_cron_expr, auto_yes: sc.raw_auto_yes, args: sc.raw_args}));
                     
                     listEl.innerHTML += `
                         <div onclick="selectScript('${sc.name}', ${isRun}, '${sc.cron || ''}', '${configStr}')" class="glass-card p-4 flex justify-between items-center ${isActiveClass}">
@@ -249,6 +343,7 @@
             
             const btnPlay = document.getElementById('btnPlayStop');
             const manualLabel = document.getElementById('manualAutoYesLabel');
+            
             btnPlay.disabled = false;
             document.getElementById('btnCron').disabled = false;
             
@@ -257,23 +352,21 @@
                 btnPlay.innerHTML = `<i class="fa-solid fa-stop mr-2"></i> Buộc Dừng`;
                 document.getElementById('terminalInputBox').classList.remove('hidden');
                 document.getElementById('terminalInput').focus();
-                manualLabel.classList.add('hidden'); // Ẩn ô tick khi đang chạy
+                manualLabel.classList.add('hidden');
             } else {
                 btnPlay.className = "px-6 py-2.5 rounded-lg font-bold transition-all flex items-center bg-green-600 hover:bg-green-500 text-white shadow-[0_0_15px_rgba(34,197,94,0.4)]";
                 btnPlay.innerHTML = `<i class="fa-solid fa-play mr-2"></i> Khởi Động`;
                 document.getElementById('terminalInputBox').classList.add('hidden');
-                manualLabel.classList.remove('hidden'); // Hiện ô tick để cbi chạy
+                manualLabel.classList.remove('hidden');
             }
         }
 
         function selectScript(name, runState, cronInfo, configStr) {
             currentScript = name;
             isRunning = runState;
-            
             if (configStr) {
                 try { currentScriptConfig = JSON.parse(decodeURIComponent(configStr)); } catch(e){}
             }
-
             updateControlPanel(cronInfo);
             fetchScripts(); 
 
@@ -287,11 +380,8 @@
             if (!currentScript) return;
             const action = isRunning ? 'stop' : 'start';
             const autoYes = document.getElementById('manualAutoYes').checked;
-            
             document.getElementById('btnPlayStop').innerHTML = `<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Gửi lệnh...`;
-            
             try {
-                // Đính kèm cờ auto_yes nếu bấm nút Start
                 const url = action === 'start' ? `/api/scripts/start/${currentScript}?auto_yes=${autoYes}` : `/api/scripts/stop/${currentScript}`;
                 const res = await fetch(url, { method: 'POST', headers: API_HEADERS });
                 if(res.ok) {
@@ -309,7 +399,6 @@
                 if (res.ok) {
                     const data = await res.json();
                     const term = document.getElementById('terminalBody');
-                    
                     let coloredLog = data.logs.replace(/ERROR|LỖI|⚠️|❌/g, '<span style="color:#ef4444; font-weight:bold;">$&</span>');
                     coloredLog = coloredLog.replace(/BẮT ĐẦU CHẠY/g, '<span style="color:#3b82f6; font-weight:bold;">$&</span>');
                     coloredLog = coloredLog.replace(/KẾT THÚC|✅/g, '<span style="color:#fbbf24; font-weight:bold;">$&</span>');
@@ -317,9 +406,7 @@
 
                     if (coloredLog !== term.innerHTML) {
                         term.innerHTML = coloredLog || '> Chưa có dòng log nào được ghi...';
-                        if(document.getElementById('autoScrollCheck').checked) {
-                            term.scrollTop = term.scrollHeight;
-                        }
+                        if(document.getElementById('autoScrollCheck').checked) { term.scrollTop = term.scrollHeight; }
                     }
                 }
             } catch(e) {}
@@ -343,32 +430,176 @@
             if (e.key === 'Enter') { e.preventDefault(); sendTerminalInput(); }
         });
 
-        // ==========================================
-        // 🚀 CẬP NHẬT GIAO DIỆN CRON (CÓ AUTO-YES)
-        // ==========================================
+        // ========================================================
+        // 🚀 VIP PRO: LÕI COMPILER & DECOMPILER CRON BẰNG GIAO DIỆN
+        // ========================================================
+        function handleCronTypeChange() {
+            const selectType = document.getElementById('cronTypeSelect').value;
+            // Ẩn tất cả sub-panels
+            document.querySelectorAll('.cron-sub-panel').forEach(p => p.classList.add('hidden'));
+            // Hiện sub-panel tương ứng
+            document.getElementById(`panel-${selectType}`).classList.remove('hidden');
+            
+            compileCronFromUI();
+        }
+
+        // 🧬 ĐÓNG GÓI GIAO DIỆN THÀNH CHUỖI CRON EXPRESSION
+        function compileCronFromUI() {
+            const type = document.getElementById('cronTypeSelect').value;
+            let cronStr = "* * * * *";
+
+            if (type === 'daily') {
+                const timeVal = document.getElementById('cronDailyTime').value || "02:00";
+                const [h, m] = timeVal.split(':');
+                cronStr = `${Number(m)} ${Number(h)} * * *`;
+            } 
+            else if (type === 'interval') {
+                const hours = document.getElementById('cronIntervalHours').value || "3";
+                const mins = document.getElementById('cronIntervalMinute').value || "0";
+                cronStr = `${Number(mins)} */${hours} * * *`;
+            } 
+            else if (type === 'weekly') {
+                const timeVal = document.getElementById('cronWeeklyTime').value || "02:00";
+                const [h, m] = timeVal.split(':');
+                const checkedDays = Array.from(document.querySelectorAll('input[name="cronWeekDays"]:checked')).map(cb => cb.value);
+                const dayStr = checkedDays.length > 0 ? checkedDays.join(',') : '*';
+                cronStr = `${Number(m)} ${Number(h)} * * ${dayStr}`;
+            } 
+            else if (type === 'monthly') {
+                const timeVal = document.getElementById('cronMonthlyTime').value || "02:00";
+                const [h, m] = timeVal.split(':');
+                const checkedDays = Array.from(document.querySelectorAll('input[name="cronMonthDays"]:checked')).map(cb => cb.value);
+                const dayStr = checkedDays.length > 0 ? checkedDays.join(',') : '*';
+                cronStr = `${Number(m)} ${Number(h)} ${dayStr} * *`;
+            } 
+            else if (type === 'custom') {
+                cronStr = document.getElementById('cronInput').value.trim() || "* * * * *";
+            }
+
+            document.getElementById('computedCronString').innerText = cronStr;
+            triggerCronPreview(cronStr);
+        }
+
+        // 🧬 GIẢI MÃ CHUỖI CRON LÊN GIAO DIỆN KHI MỞ MODAL (DECOMPILER)
+        function decompileCronToUI(cronStr) {
+            if(!cronStr) {
+                document.getElementById('cronTypeSelect').value = 'daily';
+                handleCronTypeChange();
+                return;
+            }
+
+            // Reset hết các ô checkboxes trước khi nạp
+            document.querySelectorAll('input[name="cronWeekDays"], input[name="cronMonthDays"]').forEach(cb => cb.checked = false);
+
+            // 1. Phân tích định dạng Interval: m */h * * *
+            const intervalMatch = cronStr.match(/^(\d+)\s+\*\/(\d+)\s+\*\s+\*\s+\*$/);
+            if (intervalMatch) {
+                document.getElementById('cronTypeSelect').value = 'interval';
+                document.getElementById('cronIntervalMinute').value = intervalMatch[1];
+                document.getElementById('cronIntervalHours').value = intervalMatch[2];
+                handleCronTypeChange();
+                return;
+            }
+
+            // 2. Phân tích định dạng Daily: m h * * *
+            const dailyMatch = cronStr.match(/^(\d+)\s+(\d+)\s+\*\s+\*\s+\*$/);
+            if (dailyMatch) {
+                document.getElementById('cronTypeSelect').value = 'daily';
+                document.getElementById('cronDailyTime').value = `${dailyMatch[2].padStart(2, '0')}:${dailyMatch[1].padStart(2, '0')}`;
+                handleCronTypeChange();
+                return;
+            }
+
+            // 3. Phân tích định dạng Weekly: m h * * days
+            const weeklyMatch = cronStr.match(/^(\d+)\s+(\d+)\s+\*\s+\*\s+([\d,]+)$/);
+            if (weeklyMatch) {
+                document.getElementById('cronTypeSelect').value = 'weekly';
+                document.getElementById('cronWeeklyTime').value = `${weeklyMatch[2].padStart(2, '0')}:${weeklyMatch[1].padStart(2, '0')}`;
+                const days = weeklyMatch[3].split(',');
+                days.forEach(d => {
+                    const cb = document.querySelector(`input[name="cronWeekDays"][value="${d}"]`);
+                    if(cb) cb.checked = true;
+                });
+                handleCronTypeChange();
+                return;
+            }
+
+            // 4. Phân tích định dạng Monthly: m h days * *
+            const monthlyMatch = cronStr.match(/^(\d+)\s+(\d+)\s+([\d,]+)\s+\*\s+\*$/);
+            if (monthlyMatch) {
+                document.getElementById('cronTypeSelect').value = 'monthly';
+                document.getElementById('cronMonthlyTime').value = `${monthlyMatch[2].padStart(2, '0')}:${monthlyMatch[1].padStart(2, '0')}`;
+                const days = monthlyMatch[3].split(',');
+                days.forEach(d => {
+                    const cb = document.querySelector(`input[name="cronMonthDays"][value="${d}"]`);
+                    if(cb) cb.checked = true;
+                });
+                handleCronTypeChange();
+                return;
+            }
+
+            // Nếu biểu thức phức tạp khác -> Cho vào mục Tùy chỉnh nâng cao
+            document.getElementById('cronTypeSelect').value = 'custom';
+            document.getElementById('cronInput').value = cronStr;
+            handleCronTypeChange();
+        }
+
+        // Gọi API nạp dự báo 3 lần chạy tiếp theo
+        let previewTimer;
+        function triggerCronPreview(expr) {
+            clearTimeout(previewTimer);
+            const previewBox = document.getElementById('cronPreviewList');
+            
+            previewTimer = setTimeout(async () => {
+                try {
+                    const res = await fetch('/api/scripts/cron-preview', {
+                        method: 'POST', headers: API_HEADERS, body: JSON.stringify({cron_expr: expr})
+                    });
+                    if(res.ok) {
+                        const data = await res.json();
+                        previewBox.innerHTML = data.runs.map((r, i) => `
+                            <li class="flex items-center gap-2 mt-1">
+                                <span class="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-[10px] border border-blue-500/30 font-bold">${i+1}</span>
+                                <span class="text-green-400 font-bold">${r}</span>
+                            </li>
+                        `).join('');
+                    } else {
+                        previewBox.innerHTML = '<li class="text-red-400 text-xs"><i class="fa-solid fa-triangle-exclamation mr-2"></i> Lỗi cú pháp hoặc chu kỳ không hợp lệ</li>';
+                    }
+                } catch(e) {}
+            }, 400);
+        }
+
+        // Theo dõi ô tự gõ nâng cao
+        document.getElementById('cronInput').addEventListener('input', compileCronFromUI);
+
         function openCronModal() { 
+            if(!currentScript) return;
             document.getElementById('cronFileName').innerText = currentScript;
-            document.getElementById('cronInput').value = currentScriptConfig.expr || '';
             document.getElementById('cronAutoYes').checked = currentScriptConfig.auto_yes || false;
+            document.getElementById('cronArgsInput').value = currentScriptConfig.args || '';
+            
+            // 🔥 Nạp dữ liệu cũ và tiến hành dịch ngược lên Form UI
+            decompileCronToUI(currentScriptConfig.expr);
             
             document.getElementById('cronModal').classList.remove('hidden'); 
             setTimeout(() => { document.getElementById('cronModal').classList.remove('opacity-0'); document.getElementById('cronModalContent').classList.remove('scale-95'); }, 10); 
         }
+        
         function closeCronModal() { document.getElementById('cronModal').classList.add('opacity-0'); document.getElementById('cronModalContent').classList.add('scale-95'); setTimeout(() => document.getElementById('cronModal').classList.add('hidden'), 300); }
         
         async function saveCron() { 
-            const e = document.getElementById('cronInput').value; 
+            const e = document.getElementById('computedCronString').innerText; // Lấy chuỗi đã compile
             const y = document.getElementById('cronAutoYes').checked;
+            const a = document.getElementById('cronArgsInput').value.trim();
             
             if(e) { 
                 await fetch(`/api/scripts/schedule/${currentScript}`, { 
-                    method:'POST', 
-                    headers:API_HEADERS, 
-                    body:JSON.stringify({cron_expr: e, auto_yes: y})
+                    method:'POST', headers:API_HEADERS, body:JSON.stringify({cron_expr: e, auto_yes: y, args: a})
                 }); 
                 closeCronModal(); 
                 fetchScripts(); 
-            } 
+            }
         }
         
         async function removeCron() { await fetch(`/api/scripts/unschedule/${currentScript}`, { method:'POST', headers:API_HEADERS }); closeCronModal(); fetchScripts(); }

@@ -503,5 +503,60 @@ window.TRACKS = [
     instrumentalSrc: "../audio_workspace/music/yeuemnhungkhongvoitoi/yeuemnhungkhongvoitoi_beat.mp3",
     videoSrc: "../audio_workspace/music/yeuemnhungkhongvoitoi/yeuemnhungkhongvoitoi.mp4",
     lyricSrc: "../audio_workspace/music/yeuemnhungkhongvoitoi/yeuemnhungkhongvoitoi.lrc"
+  },
+
+  {
+    id: 47,
+    title: "Chân Tình Đem Bán",
+    artist: "HLC",
+    cover: "../audio_workspace/music/embandihetchantinh/embandihetchantinh.jpg",
+    audioSrc: "../audio_workspace/music/embandihetchantinh/embandihetchantinh.mp3",
+    instrumentalSrc: "../audio_workspace/music/embandihetchantinh/embandihetchantinh_beat.mp3",
+    videoSrc: "../audio_workspace/music/embandihetchantinh/embandihetchantinh.mp4",
+    lyricSrc: "../audio_workspace/music/embandihetchantinh/embandihetchantinh.lrc"
+  },
+
+  {
+    id: 48,
+    title: "Em Đồng Ý | I Do",
+    artist: "Đức Phúc x 911",
+    cover: "../audio_workspace/music/emdongy/emdongy.jpg",
+    audioSrc: "../audio_workspace/music/emdongy/emdongy.mp3",
+    instrumentalSrc: "../audio_workspace/music/emdongy/emdongy_beat.mp3",
+    videoSrc: "../audio_workspace/music/emdongy/emdongy.mp4",
+    lyricSrc: "../audio_workspace/music/emdongy/emdongy.lrc"
+  },
+
+  {
+    id: 49,
+    title: "emongyidoucphucx911xkhachungofficialmusicvideovalentine2023",
+    artist: "Unknown Artist",
+    cover: "../audio_workspace/music/emongyidoucphucx911xkhachungofficialmusicvideovalentine2023/emongyidoucphucx911xkhachungofficialmusicvideovalentine2023.jpg",
+    audioSrc: "../audio_workspace/music/emongyidoucphucx911xkhachungofficialmusicvideovalentine2023/emongyidoucphucx911xkhachungofficialmusicvideovalentine2023.mp3",
+    instrumentalSrc: "../audio_workspace/music/emongyidoucphucx911xkhachungofficialmusicvideovalentine2023/emongyidoucphucx911xkhachungofficialmusicvideovalentine2023_beat.mp3",
+    videoSrc: "../audio_workspace/music/emongyidoucphucx911xkhachungofficialmusicvideovalentine2023/emongyidoucphucx911xkhachungofficialmusicvideovalentine2023.mp4",
+    lyricSrc: "../audio_workspace/music/emongyidoucphucx911xkhachungofficialmusicvideovalentine2023/emongyidoucphucx911xkhachungofficialmusicvideovalentine2023.lrc"
+  },
+
+  {
+    id: 50,
+    title: "Nam Chính",
+    artist: "Ca Sĩ Giấu Mặt",
+    cover: "../audio_workspace/music/namchinhcasigiaumatcoverlangnhinemangtrongvaidienngoauanhlanamchinh/namchinhcasigiaumatcoverlangnhinemangtrongvaidienngoauanhlanamchinh.jpg",
+    audioSrc: "../audio_workspace/music/namchinhcasigiaumatcoverlangnhinemangtrongvaidienngoauanhlanamchinh/namchinhcasigiaumatcoverlangnhinemangtrongvaidienngoauanhlanamchinh.mp3",
+    instrumentalSrc: "../audio_workspace/music/namchinhcasigiaumatcoverlangnhinemangtrongvaidienngoauanhlanamchinh/namchinhcasigiaumatcoverlangnhinemangtrongvaidienngoauanhlanamchinh_beat.mp3",
+    videoSrc: "../audio_workspace/music/namchinhcasigiaumatcoverlangnhinemangtrongvaidienngoauanhlanamchinh/namchinhcasigiaumatcoverlangnhinemangtrongvaidienngoauanhlanamchinh.mp4",
+    lyricSrc: "../audio_workspace/music/namchinhcasigiaumatcoverlangnhinemangtrongvaidienngoauanhlanamchinh/namchinhcasigiaumatcoverlangnhinemangtrongvaidienngoauanhlanamchinh.lrc"
+  },
+
+  {
+    id: 51,
+    title: "The Fate Of Ophelia",
+    artist: "TAYLOR SWIFT",
+    cover: "../audio_workspace/music/taylorswiftthefateofophelia/taylorswiftthefateofophelia.jpg",
+    audioSrc: "../audio_workspace/music/taylorswiftthefateofophelia/taylorswiftthefateofophelia.mp3",
+    instrumentalSrc: "../audio_workspace/music/taylorswiftthefateofophelia/taylorswiftthefateofophelia_beat.mp3",
+    videoSrc: "../audio_workspace/music/taylorswiftthefateofophelia/taylorswiftthefateofophelia.mp4",
+    lyricSrc: "../audio_workspace/music/taylorswiftthefateofophelia/taylorswiftthefateofophelia.lrc"
   }
 ]
