@@ -208,6 +208,7 @@ Object.assign(MusicPro.prototype, window.MusicProModules.events);
 Object.assign(MusicPro.prototype, window.MusicProModules.utils);
 Object.assign(MusicPro.prototype, window.MusicProModules.lyrics);
 Object.assign(MusicPro.prototype, window.MusicProModules.other);
+Object.assign(MusicPro.prototype, window.MusicProModules.auth);
 
 // Khởi tạo thực thể chạy ứng dụng toàn cục
 window.app = new MusicPro();

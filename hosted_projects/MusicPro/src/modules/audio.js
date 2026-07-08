@@ -6,7 +6,7 @@ window.MusicProModules.audio = {
     initAudioEffects() {
         this.initAudioContext();
         let audioControlsModal = document.getElementById('audio-controls-modal');
-        
+
         if (!audioControlsModal) {
             audioControlsModal = document.createElement('div');
             audioControlsModal.id = 'audio-controls-modal';
@@ -50,10 +50,13 @@ window.MusicProModules.audio = {
             const control = document.getElementById(controlId);
             const valueDisplay = document.getElementById(`${controlId}-value`);
             if (control && valueDisplay) {
-                control.oninput = () => {
+                const updateEQ = () => {
                     valueDisplay.textContent = `${control.value}dB`;
                     if (typeof this.updateEqualizer === 'function') this.updateEqualizer();
                 };
+                control.oninput = updateEQ;
+                // Set initial value
+                valueDisplay.textContent = `${control.value}dB`;
             }
         });
 
@@ -154,7 +157,7 @@ window.MusicProModules.audio = {
             default: document.documentElement.style.setProperty('--spacing-multiplier', '1');
         }
 
-        if (this.state.currentNav === 3 && typeof this.renderSettings === 'function') { 
+        if (this.state.currentNav === 3 && typeof this.renderSettings === 'function') {
             this.renderSettings();
         }
     },
@@ -171,7 +174,7 @@ window.MusicProModules.audio = {
         localStorage.setItem('favorites', JSON.stringify(this.state.favorites));
         this.updateHeartButton();
         if (typeof this.renderPlaylist === 'function') this.renderPlaylist();
-    }, 
+    },
 
     updateHeartButton() {
         if (!this.state.playlist[this.state.currentIndex]) return;
@@ -198,8 +201,8 @@ window.MusicProModules.audio = {
             this.isLyricsCanvasActive = false;
         }
 
-        if (typeof this.pause === 'function') this.pause(); 
-        
+        if (typeof this.pause === 'function') this.pause();
+
         this.state.currentIndex = idx;
         this.state.isPreloading = false;
         this.state.nextTrackData = null;
@@ -211,13 +214,13 @@ window.MusicProModules.audio = {
         if (typeof this.updateBeatBtnUI === 'function') this.updateBeatBtnUI();
         if (typeof this.renderPlaylist === 'function') this.renderPlaylist();
         if (typeof this.loadLyrics === 'function') this.loadLyrics(song.lyric);
-        if (typeof this.renderContextQueue === 'function') this.renderContextQueue(); 
+        if (typeof this.renderContextQueue === 'function') this.renderContextQueue();
         this.addToHistory(song.id);
 
         this.currentSongHasVideo = !!(song.vid && !song.vid.includes('..4.mp4') && !song.vid.includes('ERROR'));
         if (typeof this.updatePiPButtonUI === 'function') this.updatePiPButtonUI();
 
-        // Tải trước tất cả các nguồn - Fix lỗi giật ở đây (luôn gán src song song)
+        // Preload all sources - Fix stuttering issue (always assign src in parallel)
         this.video.src = this.currentSongHasVideo ? song.vid : '';
         this.audio.src = song.path;
         this.beatAudio.src = (song.instrumental && song.instrumental !== 'Tạm thời chưa có!') ? song.instrumental : '';
@@ -231,27 +234,13 @@ window.MusicProModules.audio = {
         }
 
         if (autoPlay) {
-            if (typeof this.resumeAudioContext === 'function') this.resumeAudioContext(); 
+            if (typeof this.resumeAudioContext === 'function') this.resumeAudioContext();
             if (typeof this.play === 'function') this.play();
         }
-        
+
         if (typeof this.checkMarquee === 'function') this.checkMarquee();
         localStorage.setItem('lastIndex', idx);
         localStorage.setItem('lastTime', 0);
-
-        if (wasLyricsPiPOpen) {
-            setTimeout(() => {
-                if (wasCanvasPiP && this.lyricsPipVideo && !document.pictureInPictureElement) {
-                    this.lyricsPipVideo.play().then(() => {
-                        this.lyricsPipVideo.requestPictureInPicture();
-                        this.isLyricsCanvasActive = true;
-                        if(typeof this.updatePiPButtonUI === 'function') this.updatePiPButtonUI();
-                    }).catch(() => {});
-                } else {
-                    if(typeof this.updatePiPButtonUI === 'function') this.updatePiPButtonUI();
-                }
-            }, 500);
-        }
     },
 
     addToHistory(id) {
@@ -259,7 +248,7 @@ window.MusicProModules.audio = {
         localStorage.setItem('history', JSON.stringify(this.state.history));
     },
 
-    // 🌟 BỔ SUNG: KHAI BÁO MEDIA SESSION ĐỂ CHỐNG "GIẾT APP" KHI CHẠY NGẦM
+    // 🌟 ENHANCED: MEDIA SESSION FOR BACKGROUND PLAYBACK PROTECTION 🌟
     updateMediaSession(song) {
         if ('mediaSession' in navigator) {
             navigator.mediaSession.metadata = new MediaMetadata({
@@ -273,23 +262,23 @@ window.MusicProModules.audio = {
                 ]
             });
 
-            navigator.mediaSession.setActionHandler('play', () => { 
-                if(typeof this.resumeAudioContext === 'function') this.resumeAudioContext(); 
-                if(typeof this.play === 'function') this.play(); else if(typeof this.togglePlay === 'function') this.togglePlay(); 
+            navigator.mediaSession.setActionHandler('play', () => {
+                if(typeof this.resumeAudioContext === 'function') this.resumeAudioContext();
+                if(typeof this.play === 'function') this.play(); else if(typeof this.togglePlay === 'function') this.togglePlay();
             });
-            navigator.mediaSession.setActionHandler('pause', () => { 
-                if(typeof this.pause === 'function') this.pause(); else if(typeof this.togglePlay === 'function') this.togglePlay(); 
+            navigator.mediaSession.setActionHandler('pause', () => {
+                if(typeof this.pause === 'function') this.pause(); else if(typeof this.togglePlay === 'function') this.togglePlay();
             });
-            navigator.mediaSession.setActionHandler('previoustrack', () => { 
-                if(typeof this.resumeAudioContext === 'function') this.resumeAudioContext(); 
-                if(typeof this.prev === 'function') this.prev(); 
+            navigator.mediaSession.setActionHandler('previoustrack', () => {
+                if(typeof this.resumeAudioContext === 'function') this.resumeAudioContext();
+                if(typeof this.prev === 'function') this.prev();
             });
-            navigator.mediaSession.setActionHandler('nexttrack', () => { 
-                if(typeof this.resumeAudioContext === 'function') this.resumeAudioContext(); 
-                if(typeof this.next === 'function') this.next(); 
+            navigator.mediaSession.setActionHandler('nexttrack', () => {
+                if(typeof this.resumeAudioContext === 'function') this.resumeAudioContext();
+                if(typeof this.next === 'function') this.next();
             });
-            navigator.mediaSession.setActionHandler('seekto', (details) => { 
-                if(typeof this.seek === 'function') this.seek(details.seekTime); 
+            navigator.mediaSession.setActionHandler('seekto', (details) => {
+                if(typeof this.seek === 'function') this.seek(details.seekTime);
             });
         }
     },
@@ -316,7 +305,7 @@ window.MusicProModules.audio = {
             });
         }
 
-        // Gọi khai báo Background Media Session
+        // Call Background Media Session declaration
         this.updateMediaSession(song);
     },
 
@@ -360,43 +349,43 @@ window.MusicProModules.audio = {
         }
     },
 
-    // 🌟 BỔ SUNG: HÀM CROSSFADE CHUYỂN BEAT CỰC MƯỢT (Không load lại src) 🌟
+    // 🌟 ENHANCED: CROSSFADE FOR BEAT SWITCHING (Ultra-smooth without reloading src) 🌟
     toggleBeatMode() {
         const isNowBeat = !this.state.isBeatMode;
         this.state.isBeatMode = isNowBeat;
-        
+
         if (this.elements.btnSwitchBeat) {
             this.elements.btnSwitchBeat.classList.toggle('active', isNowBeat);
         }
         this.showToast(isNowBeat ? "Chế độ Beat/Karaoke" : "Chế độ Nhạc Gốc");
 
         if (this.state.isPlaying) {
-            const fadeDuration = 500; // Làm mượt trong 0.5s
+            const fadeDuration = 500; // Smooth transition in 0.5s
             const steps = 20;
             const stepTime = fadeDuration / steps;
-            
+
             let currentStep = 0;
             const startMainVol = isNowBeat ? this.state.volume : 0;
             const endMainVol = isNowBeat ? 0 : this.state.volume;
             const startBeatVol = isNowBeat ? 0 : this.state.volume;
             const endBeatVol = isNowBeat ? this.state.volume : 0;
 
-            // Lấy chuẩn thời gian của Video (nếu có) hoặc Track đang phát
+            // Get authoritative time from Video (if available) or Track currently playing
             const masterTime = this.currentSongHasVideo ? this.video.currentTime : (isNowBeat ? this.audio.currentTime : this.beatAudio.currentTime);
-            
-            // Ép đồng bộ thời gian gắt gao trước khi phát song song
+
+            // Force time synchronization before parallel playback
             try { this.beatAudio.currentTime = masterTime; } catch(e){}
             try { this.audio.currentTime = masterTime; } catch(e){}
 
-            // Cho cả 2 track chạy song song
+            // Start both tracks in parallel
             this.beatAudio.play().catch(()=>{});
             this.audio.play().catch(()=>{});
 
-            // Vòng lặp Fade
+            // Fade loop
             const fadeInterval = setInterval(() => {
                 currentStep++;
                 const ratio = currentStep / steps;
-                
+
                 if(!this.state.isMuted) {
                     this.audio.volume = Math.max(0, startMainVol + (endMainVol - startMainVol) * ratio);
                     this.beatAudio.volume = Math.max(0, startBeatVol + (endBeatVol - startBeatVol) * ratio);
@@ -404,7 +393,7 @@ window.MusicProModules.audio = {
 
                 if (currentStep >= steps) {
                     clearInterval(fadeInterval);
-                    // Dừng hẳn cái track không cần thiết để máy rảnh tay
+                    // Stop the unnecessary track to free up resources
                     if(isNowBeat) this.audio.pause();
                     else this.beatAudio.pause();
                 }
@@ -414,7 +403,7 @@ window.MusicProModules.audio = {
 
     // --- PRELOADING LOGIC ---
     checkPreload(currentTime, duration) {
-        let threshold = 10; 
+        let threshold = 10;
         const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
         if (conn && conn.downlink) {
             if (conn.downlink < 2) threshold = 30;
@@ -435,7 +424,7 @@ window.MusicProModules.audio = {
         this.state.nextTrackData = nextSong;
         const nextAudioSrc = this.state.isBeatMode ? nextSong.instrumental : nextSong.path;
         this.preloadAudioAgent.src = nextAudioSrc;
-        this.preloadAudioAgent.load(); 
+        this.preloadAudioAgent.load();
         if (this.state.currentMode === 'video' && nextSong.vid && !nextSong.vid.includes('ERROR')) {
             this.preloadVideoAgent.src = nextSong.vid;
             this.preloadVideoAgent.load();
@@ -445,20 +434,20 @@ window.MusicProModules.audio = {
     getNextIndex() {
         let display = [];
         if (typeof this.getDisplayPlaylist === 'function') {
-            display = this.getDisplayPlaylist(); 
+            display = this.getDisplayPlaylist();
         } else {
             display = this.state.playlist;
         }
-        
+
         if (!display.length) return -1;
         const curr = this.state.playlist[this.state.currentIndex];
         let idx = display.findIndex(t => t.id === curr.id);
         let nextIdx = 0;
-        
+
         if (this.state.isShuffle) {
             if (display.length > 1) do { nextIdx = Math.floor(Math.random() * display.length); } while (nextIdx === idx);
-        } else { 
-            if (idx !== -1) nextIdx = idx + 1 >= display.length ? 0 : idx + 1; 
+        } else {
+            if (idx !== -1) nextIdx = idx + 1 >= display.length ? 0 : idx + 1;
         }
         return this.state.playlist.findIndex(t => t.id === display[nextIdx].id);
     },

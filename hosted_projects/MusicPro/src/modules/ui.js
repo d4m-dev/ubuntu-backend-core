@@ -174,6 +174,7 @@ window.MusicProModules.ui = {
 
         // Initialize Swipe UI
         this.setupSwipeUI();
+        this.initAuthSettings();
     },
 
     /**
@@ -470,10 +471,46 @@ window.MusicProModules.ui = {
         this.state.isMuted = isMuted;
         const finalVolume = isMuted ? 0 : volume;
 
-        // Direct volume control (Web Audio API disabled to prevent issues)
-        this.audio.volume = finalVolume;
-        if (this.video) this.video.volume = finalVolume;
-        this.beatAudio.volume = finalVolume;
+        // Update Web Audio API gain nodes if they exist
+        if (window.MusicProModules.utils.audioContext && this.state.isPlaying) {
+            try {
+                // Update gain for audio element
+                if (this.sourceNodes.audio && this.effectNodes.gain) {
+                    // If we're using effects, update the gain node before the effects
+                    const currentTime = this.audio.currentTime;
+                    const isPlaying = !this.audio.paused;
+                    this.audio.volume = finalVolume; // Still set element volume for immediate effect
+
+                    // The actual volume control happens through the gain node in the audio graph
+                    // which is updated in the audio module's methods
+                } else {
+                    // Direct connection - update the gain node that connects to destination
+                    // This would be handled in the audio module's play/pause methods
+                    this.audio.volume = finalVolume;
+                }
+
+                // Update gain for video element
+                if (this.sourceNodes.video && this.effectNodes.gain) {
+                    this.video.volume = finalVolume;
+                }
+
+                // Update gain for beat audio element
+                if (this.sourceNodes.beat && this.effectNodes.gain) {
+                    this.beatAudio.volume = finalVolume;
+                }
+            } catch (e) {
+                console.warn('Could not update Web Audio gain nodes:', e);
+                // Fallback to direct volume control
+                this.audio.volume = finalVolume;
+                if (this.video) this.video.volume = finalVolume;
+                this.beatAudio.volume = finalVolume;
+            }
+        } else {
+            // Fallback to direct volume control when Web Audio is not available
+            this.audio.volume = finalVolume;
+            if (this.video) this.video.volume = finalVolume;
+            this.beatAudio.volume = finalVolume;
+        }
 
         // Update UI
         const volBar = document.getElementById('vol-bar');
@@ -833,8 +870,8 @@ window.MusicProModules.ui = {
      * Initialize Audio Context and Graph
      */
     initAudioContext() {
-        // Web Audio API disabled to prevent no-sound/CORS issues
-        return;
+        // Initialize audio context via utils and assign to instance
+        this.audioContext = window.MusicProModules.utils.initAudioContext();
     },
 
     /**

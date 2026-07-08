@@ -1,10 +1,45 @@
 window.MusicProModules = window.MusicProModules || {};
+
 window.MusicProModules.other = {
-
-
 
     // --- CORE INITIALIZATION & DATA MANAGEMENT ---
     // --- FEATURE SPECIFIC LOGIC ---
+    /**
+     * Ensure media element source nodes are created for spatial audio processing.
+     * @private
+     */
+    ensureSourceNodes() {
+        if (!this.sourceNodes) {
+            this.sourceNodes = {};
+        }
+        if (!this.effectNodes) {
+            this.effectNodes = {};
+        }
+        const audioContext = window.MusicProModules.utils.audioContext;
+        if (!audioContext) return;
+        if (!this.sourceNodes.audio && this.audio) {
+            try {
+                this.sourceNodes.audio = audioContext.createMediaElementSource(this.audio);
+            } catch (e) {
+                console.warn('Failed to create audio source node:', e);
+            }
+        }
+        if (!this.sourceNodes.video && this.video) {
+            try {
+                this.sourceNodes.video = audioContext.createMediaElementSource(this.video);
+            } catch (e) {
+                console.warn('Failed to create video source node:', e);
+            }
+        }
+        if (!this.sourceNodes.beat && this.beatAudio) {
+            try {
+                this.sourceNodes.beat = audioContext.createMediaElementSource(this.beatAudio);
+            } catch (e) {
+                console.warn('Failed to create beat source node:', e);
+            }
+        }
+    },
+
     /**
      * Bật/tắt chế độ Beat (Karaoke).
      */
@@ -28,6 +63,7 @@ window.MusicProModules.other = {
             }
         }
     },
+
     /**
      * Cập nhật trạng thái nút chuyển Beat trên giao diện.
      */
@@ -41,11 +77,11 @@ window.MusicProModules.other = {
 
     play() {
         // Initialize Audio Context for basic playback
-        this.initAudioContext();
+        window.MusicProModules.utils.initAudioContext();
 
         // Resume Audio Context if suspended (browser policy)
-        if (this.audioContext && this.audioContext.state === 'suspended') {
-            this.audioContext.resume()
+        if (window.MusicProModules.utils.audioContext && window.MusicProModules.utils.audioContext.state === 'suspended') {
+            window.MusicProModules.utils.audioContext.resume()
                 .then(() => {
                     console.log('Audio context resumed successfully');
                 })
@@ -65,7 +101,7 @@ window.MusicProModules.other = {
             this.audio.play().catch(e => {
                 console.error("Failed to play audio in background:", e);
                 // Try to resume audio context and play again
-                this.resumeAudioContext();
+                window.MusicProModules.utils.resumeAudioContext();
                 setTimeout(() => {
                     this.audio.play().catch(e => {
                         console.error("Second attempt to play audio failed:", e);
@@ -95,16 +131,16 @@ window.MusicProModules.other = {
             } else {
                 this.beatAudio.pause();
             }
-            this.audio.pause(); // Audio gốc không bao giờ dùng khi có video
+            this.audio.pause(); // Original audio never used when video is present
         } else {
-            // Chế độ chỉ audio
+            // Audio-only mode
             this.video.pause();
             if (this.state.isBeatMode && this.beatAudio.src) {
                 this.audio.pause();
                 this.beatAudio.play().catch(e => {
                     console.error("Failed to play beat audio:", e);
                     // Try to resume audio context and play again
-                    this.resumeAudioContext();
+                    window.MusicProModules.utils.resumeAudioContext();
                     setTimeout(() => {
                         this.beatAudio.play().catch(e => {
                             console.error("Second attempt to play beat audio failed:", e);
@@ -116,7 +152,7 @@ window.MusicProModules.other = {
                 this.audio.play().catch(e => {
                     console.error("Failed to play audio:", e);
                     // Try to resume audio context and play again
-                    this.resumeAudioContext();
+                    window.MusicProModules.utils.resumeAudioContext();
                     setTimeout(() => {
                         this.audio.play().catch(e => {
                             console.error("Second attempt to play audio failed:", e);
@@ -126,28 +162,33 @@ window.MusicProModules.other = {
             }
         }
 
-        // Skip advanced audio effects since they are disabled
+        // Skip advanced audio effects since they are handled via other methods now
+        // The audio graph connections are established in the play methods above
+        // and updated when EQ or spatial audio settings change
     },
+
     /**
      * Tạm dừng phát nhạc/video.
      */
-    pause() { 
+    pause() {
         this.state.isPlaying = false;
         if (this.state.sleepInterval) { clearInterval(this.state.sleepInterval); this.state.sleepInterval = null; }
-        this.video.pause(); this.audio.pause(); this.beatAudio.pause(); 
+        this.video.pause(); this.audio.pause(); this.beatAudio.pause();
         if (this.isLyricsCanvasActive && this.lyricsPipVideo) this.lyricsPipVideo.pause();
-        this.updatePlayState(); 
-        
+        this.updatePlayState();
+
         const t = this.currentSongHasVideo ? this.video.currentTime : (this.state.isBeatMode ? this.beatAudio.currentTime : this.audio.currentTime);
         localStorage.setItem('lastIndex', this.state.currentIndex);
         localStorage.setItem('lastTime', t);
     },
+
     /**
      * Chuyển đổi trạng thái phát/tạm dừng.
      */
     togglePlay() {
         this.state.isPlaying ? this.pause() : this.play();
     },
+
     /**
      * Cập nhật trạng thái nút Play/Pause và hiệu ứng sóng nhạc.
      */
@@ -165,6 +206,7 @@ window.MusicProModules.other = {
             navigator.mediaSession.playbackState = this.state.isPlaying ? 'playing' : 'paused';
         }
     },
+
     next() { const nextIdx = this.getNextIndex(); if (nextIdx !== -1) this.loadSong(nextIdx, true); },
     prev() {
         const display = this.getDisplayPlaylist(); if (!display.length) return;
@@ -187,7 +229,7 @@ window.MusicProModules.other = {
             this.state.sleepTimeLeft = 0;
             localStorage.setItem('sleepTimeLeft', 0);
             this.updateTimerText();
-            this.showToast("Đã hủy hẹn giờ"); 
+            this.showToast("Đã hủy hẹn giờ");
             return;
         }
         this.state.sleepTimeLeft = minutes * 60;
@@ -221,6 +263,7 @@ window.MusicProModules.other = {
             }
         }, 1000);
     },
+
     /**
      * Cập nhật văn bản hiển thị thời gian hẹn giờ còn lại.
      */
@@ -294,13 +337,18 @@ window.MusicProModules.other = {
      * Initialize audio context for spatial audio
      */
     initAudioContext() {
-        if (!this.audioContext) {
+        // Ensure effectNodes object exists
+        if (!this.effectNodes) {
+            this.effectNodes = {};
+        }
+
+        if (!window.MusicProModules.utils.audioContext) {
             try {
-                this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                
+                window.MusicProModules.utils.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
                 // Create spatial audio nodes if supported
-                if (this.audioContext.listener && typeof this.audioContext.createPanner === 'function') {
-                    this.effectNodes.panner = this.audioContext.createPanner();
+                if (window.MusicProModules.utils.audioContext.listener && typeof window.MusicProModules.utils.audioContext.createPanner === 'function') {
+                    this.effectNodes.panner = window.MusicProModules.utils.audioContext.createPanner();
                     this.effectNodes.panner.panningModel = 'HRTF';
                     this.effectNodes.panner.distanceModel = 'inverse';
                     this.effectNodes.panner.refDistance = 1;
@@ -310,18 +358,31 @@ window.MusicProModules.other = {
                     this.effectNodes.panner.coneOuterAngle = 0;
                     this.effectNodes.panner.coneOuterGain = 0;
                 }
+
+                // Create gain node for effects
+                this.effectNodes.gain = window.MusicProModules.utils.audioContext.createGain();
             } catch (e) {
                 console.warn('Web Audio API không được hỗ trợ:', e);
             }
         }
 
-        // 👇 BỔ SUNG: Nếu đã có context nhưng đang bị trình duyệt treo (suspended), kích hoạt lại nó ngay
-        if (this.audioContext && this.audioContext.state === 'suspended') {
-            this.audioContext.resume().then(() => {
+        // 👇 ENHANCEMENT: If context exists but is suspended by browser, resume it immediately
+        if (window.MusicProModules.utils.audioContext && window.MusicProModules.utils.audioContext.state === 'suspended') {
+            window.MusicProModules.utils.audioContext.resume().then(() => {
                 console.log("🔊 Spatial AudioContext đã được mở khóa thành công!");
             }).catch(err => {
                 console.warn("Chưa thể kích hoạt AudioContext:", err);
             });
+        }
+
+        // Initialize equalizer nodes
+        if (window.MusicProModules.utils.audioContext) {
+            try {
+                this.eqNodes = window.MusicProModules.utils.createEqualizer();
+            } catch (e) {
+                console.warn('Không thể khởi tạo equalizer:', e);
+                this.eqNodes = null;
+            }
         }
     },
 
@@ -329,13 +390,16 @@ window.MusicProModules.other = {
      * Toggle spatial audio (3D sound effect)
      */
     toggleSpatialAudio() {
-        if (!this.audioContext) {
+        if (!window.MusicProModules.utils.audioContext) {
             this.showToast('Không thể kích hoạt âm thanh 3D');
             return;
         }
 
+        // Initialize audio context for spatial audio (creates panner and gain nodes if supported)
+        this.initAudioContext();
+
         this.state.spatialAudioEnabled = !this.state.spatialAudioEnabled;
-        
+
         // Update spatial audio settings
         if (this.state.spatialAudioEnabled && this.effectNodes.panner) {
             // Connect spatial audio nodes
@@ -346,7 +410,7 @@ window.MusicProModules.other = {
             this.disconnectSpatialAudio();
             this.showToast('Âm thanh 3D đã tắt');
         }
-        
+
         // Update toggle UI
         const spatialToggle = document.getElementById('spatial-audio-toggle');
         if (spatialToggle) {
@@ -358,21 +422,116 @@ window.MusicProModules.other = {
      * Setup spatial audio connections
      */
     setupSpatialAudioConnections() {
+        this.ensureSourceNodes();
         if (!this.effectNodes.panner) return;
-        
-        // This would connect the audio sources through the spatial audio nodes
-        // For now, just enable the feature flag
-        console.log('Spatial audio connections established');
+
+        try {
+            // Disconnect existing connections
+            if (this.sourceNodes.audio) {
+                this.sourceNodes.audio.disconnect();
+            }
+            if (this.sourceNodes.video) {
+                this.sourceNodes.video.disconnect();
+            }
+            if (this.sourceNodes.beat) {
+                this.sourceNodes.beat.disconnect();
+            }
+
+            if (this.effectNodes.gain) {
+                this.effectNodes.gain.disconnect();
+            }
+
+            if (this.eqNodes) {
+                // Disconnect equalizer nodes
+                this.eqNodes.nodes.forEach(node => node.disconnect());
+            }
+
+            // Create gain node if needed
+            if (!this.effectNodes.gain) {
+                this.effectNodes.gain = window.MusicProModules.utils.audioContext.createGain();
+            }
+
+            // Connect audio sources to gain -> equalizer (if enabled) -> gain -> panner -> destination
+            const audioSources = [
+                this.sourceNodes.audio,
+                this.sourceNodes.video,
+                this.sourceNodes.beat
+            ].filter(Boolean);
+
+            // Connect all active sources to the gain node
+            audioSources.forEach(source => {
+                source.connect(this.effectNodes.gain);
+            });
+
+            // If equalizer is enabled, insert it in the chain
+            if (this.eqNodes && Object.keys(this.eqNodes || {}).length > 0) {
+                // Connect gain -> equalizer input
+                this.effectNodes.gain.connect(this.eqNodes.nodes[0]);
+
+                // Connect equalizer chain
+                for (let i = 0; i < this.eqNodes.nodes.length - 1; i++) {
+                    this.eqNodes.nodes[i].connect(this.eqNodes.nodes[i + 1]);
+                }
+
+                // Connect equalizer output -> gain -> panner -> destination
+                this.eqNodes.nodes[this.eqNodes.nodes.length - 1].connect(this.effectNodes.gain);
+            } else {
+                // Direct connection: gain -> panner -> destination
+                // (eqNodes is falsy or empty)
+            }
+
+            this.effectNodes.gain.connect(this.effectNodes.panner);
+            this.effectNodes.panner.connect(window.MusicProModules.utils.audioContext.destination);
+
+            console.log('Spatial audio connections established');
+        } catch (e) {
+            console.error('Error setting up spatial audio connections:', e);
+            // Fallback: connect directly without effects
+            this.connectAudioDirectly();
+        }
     },
 
     /**
      * Disconnect spatial audio
      */
     disconnectSpatialAudio() {
+        this.ensureSourceNodes();
         if (!this.effectNodes.panner) return;
-        
-        // Disconnect spatial audio nodes
-        console.log('Spatial audio disconnected');
+
+        try {
+            // Disconnect and reconnect audio sources directly to destination
+            if (this.sourceNodes.audio) {
+                this.sourceNodes.audio.disconnect();
+                this.sourceNodes.audio.connect(window.MusicProModules.utils.audioContext.destination);
+            }
+            if (this.sourceNodes.video) {
+                this.sourceNodes.video.disconnect();
+                this.sourceNodes.video.connect(window.MusicProModules.utils.audioContext.destination);
+            }
+            if (this.sourceNodes.beat) {
+                this.sourceNodes.beat.disconnect();
+                this.sourceNodes.beat.connect(window.MusicProModules.utils.audioContext.destination);
+            }
+
+            // Disconnect effect nodes
+            if (this.effectNodes.gain) {
+                this.effectNodes.gain.disconnect();
+            }
+            if (this.effectNodes.panner) {
+                this.effectNodes.panner.disconnect();
+            }
+
+            // Disconnect equalizer nodes
+            if (this.eqNodes) {
+                this.eqNodes.nodes.forEach(node => node.disconnect());
+            }
+
+            console.log('Spatial audio disconnected');
+        } catch (e) {
+            console.error('Error disconnecting spatial audio:', e);
+            // Fallback: connect directly
+            this.connectAudioDirectly();
+        }
     },
 
     /**
@@ -385,9 +544,219 @@ window.MusicProModules.other = {
         const mid = document.getElementById('eq-mid')?.value || 0;
         const midHigh = document.getElementById('eq-mid-high')?.value || 0;
         const high = document.getElementById('eq-high')?.value || 0;
-        
+
+        // Apply EQ using utility functions
+        const eqSettings = {
+            low: parseFloat(low),
+            midLow: parseFloat(midLow),
+            mid: parseFloat(mid),
+            midHigh: parseFloat(midHigh),
+            high: parseFloat(high)
+        };
+
         console.log(`EQ: Low=${low}, Mid-Low=${midLow}, Mid=${mid}, Mid-High=${midHigh}, High=${high}`);
-        // In a real implementation, this would apply the EQ settings to the audio
+
+        // Initialize equalizer if not already done
+        if (!this.eqNodes) {
+            this.eqNodes = window.MusicProModules.utils.createEqualizer();
+        }
+
+        // Apply settings
+        if (this.eqNodes) {
+            // Ensure effectNodes object exists
+            if (!this.effectNodes) {
+                this.effectNodes = {};
+            }
+            window.MusicProModules.utils.applyEqualizer(this.eqNodes, eqSettings);
+
+            // Connect the equalizer to the audio graph if we're using spatial audio
+            if (this.state.spatialAudioEnabled && this.effectNodes.panner) {
+                this.updateEqualizerConnections();
+            }
+        }
+    },
+
+    /**
+     * Update equalizer connections in the audio graph
+     */
+    updateEqualizerConnections() {
+        this.ensureSourceNodes();
+        if (!this.eqNodes || !this.eqNodes.nodes || !this.effectNodes.panner) return;
+
+        try {
+            // Disconnect existing connections
+            if (this.sourceNodes.audio) {
+                this.sourceNodes.audio.disconnect();
+            }
+            if (this.sourceNodes.video) {
+                this.sourceNodes.video.disconnect();
+            }
+            if (this.sourceNodes.beat) {
+                this.sourceNodes.beat.disconnect();
+            }
+
+            if (this.effectNodes.gain) {
+                this.effectNodes.gain.disconnect();
+            }
+            if (this.effectNodes.panner) {
+                this.effectNodes.panner.disconnect();
+            }
+
+            // Create ganode if needed
+            if (!this.effectNodes.gain) {
+                this.effectNodes.gain = window.MusicProModules.utils.audioContext.createGain();
+            }
+
+            // Connect audio sources to gain -> equalizer -> gain -> panner -> destination
+            const audioSources = [
+                this.sourceNodes.audio,
+                this.sourceNodes.video,
+                this.sourceNodes.beat
+            ].filter(Boolean);
+
+            // Connect all active sources to the gain node
+            audioSources.forEach(source => {
+                source.connect(this.effectNodes.gain);
+            });
+
+            // Connect gain -> equalizer input
+            this.effectNodes.gain.connect(this.eqNodes.nodes[0]);
+
+            // Connect equalizer chain
+            for (let i = 0; i < this.eqNodes.nodes.length - 1; i++) {
+                this.eqNodes.nodes[i].connect(this.eqNodes.nodes[i + 1]);
+            }
+
+            // Connect equalizer output -> gain -> panner -> destination
+            this.eqNodes.nodes[this.eqNodes.nodes.length - 1].connect(this.effectNodes.gain);
+            this.effectNodes.gain.connect(this.effectNodes.panner);
+            this.effectNodes.panner.connect(window.MusicProModules.utils.audioContext.destination);
+
+            console.log('Equalizer connected to audio graph with spatial audio');
+        } catch (e) {
+            console.error('Error updating equalizer connections:', e);
+            // Fallback: connect directly without equalizer
+            this.connectAudioDirectly();
+        }
+    },
+
+    /**
+     * Connect audio directly to destination (bypassing effects)
+     */
+    connectAudioDirectly() {
+        this.ensureSourceNodes();
+        try {
+            // Disconnect existing connections
+            if (this.sourceNodes.audio) {
+                this.sourceNodes.audio.disconnect();
+            }
+            if (this.sourceNodes.video) {
+                this.sourceNodes.video.disconnect();
+            }
+            if (this.sourceNodes.beat) {
+                this.sourceNodes.beat.disconnect();
+            }
+
+            if (this.effectNodes.gain) {
+                this.effectNodes.gain.disconnect();
+            }
+            if (this.effectNodes.panner) {
+                this.effectNodes.panner.disconnect();
+            }
+
+            if (this.eqNodes) {
+                // Disconnect equalizer nodes
+                this.eqNodes.nodes.forEach(node => node.disconnect());
+            }
+
+            // Connect sources directly to destination
+            const audioSources = [
+                this.sourceNodes.audio,
+                this.sourceNodes.video,
+                this.sourceNodes.beat
+            ].filter(Boolean);
+
+            audioSources.forEach(source => {
+                source.connect(window.MusicProModules.utils.audioContext.destination);
+            });
+
+            console.log('Audio connected directly to destination');
+        } catch (e) {
+            console.error('Error connecting audio directly:', e);
+        }
+    },
+
+    /**
+     * Update spatial audio connections
+     */
+    updateSpatialAudioConnections() {
+        this.ensureSourceNodes();
+        if (!this.effectNodes.panner) return;
+
+        try {
+            // Disconnect existing connections
+            if (this.sourceNodes.audio) {
+                this.sourceNodes.audio.disconnect();
+            }
+            if (this.sourceNodes.video) {
+                this.sourceNodes.video.disconnect();
+            }
+            if (this.sourceNodes.beat) {
+                this.sourceNodes.beat.disconnect();
+            }
+
+            if (this.effectNodes.gain) {
+                this.effectNodes.gain.disconnect();
+            }
+
+            if (this.eqNodes) {
+                // Disconnect equalizer nodes
+                this.eqNodes.nodes.forEach(node => node.disconnect());
+            }
+
+            // Create gain node if needed
+            if (!this.effectNodes.gain) {
+                this.effectNodes.gain = window.MusicProModules.utils.audioContext.createGain();
+            }
+
+            // Connect audio sources to gain -> equalizer (if enabled) -> gain -> panner -> destination
+            const audioSources = [
+                this.sourceNodes.audio,
+                this.sourceNodes.video,
+                this.sourceNodes.beat
+            ].filter(Boolean);
+
+            // Connect all active sources to the gain node
+            audioSources.forEach(source => {
+                source.connect(this.effectNodes.gain);
+            });
+
+            // If equalizer is enabled, insert it in the chain
+            if (this.eqNodes && Object.keys(this.eqNodes || {}).length > 0) {
+                // Connect gain -> equalizer input
+                this.effectNodes.gain.connect(this.eqNodes.nodes[0]);
+
+                // Connect equalizer chain
+                for (let i = 0; i < this.eqNodes.nodes.length - 1; i++) {
+                    this.eqNodes.nodes[i].connect(this.eqNodes.nodes[i + 1]);
+                }
+
+                // Connect equalizer output -> gain -> panner -> destination
+                this.eqNodes.nodes[this.eqNodes.nodes.length - 1].connect(this.effectNodes.gain);
+            } else {
+                // Direct connection: gain -> panner -> destination
+                // (eqNodes is falsy or empty)
+            }
+
+            this.effectNodes.gain.connect(this.effectNodes.panner);
+            this.effectNodes.panner.connect(window.MusicProModules.utils.audioContext.destination);
+
+            console.log('Spatial audio connections updated');
+        } catch (e) {
+            console.error('Error updating spatial audio connections:', e);
+            // Fallback: connect directly without effects
+            this.connectAudioDirectly();
+        }
     },
 
     /**
@@ -451,13 +820,13 @@ window.MusicProModules.other = {
 
         switch(type) {
             case 'audio': link = song.path; fileName += '.mp3'; break;
-            case 'beat': 
+            case 'beat':
                 if (!song.instrumental || song.instrumental.includes('chưa có')) { this.showToast('Không có Beat'); return; }
                 link = song.instrumental; fileName += ' (Beat).mp3'; break;
-            case 'video': 
+            case 'video':
                 if (!song.vid || song.vid.includes('ERROR')) { this.showToast('Không có Video'); return; }
                 link = song.vid; fileName += '.mp4'; break;
-            case 'lyric': 
+            case 'lyric':
                 if (!song.lyric || song.lyric.includes('chưa có')) { this.showToast('Không có Lời'); return; }
                 link = song.lyric; fileName += '.lrc'; break;
         }
@@ -495,7 +864,7 @@ window.MusicProModules.other = {
         btn.className = 'menu-item';
         btn.style.display = 'none';
         btn.innerHTML = `<i class="fa-solid fa-clone"></i> <span>Picture-in-Picture</span> <div class="toggle-switch"></div>`;
-        
+
         btn.onclick = async (e) => {
             e.stopPropagation();
             if (this.state.currentMode === 'lyrics') {
@@ -525,11 +894,11 @@ window.MusicProModules.other = {
     setupVideoFullscreen() {
         const container = document.querySelector('.video-container');
         if (!container) return;
-        
+
         const btn = document.createElement('div');
         btn.className = 'btn-icon btn-fullscreen';
         btn.innerHTML = '<i class="fa-solid fa-expand"></i>';
-        
+
         btn.onclick = (e) => {
             e.stopPropagation();
             if (!document.fullscreenElement) {
@@ -551,7 +920,7 @@ window.MusicProModules.other = {
         if (!this.elements.pipBtn) return;
         const mode = this.state.currentMode;
         const span = this.elements.pipBtn.querySelector('span');
-        
+
         if (mode === 'lyrics') {
             this.elements.pipBtn.style.display = 'flex';
             span.innerText = this.lyricsPiPWindow ? 'Đóng Lyrics PiP' : 'Lyrics PiP';
@@ -679,18 +1048,18 @@ window.MusicProModules.other = {
 
         // Get the actual primary color value
         const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim() || '#ffffff';
-        
-        // Vẽ dòng hiện tại với màu chủ đạo
+
+        // Draw current line with primary color
         ctx.fillStyle = primaryColor;
         ctx.font = 'bold 32px Arial';
         ctx.fillText(text, this.lyricsCanvas.width / 2, this.lyricsCanvas.height / 2 - 20);
 
-        // Vẽ dòng tiếp theo với màu mờ
+        // Draw next line with dimmed color
         ctx.fillStyle = '#aaaaaa';
         ctx.font = '24px Arial';
         ctx.fillText(nextText, this.lyricsCanvas.width / 2, this.lyricsCanvas.height / 2 + 30);
 
-        // Vẽ tên bài hát nhỏ ��� dưới
+        // Draw song title smaller at bottom
         ctx.font = '20px Arial'; ctx.fillStyle = '#888';
         ctx.fillText(this.state.playlist[this.state.currentIndex]?.name || '', this.lyricsCanvas.width / 2, this.lyricsCanvas.height - 40);
     },
