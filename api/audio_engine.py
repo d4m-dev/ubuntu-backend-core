@@ -33,7 +33,7 @@ def sanitize_folder_name(filename: str) -> tuple:
 # ==========================================
 def fetch_lyrics_multi_api(query: str, output_path: str, title: str = "", artist: str = "") -> bool:
     """
-    Quét qua nhiều API để tìm Lời bài hát. 
+    Quét qua nhiều API để tìm Lời bài hát.
     Nếu API 1 sập hoặc không có, tự động nhảy sang API 2.
     """
     search_query = query.replace('_', ' ').replace('-', ' ').strip()
@@ -81,21 +81,24 @@ def fetch_lyrics_multi_api(query: str, output_path: str, title: str = "", artist
 def process_audio_pipeline(file_path: str, clean_name: str, task_id: str, ext: str, separate_beat: bool, extract_lyrics: bool, title: str = "", artist: str = "", base_in_dir=INPUT_DIR, base_out_dir=OUTPUT_DIR):
     project_dir = os.path.join(base_out_dir, clean_name)
     os.makedirs(project_dir, exist_ok=True)
-    
+
     vocal_output = os.path.join(project_dir, f"{task_id}_vocal.mp3")
     beat_output = os.path.join(project_dir, f"{task_id}_beat.mp3")
     lyrics_output = os.path.join(project_dir, f"{task_id}_lyrics.lrc")
-    
+
     # GIAI ĐOẠN 0: TRÍCH XUẤT MP3 TỪ VIDEO
     video_extensions = ['.mp4', '.mov', '.mkv', '.avi', '.flv', '.webm']
     if ext.lower() in video_extensions:
         print(f"🎬 [Audio Engine] Phát hiện Video ({ext}). Đang trích xuất MP3...")
         song_input_dir = os.path.join(base_in_dir, clean_name)
-        os.makedirs(song_input_dir, exist_ok=True) 
+        os.makedirs(song_input_dir, exist_ok=True)
         mp3_converted_path = os.path.join(song_input_dir, f"{task_id}_converted.mp3")
         try:
-            cmd_convert = f"ffmpeg -y -i '{file_path}' -q:a 0 -map a '{mp3_converted_path}'"
-            subprocess.run(cmd_convert, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+            # Replace shell=True with list args
+            subprocess.run([
+                "ffmpeg", "-y", "-i", file_path,
+                "-q:a", "0", "-map", "a", mp3_converted_path
+            ], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
             file_path = mp3_converted_path
             ext = '.mp3'
         except subprocess.CalledProcessError as e:
@@ -108,18 +111,30 @@ def process_audio_pipeline(file_path: str, clean_name: str, task_id: str, ext: s
         temp_demucs_dir = os.path.join(WORKSPACE_DIR, f"temp_demucs_{task_id}")
         os.makedirs(temp_demucs_dir, exist_ok=True)
         try:
-            cmd_demucs = f"OMP_NUM_THREADS=1 ~/myenv/bin/demucs -d cpu -j 1 --segment 7 --two-stems=vocals -o '{temp_demucs_dir}' '{file_path}'"
-            subprocess.run(cmd_demucs, shell=True, check=True)
-            
+            # Set environment variable OMP_NUM_THREADS=1
+            env = os.environ.copy()
+            env["OMP_NUM_THREADS"] = "1"
+            demucs_path = os.path.expanduser("~/myenv/bin/demucs")
+            subprocess.run([
+                demucs_path, "-d", "cpu", "-j", "1", "--segment", "7",
+                "--two-stems=vocals", "-o", temp_demucs_dir, file_path
+            ], env=env, check=True)
+
             raw_out_dir = os.path.join(temp_demucs_dir, "htdemucs", os.path.splitext(os.path.basename(file_path))[0])
             if os.path.exists(raw_out_dir):
                 vocal_wav = os.path.join(raw_out_dir, "vocals.wav")
                 beat_wav = os.path.join(raw_out_dir, "no_vocals.wav")
-                
+
                 if os.path.exists(vocal_wav):
-                    subprocess.run(f"ffmpeg -y -i '{vocal_wav}' -b:a 192k '{vocal_output}'", shell=True)
+                    subprocess.run([
+                        "ffmpeg", "-y", "-i", vocal_wav,
+                        "-b:a", "192k", vocal_output
+                    ], shell=False)
                 if os.path.exists(beat_wav):
-                    subprocess.run(f"ffmpeg -y -i '{beat_wav}' -b:a 192k '{beat_output}'", shell=True)
+                    subprocess.run([
+                        "ffmpeg", "-y", "-i", beat_wav,
+                        "-b:a", "192k", beat_output
+                    ], shell=False)
             else:
                 print(f"❌ Không tìm thấy thư mục kết quả tại: {raw_out_dir}")
         except subprocess.CalledProcessError as e:
@@ -132,7 +147,7 @@ def process_audio_pipeline(file_path: str, clean_name: str, task_id: str, ext: s
     if extract_lyrics:
         print(f"📝 [Audio Engine] Đang rà quét APIs tìm lời bài hát cho: {clean_name}")
         is_lyric_found = fetch_lyrics_multi_api(clean_name, lyrics_output, title, artist)
-        
+
         if is_lyric_found:
             print(f"⚡ Đã tải lời bài hát từ Internet thành công!")
         else:
@@ -140,16 +155,16 @@ def process_audio_pipeline(file_path: str, clean_name: str, task_id: str, ext: s
             fallback_title = title if title else clean_name
             fallback_artist = artist if artist else "Unknown"
             fallback_content = f"[ti:{fallback_title}]\n[ar:{fallback_artist}]\n[00:00.00]coming soon\n"
-            
+
             with open(lyrics_output, "w", encoding="utf-8") as f:
                 f.write(fallback_content)
 
     # ĐÓNG CỜ KẾT THÚC
     try:
         is_success = False
-        if separate_beat and (os.path.exists(vocal_output) or os.path.exists(beat_output)): 
+        if separate_beat and (os.path.exists(vocal_output) or os.path.exists(beat_output)):
             is_success = True
-        elif not separate_beat and os.path.exists(lyrics_output): 
+        elif not separate_beat and os.path.exists(lyrics_output):
             is_success = True
 
         if is_success:
@@ -171,29 +186,29 @@ async def extract_audio_features(background_tasks: BackgroundTasks, file: Upload
         final_name = custom_name.strip() if custom_name and custom_name.strip() else original_clean
         clean_name, _ = sanitize_folder_name(final_name)
         task_id = f"{clean_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-        
+
         song_input_dir = os.path.join(INPUT_DIR, clean_name)
         os.makedirs(song_input_dir, exist_ok=True)
         saved_input_path = os.path.join(song_input_dir, f"{task_id}{ext}")
-        
+
         with open(saved_input_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
-            
+
         # Nạp Pipeline (Cung cấp Title là final_name để in ra file LRC Mặc định)
         background_tasks.add_task(process_audio_pipeline, saved_input_path, clean_name, task_id, ext, separate_beat, extract_lyrics, final_name, "Unknown")
-        
+
         expected_outputs = {}
         if separate_beat:
             expected_outputs["vocal"] = f"/api/audio/stream/{clean_name}/{task_id}_vocal.mp3"
             expected_outputs["beat"] = f"/api/audio/stream/{clean_name}/{task_id}_beat.mp3"
         if extract_lyrics:
-            expected_outputs["lyrics"] = f"/api/audio/stream/{clean_name}/{task_id}_lyrics.lrc" 
-            
+            expected_outputs["lyrics"] = f"/api/audio/stream/{clean_name}/{task_id}_lyrics.lrc"
+
         return JSONResponse(status_code=202, content={
             "status": "processing",
             "message": f"Đang xử lý ngầm: '{task_id}'",
             "project_folder": f"{clean_name}/{task_id}",
-            "expected_outputs": expected_outputs 
+            "expected_outputs": expected_outputs
         })
     except Exception as error:
         raise HTTPException(status_code=500, detail=f"Lỗi: {str(error)}")
@@ -222,9 +237,9 @@ async def stream_audio(project_name: str, file_name: str, request: Request):
     # Ép trình duyệt TẢI XUỐNG thay vì mở file chữ (.txt, .lrc)
     if file_name.endswith((".lrc", ".txt")):
         return FileResponse(
-            path=file_path, 
+            path=file_path,
             media_type="text/plain; charset=utf-8",
-            filename=file_name 
+            filename=file_name
         )
 
     file_size = os.path.getsize(file_path)
@@ -242,7 +257,7 @@ async def stream_audio(project_name: str, file_name: str, request: Request):
             "Content-Type": "audio/mpeg",
         }
         return StreamingResponse(chunked_file_reader(file_path, start, end), status_code=status_code, headers=headers)
-        
+
     headers = {"Accept-Ranges": "bytes", "Content-Length": str(file_size), "Content-Type": "audio/mpeg"}
     return StreamingResponse(chunked_file_reader(file_path, 0, file_size - 1), headers=headers)
 

@@ -14,6 +14,9 @@ from core.scheduler import ai_janitor_task
 from core.telegram import telegram_polling_task
 from api.audio_engine import WORKSPACE_DIR
 
+# 🚀 IMPORT SCHEDULER TỪ ADMIN SCRIPTS
+from api.admin_scripts import scheduler, restore_schedules
+
 # --- 2. MIDDLEWARES ---
 from middlewares.logger_tracker import LoggerTrackerMiddleware
 from middlewares.rate_limit import RateLimitMiddleware
@@ -24,7 +27,8 @@ from middlewares.security_headers import SecurityHeadersMiddleware # 🛡️ B�
 # --- 3. ROUTERS ---
 from api import (
     player, dashboard, websockets, chatbox, social, auth, widgets, 
-    projects, ai_admin, audio_engine, bio_premium, music, telegram_bot, astrology, ytdl
+    projects, ai_admin, audio_engine, bio_premium, music, telegram_bot, astrology, ytdl,
+    admin_scripts
 )
 
 # ==========================================
@@ -32,12 +36,22 @@ from api import (
 # ==========================================
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # 1. Khởi động Database & Các tác vụ nền hệ thống
     init_db()                   
     db_manager.connect()   
     db_manager.init_social_tables() 
     task_janitor = asyncio.create_task(ai_janitor_task())
     task_telegram = asyncio.create_task(telegram_polling_task())
+    
+    # 🚀 2. KHỞI ĐỘNG CỖ MÁY SCHEDULER CỦA ADMIN 
+    scheduler.start()
+    restore_schedules() # Khôi phục các lịch chạy (cron) đã lưu
+    print("⏰ [Admin Scripts] Cỗ máy định thời gian đã được kích hoạt!")
+    
     yield 
+    
+    # 🛑 3. DỌN DẸP KHI SERVER TẮT
+    scheduler.shutdown() # Tắt an toàn bộ định thời
     task_janitor.cancel()
     task_telegram.cancel()
     if getattr(db_manager, "pool", None):
@@ -100,7 +114,7 @@ def setup_routers(app: FastAPI):
     api_routers = [
         auth.router, dashboard.router, websockets.router, chatbox.router, social.router,
         widgets.router, projects.router, ai_admin.router, audio_engine.router, bio_premium.router,
-        music.router, telegram_bot.router, astrology.router, ytdl.router, player.router
+        music.router, telegram_bot.router, astrology.router, ytdl.router, player.router, admin_scripts.router
     ]
     for r in api_routers:
         app.include_router(r)
@@ -110,6 +124,7 @@ def setup_frontend_routes(app: FastAPI):
         "/": "hub.html", "/hub": "hub.html", "/auth": "auth.html",
         "/admin/dashboard": "index.html", "/admin/dashboard/": "index.html",
         "/admin/upload": "admin-upload.html", "/admin/upload/": "admin-upload.html",
+        "/admin/scripts": "admin-scripts.html", "/admin/scripts/": "admin-scripts.html",
         "/audio-test": "audio-test.html", "/numerology": "numerology.html",
         "/vocal-remove": "vocal-remove.html", "/love-sync": "love-sync.html",
         "/music-pro": "music-pro.html", "/social-hub": "social-hub.html",
@@ -135,6 +150,7 @@ def setup_frontend_routes(app: FastAPI):
         if os.path.exists(file_path): 
             return FileResponse(file_path)
         return JSONResponse(status_code=404, content={"status": "error", "message": "❌ Không tìm thấy Music Pro"})
+
 # ==========================================
 # 🚀 KÍCH HOẠT HỆ THỐNG
 # ==========================================

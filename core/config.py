@@ -8,11 +8,11 @@ class Settings(BaseSettings):
     HOST: str = "0.0.0.0"
     PORT: int = 16868
     ENVIRONMENT: str = "development"
-    SECRET_KEY: str = "super-secret-jwt-key-change-me-later"
-    
+    SECRET_KEY: str
+
     # Tài khoản Admin (Mặc định lấy từ .env, không có thì xài dự phòng)
     ADMIN_USERNAME: str = "admin"
-    ADMIN_PASSWORD: str = "admin123"
+    ADMIN_PASSWORD: str
 
     # ==========================================
     # 🗄️ CẤU HÌNH CƠ SỞ DỮ LIỆU
@@ -33,8 +33,8 @@ class Settings(BaseSettings):
 
     # Cú pháp chuẩn của Pydantic V2
     model_config = SettingsConfigDict(
-        env_file=".env", 
-        env_file_encoding='utf-8', 
+        env_file=".env",
+        env_file_encoding='utf-8',
         extra="ignore"
     )
 

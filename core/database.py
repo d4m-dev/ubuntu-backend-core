@@ -145,7 +145,7 @@ class DbManager:
             ''')
             
             cursor.execute('''
-                CREATE TABLE IF NOT EXISTS post (
+                CREATE TABLE IF NOT EXISTS posts (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     user_id INT NOT NULL,
                     content TEXT,
@@ -166,7 +166,7 @@ class DbManager:
             ''')
             
             conn.commit()
-            print("✅ Đã khởi tạo và đồng bộ thành công các bảng: users, post, media!")
+            print("✅ Đã khởi tạo và đồng bộ thành công các bảng: users, posts, media!")
             
         except Exception as e:
             logging.error(f"Lỗi khi khởi tạo bảng hệ thống: {e}")

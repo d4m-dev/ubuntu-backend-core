@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D4M Command Center | Scripts</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg-color: #050505; --glass-bg: rgba(20, 20, 25, 0.6); --glass-border: rgba(255, 255, 255, 0.08); }
+        body { background-color: var(--bg-color); color: white; font-family: 'Inter', sans-serif; overflow-x: hidden; min-height: 100vh; }
+        
+        .orb { position: fixed; border-radius: 50%; filter: blur(100px); z-index: -1; animation: float 15s infinite alternate ease-in-out; opacity: 0.5; }
+        .orb-1 { width: 400px; height: 400px; background: #3b82f6; top: -100px; left: -100px; }
+        .orb-2 { width: 500px; height: 500px; background: #8b5cf6; bottom: -150px; right: -100px; animation-delay: -5s; }
+        .orb-3 { width: 300px; height: 300px; background: #10b981; top: 40%; left: 30%; animation-delay: -10s; opacity: 0.3; }
+        @keyframes float { 0% { transform: translate(0, 0) rotate(0deg); } 100% { transform: translate(100px, 100px) rotate(180deg); } }
+
+        .glass { background: var(--glass-bg); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid var(--glass-border); border-radius: 1.5rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+        .glass-card { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--glass-border); border-radius: 1rem; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
+        .glass-card:hover, .glass-card.active { background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.3); transform: translateY(-3px); box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.2); }
+        
+        /* TERMINAL CYBERPUNK NÂNG CẤP */
+        .terminal-wrapper { background: rgba(0, 0, 0, 0.85); border-radius: 0 0 1rem 1rem; display: flex; flex-direction: column; overflow: hidden; }
+        .terminal-box { font-family: 'Fira Code', monospace; color: #4ade80; text-shadow: 0 0 8px rgba(74, 222, 128, 0.4); overflow-y: auto; scroll-behavior: smooth; }
+        .mac-header { background: #1a1b26; border-radius: 1rem 1rem 0 0; padding: 12px 20px; display: flex; align-items: center; border-bottom: 1px solid #2d3748; }
+        .mac-dot { width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; }
+        .dot-red { background: #ff5f56; box-shadow: 0 0 10px #ff5f56; } .dot-yellow { background: #ffbd2e; box-shadow: 0 0 10px #ffbd2e; } .dot-green { background: #27c93f; box-shadow: 0 0 10px #27c93f; }
+        
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+        .status-running { background: #22c55e; box-shadow: 0 0 10px #22c55e; animation: pulse-green 2s infinite; }
+        .status-stopped { background: #6b7280; }
+        @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); } 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }
+
+        ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); } ::-webkit-scrollbar-thumb { background: rgba(59, 130, 246, 0.5); border-radius: 10px; } ::-webkit-scrollbar-thumb:hover { background: rgba(59, 130, 246, 0.8); }
+        .glass-input { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 10px 15px; border-radius: 8px; outline: none; width: 100%; transition: all 0.3s; }
+        .glass-input:focus { border-color: #3b82f6; box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); }
+    </style>
+</head>
+<body>
+
+    <div id="lockScreen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md transition-opacity duration-500">
+        <div class="text-center">
+            <i class="fa-solid fa-shield-halved text-6xl text-red-500 mb-6 drop-shadow-[0_0_15px_rgba(239,68,68,0.5)]"></i>
+            <h1 class="text-3xl font-black tracking-widest uppercase text-white mb-2">Truy Cập Trái Phép</h1>
+            <p class="text-gray-400 mb-6">Chỉ Tư Lệnh (Admin) mới có quyền truy cập khu vực này.</p>
+            <button onclick="window.location.href='/hub'" class="px-8 py-3 bg-red-600 hover:bg-red-500 font-bold rounded-lg transition-colors">QUAY LẠI HUB</button>
+        </div>
+    </div>
+
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
+    <div id="mainApp" class="max-w-[1400px] mx-auto p-6 md:p-8 h-screen flex flex-col hidden opacity-0 transition-opacity duration-1000">
+        
+        <header class="flex justify-between items-center mb-8 glass px-8 py-5">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-[0_0_20px_rgba(59,130,246,0.5)]">
+                    <i class="fa-solid fa-microchip text-2xl text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">COMMAND CENTER</h1>
+                    <p class="text-xs text-gray-400 font-mono tracking-widest">Tiến trình ngầm & Tương tác Terminal</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-6">
+                <div class="text-right hidden md:block">
+                    <p class="text-sm font-bold text-white"><i class="fa-solid fa-crown text-yellow-400 mr-1"></i> <span id="adminName">Sếp Ân</span></p>
+                    <p class="text-[10px] text-green-400 font-mono"><i class="fa-solid fa-circle text-[8px] animate-pulse mr-1"></i>Hệ thống ổn định</p>
+                </div>
+                <button onclick="window.location.href='/hub'" class="w-10 h-10 rounded-full bg-white/5 hover:bg-white/20 border border-white/10 flex items-center justify-center transition">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                </button>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 overflow-hidden pb-4">
+            
+            <div class="lg:col-span-4 glass p-5 flex flex-col h-full overflow-hidden">
+                <div class="flex justify-between items-center mb-5">
+                    <h2 class="font-bold text-lg text-white"><i class="fa-solid fa-folder-tree text-blue-400 mr-2"></i> Scripts List</h2>
+                    <button onclick="fetchScripts()" class="text-gray-400 hover:text-white transition" title="Làm mới"><i class="fa-solid fa-rotate-right"></i></button>
+                </div>
+                <div id="scriptList" class="flex-1 overflow-y-auto pr-2 flex flex-col gap-3 custom-scrollbar"></div>
+            </div>
+
+            <div class="lg:col-span-8 flex flex-col gap-6 h-full overflow-hidden">
+                
+                <div class="glass p-5 shrink-0 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl"></div>
+                    <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                        <div class="flex-1">
+                            <h2 class="text-2xl font-black text-white mb-1" id="ctrlTitle">Chưa chọn Script</h2>
+                            <div class="flex items-center gap-3 text-sm font-mono text-gray-400">
+                                <span id="ctrlStatus"><i class="status-dot status-stopped mr-1"></i> Trạng thái: Dừng</span>
+                                <span>|</span>
+                                <span id="ctrlCron"><i class="fa-regular fa-clock mr-1"></i> Lịch: Trống</span>
+                            </div>
+                        </div>
+                        <div class="flex gap-3">
+                            <button id="btnPlayStop" onclick="toggleCurrentScript()" disabled class="px-6 py-2.5 rounded-lg font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center bg-gray-600 text-gray-300">
+                                <i class="fa-solid fa-play mr-2"></i> Khởi Động
+                            </button>
+                            <button onclick="openCronModal()" id="btnCron" disabled class="px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-blue-400" title="Đặt lịch chạy"><i class="fa-solid fa-calendar-days"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex-1 flex flex-col shadow-2xl rounded-2xl overflow-hidden border border-white/10 relative">
+                    <div class="mac-header shrink-0">
+                        <div class="mac-dot dot-red"></div>
+                        <div class="mac-dot dot-yellow"></div>
+                        <div class="mac-dot dot-green"></div>
+                        <span class="ml-4 text-xs font-mono text-gray-400" id="terminalTitle">root@d4m-server:~</span>
+                        <label class="ml-auto text-xs text-gray-500 flex items-center gap-2 cursor-pointer hover:text-white transition">
+                            <input type="checkbox" id="autoScrollCheck" checked class="accent-green-500">
+                            Auto Scroll
+                        </label>
+                    </div>
+                    
+                    <div class="terminal-wrapper flex-1">
+                        <div id="terminalBody" class="terminal-box flex-1 p-6 text-[13px] leading-relaxed whitespace-pre-wrap">> Hệ thống đang vào vị trí...</div>
+                        
+                        <div id="terminalInputBox" class="hidden bg-[#1a1b26] border-t border-[#2d3748] p-3 flex items-center shrink-0">
+                            <span class="text-green-400 font-mono font-bold mr-3">❯</span>
+                            <input type="text" id="terminalInput" class="flex-1 bg-transparent text-white font-mono text-sm outline-none placeholder-gray-600" placeholder="Nhập câu trả lời (VD: y) hoặc lệnh rồi ấn Enter..." autocomplete="off">
+                            <button onclick="sendTerminalInput()" id="btnSendInput" class="ml-3 w-8 h-8 flex items-center justify-center bg-blue-600 hover:bg-blue-500 rounded text-white transition"><i class="fa-solid fa-turn-down fa-rotate-90"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div id="cronModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
+        <div class="glass w-full max-w-md p-8 relative transform scale-95 transition-transform duration-300" id="cronModalContent">
+            <button onclick="closeCronModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+            <h3 class="text-2xl font-black text-white mb-2"><i class="fa-solid fa-stopwatch text-blue-400 mr-2"></i>Lên lịch tự động</h3>
+            <p class="text-sm text-gray-400 mb-6 font-mono">File: <span id="cronFileName" class="text-blue-300">script.py</span></p>
+            <div class="space-y-4">
+                <div>
+                    <input type="text" id="cronInput" class="glass-input font-mono text-lg tracking-widest text-center" placeholder="* * * * *">
+                </div>
+                <div class="flex gap-3 pt-4 border-t border-white/10">
+                    <button onclick="removeCron()" class="flex-1 py-3 bg-red-500/20 hover:bg-red-500/40 text-red-400 font-bold rounded-lg transition">Xóa Lịch</button>
+                    <button onclick="saveCron()" class="flex-1 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg transition">Lưu Cài Đặt</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const TOKEN = localStorage.getItem('d4m_sso_token');
+        const API_HEADERS = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` };
+        
+        function parseJwt(token) {
+            try { return JSON.parse(decodeURIComponent(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''))); } 
+            catch (e) { return null; }
+        }
+
+        const payload = parseJwt(TOKEN);
+        if (!payload || Number(payload.role) !== 1) {
+            document.getElementById('lockScreen').style.display = 'flex';
+        } else {
+            document.getElementById('lockScreen').style.display = 'none';
+            document.getElementById('adminName').innerText = payload.full_name || payload.sub;
+            document.getElementById('mainApp').classList.remove('hidden');
+            setTimeout(() => document.getElementById('mainApp').classList.remove('opacity-0'), 100);
+            fetchScripts();
+        }
+
+        let currentScript = null;
+        let isRunning = false;
+        let logInterval = null;
+
+        async function fetchScripts() {
+            try {
+                const res = await fetch('/api/scripts/list', { headers: API_HEADERS });
+                if (!res.ok) throw new Error("Lỗi");
+                const data = await res.json();
+                
+                const listEl = document.getElementById('scriptList');
+                listEl.innerHTML = '';
+                data.scripts.forEach(sc => {
+                    const isRun = sc.status === 'running';
+                    const isActiveClass = currentScript === sc.name ? 'active border-blue-500' : 'border-white/10';
+                    const statusDot = isRun ? '<i class="status-dot status-running"></i>' : '<i class="status-dot status-stopped"></i>';
+                    
+                    // Nếu đang cập nhật giao diện mà trúng Script đang chọn có sự thay đổi trạng thái, cập nhật lại biến
+                    if (currentScript === sc.name && isRunning !== isRun) {
+                        isRunning = isRun;
+                        updateControlPanel(sc.cron);
+                    }
+
+                    listEl.innerHTML += `
+                        <div onclick="selectScript('${sc.name}', ${isRun}, '${sc.cron || ''}')" class="glass-card p-4 flex justify-between items-center ${isActiveClass}">
+                            <div class="flex items-center gap-3">
+                                <i class="fa-brands fa-python text-2xl ${isRun ? 'text-green-400 drop-shadow-[0_0_8px_rgba(74,222,128,0.6)]' : 'text-blue-500'}"></i>
+                                <div>
+                                    <h3 class="font-bold text-white text-sm">${sc.name}</h3>
+                                    <div class="flex items-center gap-2 mt-1">${statusDot} <span class="text-[10px] uppercase text-gray-400">${isRun ? 'Running' : 'Ready'}</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            } catch (e) {
+                document.getElementById('scriptList').innerHTML = `<div class="text-red-400 text-center py-5">Lỗi kết nối Máy Chủ</div>`;
+            }
+        }
+
+        function updateControlPanel(cronInfo) {
+            document.getElementById('ctrlTitle').innerText = currentScript;
+            document.getElementById('terminalTitle').innerText = `root@d4m-server:~/scripts/${currentScript}`;
+            document.getElementById('ctrlStatus').innerHTML = isRunning 
+                ? `<i class="status-dot status-running mr-1"></i> Trạng thái: Đang chạy` 
+                : `<i class="status-dot status-stopped mr-1"></i> Trạng thái: Đã dừng`;
+            
+            const btnPlay = document.getElementById('btnPlayStop');
+            btnPlay.disabled = false;
+            document.getElementById('btnCron').disabled = false;
+            
+            if (isRunning) {
+                btnPlay.className = "px-6 py-2.5 rounded-lg font-bold transition-all flex items-center bg-red-600 hover:bg-red-500 text-white shadow-[0_0_15px_rgba(220,38,38,0.4)]";
+                btnPlay.innerHTML = `<i class="fa-solid fa-stop mr-2"></i> Buộc Dừng`;
+                
+                // 🚀 BẬT THANH NHẬP LỆNH
+                document.getElementById('terminalInputBox').classList.remove('hidden');
+                document.getElementById('terminalInput').focus();
+            } else {
+                btnPlay.className = "px-6 py-2.5 rounded-lg font-bold transition-all flex items-center bg-green-600 hover:bg-green-500 text-white shadow-[0_0_15px_rgba(34,197,94,0.4)]";
+                btnPlay.innerHTML = `<i class="fa-solid fa-play mr-2"></i> Khởi Động`;
+                
+                // 🚀 TẮT THANH NHẬP LỆNH KHI SCRIPT ĐÃ DỪNG
+                document.getElementById('terminalInputBox').classList.add('hidden');
+            }
+        }
+
+        function selectScript(name, runState, cronInfo) {
+            currentScript = name;
+            isRunning = runState;
+            updateControlPanel(cronInfo);
+            fetchScripts(); 
+
+            document.getElementById('terminalBody').innerHTML = `> Chờ tải log của ${name}...\n`;
+            if(logInterval) clearInterval(logInterval);
+            fetchLogs();
+            logInterval = setInterval(() => { fetchLogs(); fetchScripts(); }, 2000); 
+        }
+
+        async function toggleCurrentScript() {
+            if (!currentScript) return;
+            const action = isRunning ? 'stop' : 'start';
+            document.getElementById('btnPlayStop').innerHTML = `<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Gửi lệnh...`;
+            
+            try {
+                const res = await fetch(`/api/scripts/${action}/${currentScript}`, { method: 'POST', headers: API_HEADERS });
+                if(res.ok) {
+                    isRunning = !isRunning;
+                    updateControlPanel('');
+                    fetchScripts();
+                } else alert((await res.json()).detail);
+            } catch(e) { alert("Lỗi mạng!"); }
+        }
+
+        async function fetchLogs() {
+            if (!currentScript) return;
+            try {
+                const res = await fetch(`/api/scripts/logs/${currentScript}`, { headers: API_HEADERS });
+                if (res.ok) {
+                    const data = await res.json();
+                    const term = document.getElementById('terminalBody');
+                    
+                    let coloredLog = data.logs.replace(/ERROR|LỖI|⚠️|❌/g, '<span style="color:#ef4444; font-weight:bold;">$&</span>');
+                    coloredLog = coloredLog.replace(/BẮT ĐẦU CHẠY/g, '<span style="color:#3b82f6; font-weight:bold;">$&</span>');
+                    coloredLog = coloredLog.replace(/KẾT THÚC|✅/g, '<span style="color:#fbbf24; font-weight:bold;">$&</span>');
+                    coloredLog = coloredLog.replace(/👉/g, '<span style="color:#a855f7; font-weight:bold; font-size:16px;">$&</span>'); // Làm nổi bật dấu nhắc
+
+                    if (coloredLog !== term.innerHTML) {
+                        term.innerHTML = coloredLog || '> Chưa có dòng log nào được ghi...';
+                        if(document.getElementById('autoScrollCheck').checked) {
+                            term.scrollTop = term.scrollHeight;
+                        }
+                    }
+                }
+            } catch(e) {}
+        }
+
+        // ==========================================
+        // 🚀 HÀM GỬI LỆNH VÀO TERMINAL
+        // ==========================================
+        async function sendTerminalInput() {
+            if (!currentScript || !isRunning) return;
+            const inputEl = document.getElementById('terminalInput');
+            const cmd = inputEl.value;
+            
+            // Xóa text ngay cho mượt và tạm khóa ô input
+            inputEl.value = '';
+            inputEl.disabled = true;
+            
+            try {
+                await fetch(`/api/scripts/input/${currentScript}`, {
+                    method: 'POST',
+                    headers: API_HEADERS,
+                    body: JSON.stringify({ command: cmd })
+                });
+                fetchLogs(); // Ép cập nhật Log ngay lập tức để hiện chữ user vừa gõ
+            } catch (e) {
+                alert("Không thể gửi lệnh!");
+            }
+            
+            // Mở khóa lại ô input và trỏ chuột vào đó
+            inputEl.disabled = false;
+            inputEl.focus();
+        }
+
+        // Lắng nghe sự kiện bấm phím Enter trong thanh nhập lệnh
+        document.getElementById('terminalInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                sendTerminalInput();
+            }
+        });
+
+        // Các hàm Modal Cron giữ nguyên
+        function openCronModal() { document.getElementById('cronModal').classList.remove('hidden'); setTimeout(() => { document.getElementById('cronModal').classList.remove('opacity-0'); document.getElementById('cronModalContent').classList.remove('scale-95'); }, 10); }
+        function closeCronModal() { document.getElementById('cronModal').classList.add('opacity-0'); document.getElementById('cronModalContent').classList.add('scale-95'); setTimeout(() => document.getElementById('cronModal').classList.add('hidden'), 300); }
+        async function saveCron() { const e = document.getElementById('cronInput').value; if(e) { await fetch(`/api/scripts/schedule/${currentScript}`, { method:'POST', headers:API_HEADERS, body:JSON.stringify({cron_expr:e})}); closeCronModal(); fetchScripts(); } }
+        async function removeCron() { await fetch(`/api/scripts/unschedule/${currentScript}`, { method:'POST', headers:API_HEADERS }); closeCronModal(); fetchScripts(); }
+    </script>
+</body>
+</html>
