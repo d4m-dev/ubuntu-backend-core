@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>d4m-dev Core | Documentation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .glass-card { background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .glass-header { background: rgba(0, 0, 0, 0.2); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+    </style>
+</head>
+<body class="bg-[#0b0f19] text-gray-200 font-sans pb-16">
+
+    <nav class="glass-header sticky top-0 z-50 px-6 py-4 mb-10">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 uppercase">
+                <i class="fa-brands fa-ubuntu text-orange-500 mr-2"></i>d4m-dev Core
+            </h1>
+            <span class="text-xs font-mono bg-purple-500/10 border border-purple-500/20 px-3 py-1 rounded-full text-purple-400 font-bold tracking-wider">v2.0.0 Stable</span>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto px-6 space-y-12">
+        <!-- Header Section -->
+        <div class="glass-card p-8 rounded-3xl relative overflow-hidden">
+            <h2 class="text-3xl font-black text-white mb-4 tracking-wide uppercase">Hệ Thống Ubuntu Backend Core</h2>
+            <p class="text-gray-400 leading-relaxed max-w-3xl">
+                Hệ sinh thái máy chủ cục bộ tối ưu hóa cho di động. FastAPI, Google Gemini AI, Demucs Audio Studio, và hạ tầng tự động hóa lịch trình (Google Calendar Integration). Vận hành biệt lập tại cổng <strong class="text-purple-400 font-mono">16868</strong>.
+            </p>
+        </div>
+
+        <!-- File Structure Section -->
+        <div class="glass-card p-6 rounded-2xl">
+            <h3 class="text-lg font-bold text-white mb-4 flex items-center"><i class="fa-solid fa-folder-tree text-blue-400 mr-2"></i> Sơ Đồ Cấu Trúc Hệ Thống</h3>
+            <div class="bg-[#070b12] p-6 rounded-xl border border-white/5 font-mono text-xs text-gray-400 leading-relaxed overflow-x-auto">
+                <p class="text-white font-bold">ubuntu-backend-core/</p>
+                <p>├── <span class="text-blue-300">main.py</span>            <span class="text-gray-600"># Entry point: Uvicorn Server</span></p>
+                <p>├── <span class="text-blue-300">.env</span>               <span class="text-gray-600"># Biến môi trường (Hidden)</span></p>
+                <p>├── <span class="text-yellow-500">auth/</span>              <span class="text-gray-600"># Chìa khóa Google Cloud (d4m-calendar-key.json)</span></p>
+                <p>├── <span class="text-purple-400">core/</span></p>
+                <p>│   ├── <span class="text-blue-300">database.py</span>    <span class="text-gray-600"># MariaDB Driver & Connection Pool</span></p>
+                <p>│   ├── <span class="text-blue-300">gcal.py</span>        <span class="text-gray-600"># Logic đồng bộ Lịch Google thông minh</span></p>
+                <p>│   ├── <span class="text-blue-300">tg_handlers.py</span> <span class="text-gray-600"># J.A.R.V.I.S Telegram Bot Engine</span></p>
+                <p>│   └── <span class="text-blue-300">security.py</span>    <span class="text-gray-600"># Xác thực JWT SSO</span></p>
+                <p>├── <span class="text-purple-400">api/</span></p>
+                <p>│   ├── <span class="text-blue-300">ai_admin.py</span>    <span class="text-gray-600"># Bộ não AI xử lý lệnh lịch & hệ thống</span></p>
+                <p>│   ├── <span class="text-blue-300">audio_engine.py</span><span class="text-gray-600"># Xử lý Demucs & Whisper AI</span></p>
+                <p>│   └── <span class="text-blue-300">dashboard.py</span>   <span class="text-gray-600"># API giám sát tài nguyên (CPU/RAM)</span></p>
+                <p>├── <span class="text-purple-400">scripts/</span></p>
+                <p>│   ├── <span class="text-blue-300">deploy.py</span>      <span class="text-gray-600"># Máy phóng code lên GitHub (Auto Sync)</span></p>
+                <p>│   └── <span class="text-blue-300">network_tunnel.py</span><span class="text-gray-600"># Quản lý Cloudflare Tunnel</span></p>
+                <p>└── <span class="text-purple-400">public/</span>            <span class="text-gray-600"># Giao diện Native Calendar & Dashboards</span></p>
+            </div>
+        </div>
+    </main>
+
+    <footer class="mt-16 py-6 border-t border-white/5 text-center text-xs text-gray-500">
+        &copy; 2026 Developed with ⚡ by d4m-dev.
+    </footer>
+</body>
+</html>
