@@ -13,13 +13,9 @@
         h1, h2, h3, .font-heading { font-family: 'Outfit', sans-serif; }
         .font-mono { font-family: 'Fira Code', monospace; }
 
-        /* 🌌 HIỆU ỨNG NỀN VŨ TRỤ LƯỚI */
         .cyber-grid {
-            position: fixed; inset: 0; z-index: -2;
-            background-size: 50px 50px;
-            background-image: 
-                linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            position: fixed; inset: 0; z-index: -2; background-size: 50px 50px;
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
             mask-image: radial-gradient(circle at center, black 30%, transparent 80%);
             -webkit-mask-image: radial-gradient(circle at top center, black 20%, transparent 100%);
         }
@@ -29,51 +25,33 @@
         .orb-2 { width: 40vw; height: 40vh; background: rgba(139, 92, 246, 0.15); bottom: -10vh; right: -10vw; animation-delay: -5s; }
         @keyframes float-orb { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(5%, 10%) scale(1.1); } }
 
-        /* 🃏 GLASS CARD CAO CẤP */
-        .glass-card { 
-            background: rgba(255, 255, 255, 0.02); 
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.05); 
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-        }
-        .glass-card:hover { 
-            transform: translateY(-8px); 
-            background: rgba(255, 255, 255, 0.04);
-            border-color: rgba(99, 102, 241, 0.4); 
-            box-shadow: 0 20px 40px -10px rgba(79, 70, 229, 0.2), inset 0 1px 0 rgba(255,255,255,0.1); 
-        }
+        .glass-card { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .glass-card:hover { transform: translateY(-8px); background: rgba(255, 255, 255, 0.04); border-color: rgba(99, 102, 241, 0.4); box-shadow: 0 20px 40px -10px rgba(79, 70, 229, 0.2), inset 0 1px 0 rgba(255,255,255,0.1); }
         
-        /* 🧊 TRẠNG THÁI KHÓA */
         .frozen-card { position: relative; overflow: hidden; }
         .frozen-card::after { content: ''; position: absolute; inset: 0; backdrop-filter: grayscale(100%) blur(2px); background: rgba(0,0,0,0.4); z-index: 10; pointer-events: none; }
         .frozen-badge { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 20; }
 
-        /* ✨ NÚT BẤM GRADIENT */
         .btn-glow { position: relative; }
         .btn-glow::before { content: ''; position: absolute; inset: -2px; background: linear-gradient(45deg, #3b82f6, #8b5cf6, #ec4899); border-radius: inherit; z-index: -1; filter: blur(10px); opacity: 0; transition: opacity 0.3s; }
         .btn-glow:hover::before { opacity: 0.7; }
 
-        /* 📜 SCROLLBAR & SEARCH */
         ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); } ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; } ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
         .search-input { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); transition: all 0.3s; }
         .search-input:focus { background: rgba(0,0,0,0.6); border-color: #8b5cf6; box-shadow: 0 0 20px rgba(139, 92, 246, 0.2); }
 
-        /* 🍞 TOAST ANIMATION */
         @keyframes toast-slide { 0% { transform: translateX(120%); opacity: 0; } 100% { transform: translateX(0); opacity: 1; } }
         .toast-enter { animation: toast-slide 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
     </style>
 </head>
 <body class="flex flex-col min-h-screen">
 
-    <!-- KHÔNG GIAN NỀN -->
     <div class="cyber-grid"></div>
     <div class="orb orb-1"></div>
     <div class="orb orb-2"></div>
 
-    <!-- 🍞 TOAST CONTAINER -->
     <div id="toast-container" class="fixed bottom-6 right-6 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
 
-    <!-- 🚪 MODAL ĐĂNG XUẤT -->
     <div id="logoutModal" class="fixed inset-0 z-[100] flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
         <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeLogoutModal()"></div>
         <div class="relative z-10 w-full max-w-sm mx-4 p-8 glass-card rounded-3xl transform scale-95 transition-transform duration-300" id="logoutModalContent">
@@ -91,7 +69,6 @@
         </div>
     </div>
 
-    <!-- 🌌 NAVBAR (TOP BAR) -->
     <nav class="w-full relative z-40 border-b border-white/5 bg-black/20 backdrop-blur-xl">
         <div class="max-w-7xl mx-auto px-6 h-16 flex justify-between items-center">
             <div class="flex items-center gap-3">
@@ -101,7 +78,6 @@
                 <span class="font-heading font-black text-xl tracking-wide">D4M<span class="text-gray-500">.HUB</span></span>
             </div>
 
-            <!-- Auth Widget -->
             <div>
                 <button id="btnHeaderAuth" onclick="redirectToAuth()" class="btn-glow relative px-5 py-2 bg-white/10 hover:bg-white/20 text-white text-sm rounded-full backdrop-blur-md border border-white/10 transition flex items-center gap-2 font-bold">
                     <i class="fa-solid fa-fingerprint text-blue-400"></i> Xác Thực D4M
@@ -124,7 +100,6 @@
         </div>
     </nav>
 
-    <!-- 🛸 HERO SECTION & SEARCH -->
     <header class="pt-16 pb-12 text-center relative z-10 flex flex-col items-center px-4">
         <div class="inline-block mb-4 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold uppercase tracking-widest backdrop-blur-md">
             <i class="fa-solid fa-bolt text-yellow-400 mr-1"></i> Mạng Lưới Serverless Nội Bộ
@@ -136,7 +111,6 @@
             Trung tâm quản lý, triển khai và vận hành các vi dịch vụ, ứng dụng nội bộ. Tất cả được đồng bộ và cô lập an toàn trong không gian D4M.
         </p>
 
-        <!-- Search Bar -->
         <div class="relative w-full max-w-xl group">
             <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                 <i class="fa-solid fa-magnifying-glass text-gray-500 group-focus-within:text-purple-400 transition-colors"></i>
@@ -148,16 +122,9 @@
         </div>
     </header>
 
-    <!-- 📦 MAIN CONTENT -->
     <main class="flex-grow w-full max-w-7xl mx-auto px-6 relative z-10 pb-20">
         
-        <!-- Loading State -->
-        <div id="loading" class="text-center py-20 hidden">
-            <div class="w-16 h-16 mx-auto border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mb-4"></div>
-            <p class="text-blue-400 font-mono tracking-widest text-sm uppercase">Đang quét không gian...</p>
-        </div>
-
-        <!-- 🌟 SECTION 1: CORE APPS (Hệ Sinh Thái Lõi) -->
+        <!-- SECTION 1: CORE APPS -->
         <div id="section-core" class="mb-16">
             <div class="flex items-center gap-3 mb-6">
                 <div class="h-px bg-gradient-to-r from-transparent to-purple-500/50 flex-1"></div>
@@ -169,8 +136,8 @@
             <div id="core-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
         </div>
 
-        <!-- 🚀 SECTION 2: DEPLOYED PROJECTS (Dự án của User) -->
-        <div id="section-projects" class="mb-10">
+        <!-- 🚀 KHỐI BẢO MẬT: CHỈ HIỂN THỊ DỰ ÁN KHI CÓ TOKEN -->
+        <div id="section-projects" class="mb-10 hidden">
             <div class="flex items-center gap-3 mb-6">
                 <div class="h-px bg-gradient-to-r from-transparent to-blue-500/50 flex-1"></div>
                 <h2 class="text-xl font-heading font-black text-white uppercase tracking-widest flex items-center gap-2">
@@ -178,22 +145,36 @@
                 </h2>
                 <div class="h-px bg-gradient-to-r from-blue-500/50 to-transparent flex-1"></div>
             </div>
+
+            <!-- Loading API -->
+            <div id="loading" class="text-center py-10">
+                <div class="w-12 h-12 mx-auto border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mb-4"></div>
+                <p class="text-blue-400 font-mono tracking-widest text-xs uppercase">Đang đồng bộ phân hệ...</p>
+            </div>
             
             <div id="empty-state" class="hidden text-center py-16 glass-card rounded-3xl border-dashed border-white/20">
                 <div class="w-20 h-20 mx-auto bg-white/5 rounded-full flex items-center justify-center mb-4">
                     <i class="fa-solid fa-satellite text-3xl text-gray-500"></i>
                 </div>
                 <h3 class="text-xl font-bold text-gray-300 mb-2">Không gian triển khai trống</h3>
-                <p class="text-gray-500 text-sm">Hệ thống đang chờ sếp tải lên và kích hoạt dự án từ Control Panel.</p>
-                <a href="/dashboard" class="inline-block mt-6 px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold rounded-full transition shadow-[0_0_15px_rgba(59,130,246,0.3)]">Đến Control Panel</a>
+                <p class="text-gray-500 text-sm">Chưa có dự án nào được đẩy lên Máy chủ.</p>
             </div>
 
             <div id="project-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
         </div>
 
+        <!-- 🛡️ KHỐI BẢO MẬT: YÊU CẦU ĐĂNG NHẬP -->
+        <div id="auth-guard" class="text-center py-12 glass-card rounded-3xl border border-red-500/20 shadow-[0_0_30px_rgba(239,68,68,0.05)]">
+            <div class="w-16 h-16 mx-auto bg-red-500/10 rounded-2xl flex items-center justify-center mb-4">
+                <i class="fa-solid fa-shield-halved text-2xl text-red-400"></i>
+            </div>
+            <h3 class="text-lg font-bold text-white mb-2">Khu Vực Hạn Chế</h3>
+            <p class="text-gray-400 text-sm max-w-md mx-auto mb-6">Hệ thống Các dự án triển khai (Hosted Projects) chỉ hiển thị cho người có thẩm quyền. Vui lòng xác thực D4M ID.</p>
+            <button onclick="redirectToAuth()" class="px-6 py-2.5 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-full font-bold transition">Đăng Nhập Ngay</button>
+        </div>
+
     </main>
 
-    <!-- 🏁 FOOTER -->
     <footer class="py-8 border-t border-white/5 bg-black/60 backdrop-blur-2xl relative z-40 mt-auto">
         <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
             <div class="flex items-center gap-2 text-gray-400">
@@ -209,7 +190,6 @@
     </footer>
 
     <script>
-        // Bắt phím tắt Ctrl+K để focus vào thanh tìm kiếm
         document.addEventListener('keydown', function(e) {
             if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
                 e.preventDefault();
@@ -218,13 +198,23 @@
         });
 
         // ==========================================
-        // 🚀 BỘ ĐIỀU KHIỂN UI / MODAL / TOAST
+        // 🚀 UI HELPERS & JWT PARSER
         // ==========================================
+        function parseJwt(token) {
+            try {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+                return JSON.parse(jsonPayload);
+            } catch (e) { return null; }
+        }
+
         function openLogoutModal() {
             const modal = document.getElementById('logoutModal');
             const content = document.getElementById('logoutModalContent');
             modal.classList.remove('hidden');
-            // Dùng setTimeout để nhường 1 frame cho DOM render xong display:block, sau đó kích hoạt opacity
             setTimeout(() => {
                 modal.classList.remove('opacity-0');
                 content.classList.remove('scale-95');
@@ -265,69 +255,82 @@
             }, 4000);
         }
 
+        function redirectToAuth() { window.location.href = `/auth?redirect=${window.location.pathname}`; }
+
         // ==========================================
-        // 🚀 XÁC THỰC NGƯỜI DÙNG
+        // 🚀 BƯỚC 1: XÁC THỰC BẰNG THẺ JWT (CỰC NHANH VÀ CHÍNH XÁC)
         // ==========================================
+        let d4mRole = 0; 
+        let globalToken = "";
+
         async function checkLoginStatus() {
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('login') === 'success') {
-                showToast('Hệ thống Aegis nhận dạng thành công. Chào mừng Tư Lệnh!');
+                showToast('Hệ thống Aegis nhận dạng thành công!');
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
 
-            const token = localStorage.getItem('d4m_sso_token');
+            let token = localStorage.getItem('d4m_sso_token') || localStorage.getItem('token');
             if (token) {
+                token = token.replace(/^["']|["']$/g, '');
+                globalToken = token;
+                
+                // 1. Giải mã thẻ Token lấy thẳng quyền hạn (Role & Active)
+                const payload = parseJwt(token);
+                if (payload) {
+                    d4mRole = Number(payload.role);
+                    const isActive = Number(payload.active) === 1 || payload.active === true;
+
+                    // 2. Nếu tài khoản Kích hoạt, mở khóa Giao diện Dự Án ngay lập tức
+                    if (isActive) {
+                        document.getElementById('auth-guard').classList.add('hidden');
+                        document.getElementById('section-projects').classList.remove('hidden');
+                        loadUserProjects(); // Gọi API lấy danh sách dự án
+                    }
+                }
+
+                // 3. Hiển thị UI Profile ở góc trên
                 document.getElementById('btnHeaderAuth').classList.add('hidden');
                 document.getElementById('userProfileWidget').classList.remove('hidden');
 
+                // 4. Kéo API phụ chỉ để lấy Avatar và Tên (Không ảnh hưởng bảo mật nữa)
                 try {
                     const res = await fetch('/api/auth/profile/me', { headers: { 'Authorization': `Bearer ${token}` } });
                     if (res.ok) {
                         const data = await res.json();
-                        document.getElementById('headerAvatar').src = data.data.avatar_url;
+                        if(data.data.avatar_url) document.getElementById('headerAvatar').src = data.data.avatar_url;
                         document.getElementById('headerUsername').innerText = data.data.full_name || data.data.username;
                     } else {
+                        // Token hết hạn
                         localStorage.removeItem('d4m_sso_token');
                         window.location.reload();
                     }
-                } catch (e) { console.log("Lỗi mạng khi tải Profile"); }
+                } catch (e) { console.log("Lỗi mạng khi tải Avatar Profile"); }
             }
         }
 
-        function redirectToAuth() { window.location.href = `/auth?redirect=${window.location.pathname}`; }
-
         // ==========================================
-        // 🚀 RENDER DỮ LIỆU CARD DỰ ÁN
+        // 🚀 BƯỚC 2: RENDER HỆ SINH THÁI LÕI (STATIC)
         // ==========================================
         const coreApps = [
             { name: "Social Hub", path: "social-hub", desc: "Mạng xã hội & Tương tác", icon: "fa-solid fa-earth-asia", color: "from-rose-500 to-red-600" },
-            { name: "Generated code from IMG", path: "autocode", desc: "Tạo code từ ảnh", icon: "fa-solid fa-earth-asia", color: "from-rose-500 to-cyan-600" },
-            { name: "Music Pro", path: "music-pro", desc: "Trình phát nhạc chuẩn Premium", icon: "fa-compact-disc", color: "from-blue-500 to-indigo-600" },
-            { name: "Love Sync", path: "love-sync", desc: "Đồng bộ và ghép đôi tình yêu", icon: "fa-heart", color: "from-pink-500 to-rose-400" },
-            { name: "Thần Số Học", path: "numerology", desc: "Phân tích vận mệnh và đường đời", icon: "fa-star-and-crescent", color: "from-purple-500 to-indigo-500" },
-            { name: "Documentation", path: "documentation", desc: "Tài liệu hệ thống cốt lõi Backend", icon: "fa-book-journal-whills", color: "from-emerald-500 to-teal-600" },
-            { name: "Remove Audio", path: "vocal-remove", desc: "Công cụ tách âm thanh AI", icon: "fa-headphones-simple", color: "from-amber-500 to-orange-600" },
+            { name: "Generated code", path: "autocode", desc: "Tạo code từ ảnh AI", icon: "fa-solid fa-code", color: "from-rose-500 to-cyan-600" },
+            { name: "Music Pro", path: "music-pro", desc: "Trình phát nhạc chuẩn Premium", icon: "fa-solid fa-compact-disc", color: "from-blue-500 to-indigo-600" },
+            { name: "Love Sync", path: "love-sync", desc: "Đồng bộ và ghép đôi tình yêu", icon: "fa-solid fa-heart", color: "from-pink-500 to-rose-400" },
+            { name: "Thần Số Học", path: "numerology", desc: "Phân tích vận mệnh đường đời", icon: "fa-solid fa-star-and-crescent", color: "from-purple-500 to-indigo-500" },
+            { name: "Documentation", path: "documentation", desc: "Tài liệu hệ thống Backend", icon: "fa-solid fa-book-journal-whills", color: "from-emerald-500 to-teal-600" },
+            { name: "Remove Audio", path: "vocal-remove", desc: "Công cụ tách âm thanh AI", icon: "fa-solid fa-headphones-simple", color: "from-amber-500 to-orange-600" },
             { name: "YT Downloader", path: "yt-downloader", desc: "Tải MP4/MP3 tốc độ cao", icon: "fa-solid fa-play", color: "from-red-600 to-red-800" }
         ];
 
-        function stringToColorClass(str) {
-            const gradients = ['from-cyan-500 to-blue-500', 'from-purple-500 to-pink-500', 'from-emerald-400 to-cyan-500', 'from-orange-400 to-rose-400', 'from-indigo-500 to-purple-600'];
-            let hash = 0; for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
-            return gradients[Math.abs(hash) % gradients.length];
-        }
-
-        async function loadProjects() {
-            document.getElementById('loading').classList.remove('hidden');
+        function renderCoreApps() {
             const coreGrid = document.getElementById('core-grid');
-            const projectGrid = document.getElementById('project-grid');
-            
-            // 1. Render Core Apps
             coreApps.forEach(app => {
                 const searchStr = `${app.name} ${app.desc}`.toLowerCase();
                 coreGrid.innerHTML += `
                 <div class="project-card glass-card rounded-2xl flex flex-col p-5 group h-full" data-search="${searchStr}">
                     <div class="w-12 h-12 rounded-xl bg-gradient-to-br ${app.color} flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform">
-                        <i class="fa-solid ${app.icon} text-white text-xl"></i>
+                        <i class="${app.icon} text-white text-xl"></i>
                     </div>
                     <h3 class="text-lg font-heading font-bold text-white mb-2 line-clamp-1">${app.name}</h3>
                     <p class="text-sm text-gray-400 mb-6 flex-grow line-clamp-2">${app.desc}</p>
@@ -337,13 +340,31 @@
                     </div>
                 </div>`;
             });
+        }
 
-            // 2. Fetch & Render User Projects
+        // ==========================================
+        // 🚀 BƯỚC 3: LOAD DỰ ÁN (CHỈ CHẠY KHI ĐÃ AUTH)
+        // ==========================================
+        function stringToColorClass(str) {
+            const gradients = ['from-cyan-500 to-blue-500', 'from-purple-500 to-pink-500', 'from-emerald-400 to-cyan-500', 'from-orange-400 to-rose-400', 'from-indigo-500 to-purple-600'];
+            let hash = 0; for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+            return gradients[Math.abs(hash) % gradients.length];
+        }
+
+        async function loadUserProjects() {
+            const projectGrid = document.getElementById('project-grid');
+            const loading = document.getElementById('loading');
+            
             try {
-                const port = window.location.port ? `:${window.location.port}` : '';
-                const res = await fetch(`${window.location.protocol}//${window.location.hostname}${port}/api/projects/`);
+                // Đính kèm token vào Header để Máy chủ soi xét
+                const res = await fetch('/api/projects/', {
+                    headers: { 'Authorization': `Bearer ${globalToken}` }
+                });
+                
                 const data = await res.json();
-                document.getElementById('loading').classList.add('hidden');
+                loading.classList.add('hidden');
+
+                if (!res.ok) throw new Error("Chưa cấp quyền");
 
                 if (data.projects.length === 0) {
                     document.getElementById('empty-state').classList.remove('hidden');
@@ -380,12 +401,12 @@
                     </div>`;
                 });
             } catch (err) { 
-                document.getElementById('loading').innerHTML = '<p class="text-red-400 font-bold"><i class="fa-solid fa-triangle-exclamation mr-2"></i>Mất kết nối máy chủ!</p>';
+                loading.innerHTML = '<p class="text-red-400 font-bold"><i class="fa-solid fa-shield-halved mr-2"></i>Quyền truy cập bị từ chối!</p>';
             }
         }
 
         // ==========================================
-        // 🔍 LIVE SEARCH (BỘ LỌC TÌM KIẾM NHANH)
+        // 🔍 LIVE SEARCH 
         // ==========================================
         function filterProjects() {
             const query = document.getElementById('searchInput').value.toLowerCase();
@@ -403,14 +424,18 @@
                 }
             });
 
-            // Ẩn/hiện nguyên cả Section nếu không có kết quả nào bên trong
             document.getElementById('section-core').style.display = coreCount === 0 ? 'none' : 'block';
-            document.getElementById('section-projects').style.display = projCount === 0 && query !== '' ? 'none' : 'block';
+            
+            const projSection = document.getElementById('section-projects');
+            if(!projSection.classList.contains('hidden')) {
+                projSection.style.display = projCount === 0 && query !== '' ? 'none' : 'block';
+            }
         }
 
+        // 🚀 INIT SEQUENCE
         document.addEventListener('DOMContentLoaded', () => {
-            checkLoginStatus();
-            loadProjects();
+            renderCoreApps(); // 1. Render khung Core tĩnh ngay lập tức
+            checkLoginStatus(); // 2. Kích hoạt SSO Check (Giải mã Token cực lẹ)
         });
     </script>
 </body>

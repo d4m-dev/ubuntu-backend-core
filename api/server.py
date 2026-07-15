@@ -123,20 +123,40 @@ def setup_routers(app: FastAPI):
         app.include_router(r)
 
 def setup_frontend_routes(app: FastAPI):
+    # 🚀 QUY HOẠCH ĐƯỜNG DẪN MỚI THEO CHIẾN LƯỢC "PHÂN LÔ"
     FRONTEND_PAGES = {
-        "/": "index.html", "/hub": "hub.html", "/auth": "auth.html",
-        "/admin/dashboard": "dashboard.html", "/admin/dashboard/": "dashboard.html",
-        "/admin/upload": "admin-upload.html", "/admin/upload/": "admin-upload.html",
-        "/admin/scripts": "admin-scripts.html", "/admin/scripts/": "admin-scripts.html",
-        "/audio-test": "audio-test.html", "/numerology": "numerology.html",
-        "/vocal-remove": "vocal-remove.html", "/love-sync": "love-sync.html",
-        "/music-pro": "music-pro.html", "/social-hub": "social-hub.html",
-        "/documentation": "documentation.html", "/yt-downloader": "yt-downloader.html",
-        "/profile": "profile.html", "/test-tracks": "test-tracks.html",
-        "/admin/security": "admin-security.html",
-        "/admin/dldriver": "download-ggdriver.html",
-        "/admin/omni": "admin-master.html", "/admin/calendar": "calendar-viewer.html",
-        "/autocode": "autocode.html", "/admin/jarvis": "jarvis-chat.html"
+        # 📂 THƯ MỤC GỐC (Gateway)
+        "/": "index.html", 
+        "/hub": "hub.html", 
+        "/auth": "auth.html",
+        "/documentation": "documentation.html", 
+        
+        # 📂 ADMIN (Lõi Quản trị)
+        "/admin/dashboard": "admin/dashboard.html", 
+        "/admin/dashboard/": "admin/dashboard.html",
+        "/admin/upload": "admin/admin-upload.html", 
+        "/admin/upload/": "admin/admin-upload.html",
+        "/admin/scripts": "admin/admin-scripts.html", 
+        "/admin/scripts/": "admin/admin-scripts.html",
+        "/admin/security": "admin/admin-security.html",
+        "/admin/omni": "admin/admin-master.html", 
+        "/profile": "admin/profile.html", 
+
+        # 📂 TOOLS (Công cụ Tiện ích & AI)
+        "/audio-test": "tools/audio-test.html", 
+        "/vocal-remove": "tools/vocal-remove.html", 
+        "/yt-downloader": "tools/yt-downloader.html",
+        "/admin/dldriver": "tools/download-ggdriver.html",
+        "/admin/calendar": "tools/calendar-viewer.html",
+        "/autocode": "tools/autocode.html", 
+        "/admin/jarvis": "tools/jarvis-chat.html",
+
+        # 📂 SOCIAL (Giải trí & Cộng đồng)
+        "/numerology": "social/numerology.html",
+        "/love-sync": "social/love-sync.html",
+        "/music-pro": "social/music-pro.html", 
+        "/social-hub": "social/social-hub.html",
+        "/test-tracks": "social/test-tracks.html"
     }
     
     PUBLIC_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "public")
@@ -145,15 +165,17 @@ def setup_frontend_routes(app: FastAPI):
         def create_handler(file_name=filename):
             async def serve_page():
                 file_path = os.path.join(PUBLIC_DIR, file_name)
-                if os.path.exists(file_path): return FileResponse(file_path)
+                if os.path.exists(file_path): 
+                    return FileResponse(file_path)
                 return JSONResponse(status_code=404, content={"status": "error", "message": f"❌ Không tìm thấy {file_name}"})
             return serve_page
             
         app.get(route)(create_handler())
 
+    # 🚀 XỬ LÝ RIÊNG ĐƯỜNG DẪN ĐỘNG CHO TRANG NGHE NHẠC (SOCIAL)
     @app.get("/music-pro/{song_slug}")
     async def serve_dynamic_music_pro(song_slug: str):
-        file_path = os.path.join(PUBLIC_DIR, "music-pro.html")
+        file_path = os.path.join(PUBLIC_DIR, "social", "music-pro.html")
         if os.path.exists(file_path): 
             return FileResponse(file_path)
         return JSONResponse(status_code=404, content={"status": "error", "message": "❌ Không tìm thấy Music Pro"})
