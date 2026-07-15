@@ -1,12 +1,14 @@
-// Tự động nhận diện dùng ws:// (localhost) hoặc wss:// (nếu chạy qua Cloudflare Tunnel)
+// ==========================================
+// WEBSOCKET TERMINAL (DỰ PHÒNG CHẠY NGẦM)
+// ==========================================
 const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-// Tự động lấy port 16868 hoặc domain tunnel hiện tại
 const wsUrl = `${protocol}//${window.location.host}/api/ws/terminal`;
-
 const termOutput = document.getElementById('terminal-output');
 let ws;
 
 function initTerminal() {
+    if(!termOutput) return; // Nếu giao diện không có thẻ này, ngưng chạy để tránh báo lỗi đỏ
+    
     termOutput.innerHTML = '<div class="text-yellow-400 mb-1">Đang thiết lập kết nối mã hóa tới lõi máy chủ...</div>';
     
     ws = new WebSocket(wsUrl);
@@ -18,8 +20,7 @@ function initTerminal() {
     ws.onmessage = function(event) {
         const text = event.data;
         const div = document.createElement('div');
-        // Định dạng text cho đẹp
-        div.className = text.includes('LỖI:') ? 'text-red-400' : 'text-gray-300';
+        div.className = text.includes('LỖI:') ? 'text-red-400 font-bold' : 'text-gray-300';
         div.textContent = text;
         termOutput.appendChild(div);
         termOutput.scrollTop = termOutput.scrollHeight;
@@ -30,8 +31,5 @@ function initTerminal() {
         setTimeout(initTerminal, 3000); // Tự động kết nối lại
     };
 }
-
-// Bắt sự kiện khi người dùng gõ phím (nếu bạn có input riêng cho terminal)
-// Hiện tại terminal chỉ đang hiển thị log, nếu muốn gõ lệnh, chúng ta có thể mở rộng sau.
 
 document.addEventListener('DOMContentLoaded', initTerminal);

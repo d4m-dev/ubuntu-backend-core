@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drive Core API | D4M Ecosystem</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg-color: #050505; --glass-bg: rgba(20, 20, 25, 0.6); --glass-border: rgba(255, 255, 255, 0.08); }
+        body { background-color: var(--bg-color); color: white; font-family: 'Inter', sans-serif; overflow-x: hidden; min-height: 100vh; }
+        
+        .orb { position: fixed; border-radius: 50%; filter: blur(100px); z-index: -1; pointer-events: none; }
+        .orb-1 { width: 400px; height: 400px; background: #3b82f6; top: -100px; left: -100px; opacity: 0.3; }
+        .orb-2 { width: 500px; height: 500px; background: #10b981; bottom: -150px; right: -100px; opacity: 0.2; }
+        
+        .glass { background: var(--glass-bg); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid var(--glass-border); border-radius: 1.5rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+        .glass-input { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 12px 16px; border-radius: 12px; outline: none; width: 100%; transition: all 0.3s; font-family: 'Fira Code', monospace; font-size: 13px; }
+        .glass-input:focus { border-color: #3b82f6; box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); background: rgba(0,0,0,0.6); }
+
+        /* TERMINAL 3D */
+        .terminal-window { background: rgba(10, 10, 15, 0.9); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.8), 0 0 20px rgba(59, 130, 246, 0.2); backdrop-filter: blur(20px); }
+        .log-line { border-left: 2px solid transparent; padding-left: 8px; margin-bottom: 6px; }
+        .log-line:hover { background: rgba(255,255,255,0.05); border-left-color: #3b82f6; }
+        
+        ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); } ::-webkit-scrollbar-thumb { background: rgba(59, 130, 246, 0.5); border-radius: 10px; } ::-webkit-scrollbar-thumb:hover { background: rgba(59, 130, 246, 0.8); }
+
+        /* TOAST ANIMATION */
+        @keyframes toast-slide { 0% { transform: translateX(120%); opacity: 0; } 100% { transform: translateX(0); opacity: 1; } }
+        .toast-enter { animation: toast-slide 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div id="toast-container" class="fixed bottom-6 right-6 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
+
+    <!-- KHÓA BẢO MẬT -->
+    <div id="lockScreen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-xl transition-opacity duration-500">
+        <div class="text-center">
+            <i class="fa-solid fa-shield-halved text-7xl text-red-500 mb-6 drop-shadow-[0_0_25px_rgba(239,68,68,0.8)]"></i>
+            <h1 class="text-3xl font-black tracking-widest uppercase text-white mb-2">Truy Cập Trái Phép</h1>
+            <button onclick="window.location.href='/hub'" class="mt-6 px-8 py-3 bg-red-600 hover:bg-red-500 text-white font-bold rounded-lg transition-all shadow-[0_0_15px_rgba(239,68,68,0.3)]">QUAY LẠI TRẠM CHÍNH</button>
+        </div>
+    </div>
+
+    <div id="mainApp" class="max-w-[1500px] w-full mx-auto p-6 md:p-8 h-screen flex flex-col hidden opacity-0 transition-opacity duration-1000">
+        
+        <!-- HEADER -->
+        <header class="flex justify-between items-center mb-6 glass px-8 py-5 shrink-0">
+            <div class="flex items-center gap-5">
+                <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-[0_0_30px_rgba(59,130,246,0.4)] border border-blue-400/50">
+                    <i class="fa-brands fa-google-drive text-3xl text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-white to-blue-400">G-DRIVE COMMANDER</h1>
+                    <p class="text-xs text-blue-300/80 font-mono tracking-widest uppercase flex items-center gap-2 mt-1">
+                        <i class="fa-solid fa-server"></i> Máy chủ Truyền tải Dữ liệu Lõi
+                    </p>
+                </div>
+            </div>
+            <div class="flex items-center gap-6">
+                <!-- AUTH STATUS -->
+                <div id="authStatus" class="px-4 py-2 rounded-lg text-xs font-mono border bg-black/50 border-gray-600 text-gray-400 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-notch fa-spin"></i> Đang quét Token...
+                </div>
+                <button onclick="window.location.href='/hub'" class="w-12 h-12 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center transition text-gray-400 hover:text-white" title="Về Hub">
+                    <i class="fa-solid fa-house"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- MAIN LAYOUT 2 CỘT -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 overflow-hidden pb-4">
+            
+            <!-- CỘT TRÁI: BẢNG ĐIỀU KHIỂN (CONTROL PANEL) -->
+            <div class="lg:col-span-5 glass flex flex-col overflow-hidden relative">
+                <!-- Tab Switching -->
+                <div class="flex border-b border-white/10 bg-black/20 shrink-0">
+                    <button id="tab1Btn" onclick="switchTab(1)" class="flex-1 py-4 text-sm font-bold border-b-2 border-blue-500 text-blue-400 bg-blue-500/5 transition">
+                        <i class="fa-solid fa-download mr-2"></i> Tải về Server
+                    </button>
+                    <button id="tab2Btn" onclick="switchTab(2)" class="flex-1 py-4 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-gray-300 transition">
+                        <i class="fa-solid fa-clone mr-2"></i> Clone Drive
+                    </button>
+                </div>
+
+                <div class="flex-1 overflow-y-auto p-6 custom-scrollbar">
+                    
+                    <!-- TAB 1 CONTENT -->
+                    <div id="tab1Content" class="space-y-6 animate-fade-in">
+                        <div class="p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl">
+                            <h3 class="text-sm font-bold text-blue-300 mb-1"><i class="fa-solid fa-circle-info"></i> Chế độ Tải Cục Bộ</h3>
+                            <p class="text-xs text-gray-400 leading-relaxed">Hệ thống sẽ kéo toàn bộ cấu trúc thư mục từ G-Drive về thẳng ổ cứng vật lý của Ubuntu Server này.</p>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">URL Thư Mục Nguồn (G-Drive)</label>
+                            <input type="text" id="downloadUrl" placeholder="https://drive.google.com/drive/folders/..." class="glass-input">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">Đường Dẫn Lưu Trữ (Downloads)</label>
+                            <input type="text" id="downloadDest" value="/sdcard/Downloads" class="glass-input font-bold text-blue-300">
+                        </div>
+                        <button onclick="executeDownload()" class="w-full mt-4 py-4 bg-blue-600 hover:bg-blue-500 text-white font-black tracking-widest uppercase rounded-xl shadow-[0_0_20px_rgba(59,130,246,0.4)] transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-bolt"></i> KÍCH HOẠT TIẾN TRÌNH
+                        </button>
+                    </div>
+
+                    <!-- TAB 2 CONTENT -->
+                    <div id="tab2Content" class="space-y-6 hidden animate-fade-in">
+                        <div class="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
+                            <h3 class="text-sm font-bold text-emerald-400 mb-1"><i class="fa-solid fa-circle-info"></i> Chế độ Clone Đám Mây</h3>
+                            <p class="text-xs text-gray-400 leading-relaxed">Máy chủ sẽ đóng vai trò trung gian, sao chép thư mục từ Drive người khác thẳng sang Drive của sếp (Server-to-Server).</p>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">URL Thư Mục BỊ SAO CHÉP (Nguồn)</label>
+                            <input type="text" id="copySrc" placeholder="https://drive.google.com/drive/folders/source_id" class="glass-input focus:border-emerald-500 focus:shadow-[0_0_15px_rgba(16,185,129,0.3)]">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">URL Thư Mục LƯU TRỮ (Của Sếp)</label>
+                            <input type="text" id="copyDest" placeholder="Để trống = Lưu vào Root (My Drive)" class="glass-input focus:border-emerald-500 focus:shadow-[0_0_15px_rgba(16,185,129,0.3)]">
+                        </div>
+                        <button onclick="executeCopy()" class="w-full mt-4 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-black tracking-widest uppercase rounded-xl shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-copy"></i> BẮT ĐẦU NHÂN BẢN
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- CỘT PHẢI: TERMINAL GIÁM SÁT -->
+            <div class="lg:col-span-7 flex flex-col h-full overflow-hidden terminal-window rounded-2xl relative">
+                <!-- Header Terminal -->
+                <div class="bg-black/60 border-b border-white/10 p-3.5 flex items-center shrink-0">
+                    <div class="flex gap-2.5 ml-2">
+                        <div class="w-3.5 h-3.5 rounded-full bg-red-500 shadow-[0_0_8px_#ef4444]"></div>
+                        <div class="w-3.5 h-3.5 rounded-full bg-yellow-500 shadow-[0_0_8px_#f59e0b]"></div>
+                        <div class="w-3.5 h-3.5 rounded-full bg-green-500 shadow-[0_0_8px_#10b981]"></div>
+                    </div>
+                    <div class="mx-auto text-xs text-gray-400 font-mono font-bold flex items-center gap-3">
+                        <span id="taskStatusBadge" class="px-2 py-0.5 rounded bg-gray-800 text-gray-500 border border-gray-700">STANDBY</span>
+                        root@d4m-driver:~
+                    </div>
+                </div>
+
+                <!-- Body Terminal -->
+                <div id="terminalLog" class="flex-1 p-6 font-mono text-[13px] text-green-400 overflow-y-auto custom-scrollbar shadow-inner bg-gradient-to-b from-transparent to-black/30">
+                    <div class="text-gray-500 mb-4">
+                        D4M Driver System [Version 2.0]<br>
+                        (c) 2026 D4M Corporation. All rights reserved.<br><br>
+                        root@d4m-driver:~$ Waiting for task dispatch...
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // 🚀 TOAST NOTIFICATION VÀ BẢO MẬT
+        // ==========================================
+        function showToast(title, message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            let colorCfg = type === 'success' ? { bg: 'bg-green-950/90', border: 'border-green-500/50', icon: 'fa-check-circle text-green-400' } : { bg: 'bg-red-950/90', border: 'border-red-500/50', icon: 'fa-triangle-exclamation text-red-500' };
+            toast.className = `flex items-start gap-3 p-4 rounded-xl border ${colorCfg.border} ${colorCfg.bg} backdrop-blur-md shadow-2xl toast-enter w-80 pointer-events-auto`;
+            toast.innerHTML = `<i class="fa-solid ${colorCfg.icon} mt-1 text-lg animate-pulse"></i><div><h4 class="font-bold text-white text-sm uppercase">${title}</h4><p class="text-xs text-gray-300 mt-1">${message}</p></div>`;
+            container.appendChild(toast);
+            setTimeout(() => { toast.style.transform = 'translateX(120%)'; toast.style.opacity = '0'; toast.style.transition = 'all 0.4s'; setTimeout(() => toast.remove(), 400); }, 4000);
+        }
+
+        const TOKEN = localStorage.getItem('d4m_sso_token');
+        const API_HEADERS = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` };
+
+        function parseJwt(token) {
+            try { return JSON.parse(decodeURIComponent(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''))); } 
+            catch (e) { return null; }
+        }
+
+        const payload = parseJwt(TOKEN);
+        if (!payload || Number(payload.role) !== 1) {
+            document.getElementById('lockScreen').style.display = 'flex';
+        } else {
+            document.getElementById('lockScreen').style.display = 'none';
+            document.getElementById('mainApp').classList.remove('hidden');
+            setTimeout(() => document.getElementById('mainApp').classList.remove('opacity-0'), 100);
+            checkApiStatus();
+        }
+
+        // ==========================================
+        // 🚀 LOGIC ĐIỀU KHIỂN
+        // ==========================================
+        let activePollingInterval = null;
+
+        async function checkApiStatus() {
+            try {
+                const res = await fetch('/api/dldriver/status', { headers: API_HEADERS });
+                const statusDiv = document.getElementById('authStatus');
+                if (res.ok) {
+                    const data = await res.json();
+                    if(data.authenticated) {
+                        statusDiv.className = "px-4 py-2 rounded-lg text-xs font-mono border bg-emerald-950/40 border-emerald-800 text-emerald-400 flex items-center gap-2";
+                        statusDiv.innerHTML = '<i class="fa-solid fa-shield-check"></i> API CONNECTED';
+                    } else {
+                        statusDiv.className = "px-4 py-2 rounded-lg text-xs font-mono border bg-rose-950/40 border-rose-800 text-rose-400 flex items-center gap-2";
+                        statusDiv.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> MISSING TOKEN.JSON';
+                    }
+                }
+            } catch (e) { showToast('LỖI KẾT NỐI', 'Không thể chạm tới máy chủ Backend', 'error'); }
+        }
+
+        function switchTab(tabNum) {
+            const btn1 = document.getElementById('tab1Btn'), btn2 = document.getElementById('tab2Btn');
+            const cont1 = document.getElementById('tab1Content'), cont2 = document.getElementById('tab2Content');
+
+            if (tabNum === 1) {
+                btn1.className = "flex-1 py-4 text-sm font-bold border-b-2 border-blue-500 text-blue-400 bg-blue-500/5 transition";
+                btn2.className = "flex-1 py-4 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-gray-300 transition";
+                cont1.classList.remove('hidden'); cont2.classList.add('hidden');
+            } else {
+                btn2.className = "flex-1 py-4 text-sm font-bold border-b-2 border-emerald-500 text-emerald-400 bg-emerald-500/5 transition";
+                btn1.className = "flex-1 py-4 text-sm font-bold border-b-2 border-transparent text-gray-500 hover:text-gray-300 transition";
+                cont2.classList.remove('hidden'); cont1.classList.add('hidden');
+            }
+        }
+
+        async function executeDownload() {
+            const url = document.getElementById('downloadUrl').value;
+            const destination = document.getElementById('downloadDest').value;
+            if(!url) return showToast('THIẾU DỮ LIỆU', 'Chưa nạp URL thư mục nguồn', 'error');
+
+            try {
+                const res = await fetch('/api/dldriver/download', { method: 'POST', headers: API_HEADERS, body: JSON.stringify({ url, destination }) });
+                const data = await res.json();
+                if(res.ok) { showToast('ĐÃ NHẬN LỆNH', 'Bắt đầu luồng tải dữ liệu...', 'success'); startTrackingProgress(data.task_id); } 
+                else showToast('LỖI API', data.detail, 'error');
+            } catch(err) { showToast('LỖI MẠNG', 'Mất kết nối API', 'error'); }
+        }
+
+        async function executeCopy() {
+            const source_url = document.getElementById('copySrc').value;
+            const target_url = document.getElementById('copyDest').value;
+            if(!source_url) return showToast('THIẾU DỮ LIỆU', 'Chưa nạp URL nguồn để sao chép', 'error');
+
+            try {
+                const res = await fetch('/api/dldriver/copy', { method: 'POST', headers: API_HEADERS, body: JSON.stringify({ source_url, target_url }) });
+                const data = await res.json();
+                if(res.ok) { showToast('ĐÃ NHẬN LỆNH', 'Bắt đầu nhân bản Cloud-to-Cloud', 'success'); startTrackingProgress(data.task_id); } 
+                else showToast('LỖI API', data.detail, 'error');
+            } catch(err) { showToast('LỖI MẠNG', 'Mất kết nối API', 'error'); }
+        }
+
+        function startTrackingProgress(taskId) {
+            if(activePollingInterval) clearInterval(activePollingInterval);
+            const terminal = document.getElementById('terminalLog');
+            const badge = document.getElementById('taskStatusBadge');
+            
+            terminal.innerHTML = `<div class="log-line text-blue-400">> root@d4m-driver:~$ Connecting to Task Stream [${taskId}]...</div>`;
+            badge.className = "px-2 py-0.5 rounded border font-bold animate-pulse bg-blue-900/30 border-blue-500/50 text-blue-400";
+            badge.innerText = "RUNNING";
+            
+            activePollingInterval = setInterval(async () => {
+                try {
+                    const res = await fetch(`/api/dldriver/progress/${taskId}`, { headers: API_HEADERS });
+                    if(!res.ok) return;
+                    const data = await res.json();
+                    
+                    if(data.status === 'completed') {
+                        badge.className = "px-2 py-0.5 rounded border font-bold bg-green-900/40 border-green-500/50 text-green-400";
+                        badge.innerText = "COMPLETED";
+                        clearInterval(activePollingInterval);
+                        showToast('THÀNH CÔNG', 'Tác vụ đã hoàn tất 100%', 'success');
+                    } else if (data.status === 'failed') {
+                        badge.className = "px-2 py-0.5 rounded border font-bold bg-red-900/40 border-red-500/50 text-red-400";
+                        badge.innerText = "FAILED";
+                        clearInterval(activePollingInterval);
+                        showToast('THẤT BẠI', 'Tác vụ đã xảy ra lỗi', 'error');
+                    }
+                    
+                    // Render log with terminal style
+                    terminal.innerHTML = data.logs.map(log => {
+                        let color = "text-green-400";
+                        if(log.includes("[+]")) color = "text-blue-400 font-bold";
+                        if(log.includes("[!]")) color = "text-yellow-400";
+                        if(log.includes("[-]")) color = "text-red-400 font-bold";
+                        if(log.includes("[✓]")) color = "text-emerald-400 font-bold";
+                        return `<div class="log-line ${color}">${log}</div>`;
+                    }).join('');
+                    terminal.scrollTop = terminal.scrollHeight;
+                    
+                } catch(e) {}
+            }, 1500); // Polling mỗi 1.5 giây
+        }
+    </script>
+</body>
+</html>

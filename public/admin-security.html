@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AEGIS Shield | D4M Security</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg-color: #050505; --glass-bg: rgba(15, 10, 15, 0.7); --glass-border: rgba(239, 68, 68, 0.15); }
+        body { background-color: var(--bg-color); color: white; font-family: 'Inter', sans-serif; overflow-x: hidden; min-height: 100vh; }
+        
+        /* HIỆU ỨNG RADAR NỀN */
+        .radar-bg { position: fixed; inset: 0; z-index: -2; background-image: 
+            radial-gradient(circle at center, rgba(239, 68, 68, 0.03) 0%, transparent 60%),
+            linear-gradient(rgba(239, 68, 68, 0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(239, 68, 68, 0.05) 1px, transparent 1px);
+            background-size: 100% 100%, 40px 40px, 40px 40px; opacity: 0.5;
+        }
+        .orb { position: fixed; border-radius: 50%; filter: blur(120px); z-index: -1; pointer-events: none; }
+        .orb-red { width: 500px; height: 500px; background: #ef4444; top: -100px; right: -150px; opacity: 0.15; animation: pulse-orb 8s infinite alternate; }
+        .orb-purple { width: 400px; height: 400px; background: #8b5cf6; bottom: -100px; left: -100px; opacity: 0.1; }
+        @keyframes pulse-orb { 0% { transform: scale(1); opacity: 0.1; } 100% { transform: scale(1.2); opacity: 0.2; } }
+
+        /* GLASSMORPHISM ĐỎ TÁC CHIẾN */
+        .glass { background: var(--glass-bg); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid var(--glass-border); border-radius: 1.5rem; box-shadow: 0 25px 50px -12px rgba(239, 68, 68, 0.1); }
+        .glass-panel { background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(239,68,68,0.2); border-radius: 1rem; }
+        
+        /* SCROLLBAR TÁC CHIẾN */
+        ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); } ::-webkit-scrollbar-thumb { background: rgba(239, 68, 68, 0.5); border-radius: 10px; } ::-webkit-scrollbar-thumb:hover { background: rgba(239, 68, 68, 0.8); }
+
+        /* ANIMATION THANH CẢNH BÁO */
+        .threat-bar { height: 6px; border-radius: 3px; background: linear-gradient(90deg, #ef4444, #f59e0b); box-shadow: 0 0 10px rgba(239,68,68,0.5); }
+        .pulse-red { animation: text-pulse 2s infinite; }
+        @keyframes text-pulse { 0% { text-shadow: 0 0 5px rgba(239,68,68,0.2); } 50% { text-shadow: 0 0 15px rgba(239,68,68,0.8); } 100% { text-shadow: 0 0 5px rgba(239,68,68,0.2); } }
+        
+        /* FORM INPUT */
+        .cyber-input { background: rgba(0,0,0,0.6); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; padding: 12px 16px; border-radius: 8px; outline: none; width: 100%; transition: all 0.3s; font-family: 'Fira Code', monospace; }
+        .cyber-input:focus { border-color: #ef4444; box-shadow: 0 0 20px rgba(239, 68, 68, 0.2); }
+        .cyber-input::placeholder { color: rgba(239,68,68,0.4); }
+    </style>
+</head>
+<body>
+
+    <!-- KHÓA BẢO MẬT -->
+    <div id="lockScreen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-xl transition-opacity duration-500">
+        <div class="text-center">
+            <i class="fa-solid fa-fingerprint text-7xl text-red-600 mb-6 drop-shadow-[0_0_25px_rgba(239,68,68,0.8)] pulse-red"></i>
+            <h1 class="text-4xl font-black tracking-widest uppercase text-white mb-2">KHÔNG PHẬN CẤM</h1>
+            <p class="text-red-400 mb-6 font-mono text-sm">Hệ thống khiên Aegis từ chối quyền truy cập.</p>
+            <button onclick="window.location.href='/hub'" class="px-8 py-3 bg-red-600/20 border border-red-500 hover:bg-red-600 text-white font-bold rounded-lg transition-all shadow-[0_0_15px_rgba(239,68,68,0.3)]">QUAY LẠI TRẠM CHÍNH</button>
+        </div>
+    </div>
+
+    <!-- BACKGROUND NỀN -->
+    <div class="radar-bg"></div>
+    <div class="orb orb-red"></div>
+    <div class="orb orb-purple"></div>
+
+    <div id="mainApp" class="max-w-[1500px] mx-auto p-6 md:p-8 h-screen flex flex-col hidden opacity-0 transition-opacity duration-1000">
+        
+        <!-- HEADER CHIẾN LƯỢC -->
+        <header class="flex justify-between items-center mb-6 glass px-8 py-5">
+            <div class="flex items-center gap-5">
+                <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-red-600 to-rose-900 flex items-center justify-center shadow-[0_0_30px_rgba(239,68,68,0.4)] border border-red-500/50">
+                    <i class="fa-solid fa-shield-cat text-3xl text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-3xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-white to-red-400 drop-shadow-[0_0_10px_rgba(239,68,68,0.5)]">AEGIS SHIELD</h1>
+                    <p class="text-xs text-red-400/80 font-mono tracking-widest uppercase flex items-center gap-2">
+                        <i class="fa-solid fa-satellite-dish animate-pulse"></i> Trạm Giám Sát & Phản Công Tự Động
+                    </p>
+                </div>
+            </div>
+            <div class="flex items-center gap-6">
+                <div class="text-right hidden md:block border-r border-red-500/30 pr-6">
+                    <p class="text-sm font-bold text-white uppercase tracking-wider" id="adminName">Tư Lệnh Ân</p>
+                    <p class="text-[10px] text-red-400 font-mono">Quyền hạn: Tối cao</p>
+                </div>
+                <button onclick="window.location.href='/admin/scripts'" class="w-12 h-12 rounded-xl bg-red-950/50 hover:bg-red-900/50 border border-red-500/30 flex items-center justify-center transition text-red-400 hover:text-white group relative" title="Quản lý Script">
+                    <i class="fa-solid fa-microchip group-hover:scale-110 transition-transform"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- TOP STATS (4 THẺ) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="glass p-5 relative overflow-hidden group">
+                <i class="fa-solid fa-network-wired absolute -right-4 -bottom-4 text-7xl text-white/5 group-hover:text-red-500/10 transition-colors"></i>
+                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Tổng Lượng Ping</h3>
+                <div class="text-4xl font-black text-white" id="statTotal">--</div>
+                <div class="text-[10px] text-green-400 font-mono mt-2"><i class="fa-solid fa-arrow-trend-up"></i> Hệ thống đang ghi nhận</div>
+            </div>
+            <div class="glass p-5 relative overflow-hidden group">
+                <i class="fa-regular fa-clock absolute -right-4 -bottom-4 text-7xl text-white/5 group-hover:text-red-500/10 transition-colors"></i>
+                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Giờ Cao Điểm</h3>
+                <div class="text-3xl font-black text-white mt-1" id="statPeak">--:--</div>
+                <div class="text-[10px] text-red-400 font-mono mt-2">Nhiều thiết bị quét qua radar nhất</div>
+            </div>
+            <div class="glass p-5 relative overflow-hidden group">
+                <i class="fa-solid fa-server absolute -right-4 -bottom-4 text-7xl text-white/5 group-hover:text-red-500/10 transition-colors"></i>
+                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Phân Tán Thiết Bị</h3>
+                <div class="flex items-end gap-4 mt-2" id="statDevices">
+                    <div class="text-gray-500 text-sm animate-pulse">Đang quét...</div>
+                </div>
+            </div>
+            <div class="glass p-5 relative overflow-hidden border-red-500/40 bg-red-950/20">
+                <div class="absolute top-0 left-0 w-1 h-full bg-red-500 shadow-[0_0_15px_#ef4444]"></div>
+                <h3 class="text-xs font-bold text-red-400 uppercase tracking-wider mb-1 pulse-red"><i class="fa-solid fa-triangle-exclamation"></i> Mức Độ Đe Dọa</h3>
+                <div class="text-2xl font-black text-white mt-1" id="statThreat">AN TOÀN</div>
+                <div class="text-[10px] text-gray-400 font-mono mt-2" id="statBannedCount">0 IP đang bị giam giữ</div>
+            </div>
+        </div>
+
+        <!-- MAIN KHOANG TÁC CHIẾN (2 CỘT) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 overflow-hidden pb-4">
+            
+            <!-- CỘT TRÁI: RADAR IP TRUY CẬP -->
+            <div class="lg:col-span-7 glass flex flex-col overflow-hidden relative">
+                <div class="absolute top-0 right-0 w-48 h-48 bg-red-500/5 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="p-6 border-b border-red-500/10 flex justify-between items-center bg-black/20">
+                    <h2 class="text-xl font-black text-white uppercase tracking-widest flex items-center gap-3">
+                        <i class="fa-solid fa-radar text-red-500 animate-spin-slow"></i> Tần Số Radar (Top IP)
+                    </h2>
+                    <button onclick="fetchRadarData()" class="text-red-400 hover:text-white transition"><i class="fa-solid fa-rotate-right"></i></button>
+                </div>
+                
+                <div class="flex-1 overflow-y-auto p-6 space-y-5 custom-scrollbar" id="topIpList">
+                    <div class="text-center text-red-900 py-10 font-mono animate-pulse">
+                        <i class="fa-solid fa-satellite-dish text-4xl mb-3"></i><br>Đang đồng bộ vệ tinh...
+                    </div>
+                </div>
+            </div>
+
+            <!-- CỘT PHẢI: VŨ KHÍ & SỔ ĐEN -->
+            <div class="lg:col-span-5 flex flex-col gap-6 overflow-hidden">
+                
+                <!-- Bảng Khóa Mục Tiêu Trực Tiếp -->
+                <div class="glass p-6 shrink-0 border border-red-500/30 bg-gradient-to-b from-red-950/40 to-black/60 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fa-solid fa-crosshairs text-8xl text-red-500"></i></div>
+                    <h2 class="text-lg font-black text-red-400 uppercase tracking-widest mb-4 flex items-center gap-2 relative z-10">
+                        <i class="fa-solid fa-crosshairs"></i> Khóa Mục Tiêu (Manual Ban)
+                    </h2>
+                    
+                    <div class="space-y-4 relative z-10">
+                        <div class="flex gap-3">
+                            <input type="text" id="banIpInput" class="cyber-input flex-1" placeholder="Nhập địa chỉ IP (VD: 192.168.1.1)">
+                            <input type="number" id="banHoursInput" class="cyber-input w-24 text-center" placeholder="Giờ" value="24" title="Số giờ cấm">
+                        </div>
+                        <input type="text" id="banReasonInput" class="cyber-input text-sm" placeholder="Lý do khóa mõm (Tùy chọn)...">
+                        
+                        <button onclick="executeBan()" class="w-full py-3.5 bg-red-600 hover:bg-red-500 text-white font-black tracking-widest uppercase rounded-lg shadow-[0_0_20px_rgba(239,68,68,0.4)] transition-all transform hover:scale-[1.01] flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-skull"></i> KHAI HỎA XÓA SỔ
+                        </button>
+
+                        <!-- 🚀 HIỂN THỊ THÔNG TIN KIM BÀI MIỄN TỬ -->
+                        <div class="text-center mt-3">
+                            <p class="text-[11px] text-green-400/80 font-mono flex justify-center items-center gap-1.5">
+                                <i class="fa-solid fa-shield-halved"></i> 
+                                Vùng an toàn (Whitelist): 192.168.110.123 (Backend IP)
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Danh Sách Đen (Hầm Ngục) -->
+                <div class="glass flex-1 flex flex-col overflow-hidden border border-red-500/10">
+                    <div class="p-5 border-b border-red-500/10 bg-black/40 flex justify-between items-center">
+                        <h2 class="text-sm font-black text-white uppercase tracking-widest"><i class="fa-solid fa-lock text-gray-400 mr-2"></i> Hầm Ngục (Blacklist)</h2>
+                        <span class="text-[10px] bg-red-900/50 text-red-400 px-2 py-1 rounded border border-red-500/30" id="blacklistCount">0 Bị Giam</span>
+                    </div>
+                    
+                    <div class="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar" id="blacklistContainer">
+                        <div class="text-center text-gray-600 py-8 font-mono text-sm">Hầm ngục trống. Không có tù nhân.</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- 🚀 KHAY CHỨA TOAST NOTIFICATION -->
+    <div id="toastContainer" class="fixed bottom-6 right-6 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
+
+    <script>
+        // ==========================================
+        // 🚀 HỆ THỐNG TOAST NOTIFICATION (CYBERPUNK)
+        // ==========================================
+        function showToast(type, title, message) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            
+            // Cấu hình màu sắc theo loại
+            let colorCfg = { bg: 'bg-blue-950/80', border: 'border-blue-500/50', icon: 'fa-circle-info text-blue-400', bar: 'bg-blue-500' };
+            if (type === 'success') colorCfg = { bg: 'bg-green-950/80', border: 'border-green-500/50', icon: 'fa-check-circle text-green-400', bar: 'bg-green-500' };
+            if (type === 'error') colorCfg = { bg: 'bg-red-950/90', border: 'border-red-500/50', icon: 'fa-triangle-exclamation text-red-500', bar: 'bg-red-500' };
+
+            toast.className = `transform translate-x-[120%] transition-all duration-500 ease-out flex flex-col overflow-hidden rounded-xl border ${colorCfg.border} ${colorCfg.bg} backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.5)] w-80 pointer-events-auto`;
+            
+            toast.innerHTML = `
+                <div class="p-4 flex items-start gap-3">
+                    <i class="fa-solid ${colorCfg.icon} text-xl mt-0.5 animate-pulse"></i>
+                    <div class="flex-1">
+                        <h4 class="font-bold text-white text-sm tracking-wide uppercase">${title}</h4>
+                        <p class="text-xs text-gray-300 mt-1">${message}</p>
+                    </div>
+                    <button onclick="this.closest('div.transform').remove()" class="text-gray-400 hover:text-white transition"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="w-full h-1 bg-black/50">
+                    <div class="h-full ${colorCfg.bar} w-full" style="animation: toast-progress 4s linear forwards;"></div>
+                </div>
+            `;
+            
+            container.appendChild(toast);
+            
+            // CSS Animation chạy thanh progress inline
+            if(!document.getElementById('toastStyles')) {
+                const style = document.createElement('style');
+                style.id = 'toastStyles';
+                style.innerHTML = `@keyframes toast-progress { 0% { width: 100%; } 100% { width: 0%; } }`;
+                document.head.appendChild(style);
+            }
+
+            // Slide in
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-x-[120%]');
+                toast.classList.add('translate-x-0');
+            });
+
+            // Slide out and remove
+            setTimeout(() => {
+                toast.classList.remove('translate-x-0');
+                toast.classList.add('translate-x-[120%]', 'opacity-0');
+                setTimeout(() => toast.remove(), 500);
+            }, 4000);
+        }
+
+        // ==========================================
+        // 🚀 BẢO MẬT & ĐỊNH DANH
+        // ==========================================
+        const TOKEN = localStorage.getItem('d4m_sso_token');
+        const API_HEADERS = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` };
+        
+        function parseJwt(token) {
+            try { return JSON.parse(decodeURIComponent(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''))); } 
+            catch (e) { return null; }
+        }
+
+        const payload = parseJwt(TOKEN);
+        if (!payload || Number(payload.role) !== 1) {
+            document.getElementById('lockScreen').style.display = 'flex';
+        } else {
+            document.getElementById('lockScreen').style.display = 'none';
+            document.getElementById('adminName').innerText = payload.full_name || payload.sub;
+            document.getElementById('mainApp').classList.remove('hidden');
+            setTimeout(() => document.getElementById('mainApp').classList.remove('opacity-0'), 100);
+            
+            fetchRadarData();
+            fetchBlacklist();
+            setInterval(fetchRadarData, 5000); 
+            setInterval(fetchBlacklist, 10000); 
+        }
+
+        // ==========================================
+        // 📡 RADAR QUÉT DỮ LIỆU
+        // ==========================================
+        async function fetchRadarData() {
+            try {
+                const res = await fetch('/api/security/radar', { headers: API_HEADERS });
+                if(!res.ok) return;
+                const data = await res.json();
+                if(data.report) renderRadar(data.report);
+            } catch(e) {}
+        }
+
+        function renderRadar(report) {
+            document.getElementById('statTotal').innerText = report.total_requests.toLocaleString();
+            document.getElementById('statPeak').innerText = report.peak_hour.split(' ')[0];
+            
+            const devBox = document.getElementById('statDevices');
+            devBox.innerHTML = '';
+            for (const [device, count] of Object.entries(report.device_stats)) {
+                let icon = 'fa-microchip'; let color = 'text-gray-400';
+                if(device.includes('Mobile')) { icon = 'fa-mobile-screen'; color = 'text-blue-400'; }
+                else if(device.includes('PC')) { icon = 'fa-desktop'; color = 'text-green-400'; }
+                else if(device.includes('Bot')) { icon = 'fa-robot'; color = 'text-purple-400'; }
+                
+                devBox.innerHTML += `
+                    <div class="text-center" title="${device}: ${count} req">
+                        <i class="fa-solid ${icon} text-2xl ${color} mb-1 drop-shadow-[0_0_8px_currentColor]"></i>
+                        <div class="text-xs font-bold text-white">${count}</div>
+                    </div>
+                `;
+            }
+
+            const ipList = document.getElementById('topIpList');
+            if(report.top_attackers_or_users.length === 0) {
+                ipList.innerHTML = '<div class="text-gray-500 font-mono text-center">Chưa ghi nhận tín hiệu nào.</div>';
+                return;
+            }
+
+            const maxReq = report.top_attackers_or_users[0].count; 
+            let html = '';
+            report.top_attackers_or_users.forEach((item, index) => {
+                const percent = Math.max(5, (item.count / maxReq) * 100);
+                const isThreat = item.count > 100 ? 'bg-red-500 shadow-[0_0_10px_#ef4444]' : 'bg-blue-500';
+                const textCol = item.count > 100 ? 'text-red-400' : 'text-blue-300';
+                
+                html += `
+                    <div class="glass-panel p-4 relative group hover:border-red-500/50 transition-colors">
+                        <div class="flex justify-between items-center mb-2">
+                            <div class="flex items-center gap-3">
+                                <span class="w-6 h-6 rounded bg-white/5 border border-white/10 flex items-center justify-center text-[10px] font-bold text-gray-400">#${index+1}</span>
+                                <span class="font-mono font-bold ${textCol} text-lg tracking-wider">${item.ip}</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="font-black text-white text-xl">${item.count} <span class="text-[10px] text-gray-500 font-normal">Ping</span></span>
+                                <button onclick="quickBan('${item.ip}')" class="w-8 h-8 rounded bg-red-900/50 hover:bg-red-600 border border-red-500/30 text-white flex items-center justify-center transition opacity-0 group-hover:opacity-100" title="Đưa vào Sổ Đen ngay lập tức">
+                                    <i class="fa-solid fa-crosshairs"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="w-full bg-black/50 rounded-full h-1.5 overflow-hidden">
+                            <div class="h-full rounded-full ${isThreat} transition-all duration-1000" style="width: ${percent}%"></div>
+                        </div>
+                    </div>
+                `;
+            });
+            ipList.innerHTML = html;
+        }
+
+        // ==========================================
+        // 🛑 QUẢN LÝ HẦM NGỤC (BLACKLIST)
+        // ==========================================
+        async function fetchBlacklist() {
+            try {
+                const res = await fetch('/api/security/blacklist', { headers: API_HEADERS });
+                if(!res.ok) return;
+                const data = await res.json();
+                renderBlacklist(data.blacklist);
+            } catch(e) {}
+        }
+
+        function renderBlacklist(blacklist) {
+            const container = document.getElementById('blacklistContainer');
+            const keys = Object.keys(blacklist);
+            
+            document.getElementById('blacklistCount').innerText = `${keys.length} Bị Giam`;
+            
+            const threatEl = document.getElementById('statThreat');
+            document.getElementById('statBannedCount').innerText = `${keys.length} IP đang bị giam giữ`;
+            if(keys.length > 5) { threatEl.innerText = "BÁO ĐỘNG"; threatEl.className = "text-2xl font-black text-red-500 mt-1 pulse-red"; }
+            else if(keys.length > 0) { threatEl.innerText = "CẢNH GIÁC"; threatEl.className = "text-2xl font-black text-yellow-500 mt-1"; }
+            else { threatEl.innerText = "AN TOÀN"; threatEl.className = "text-2xl font-black text-green-500 mt-1"; }
+
+            if(keys.length === 0) {
+                container.innerHTML = '<div class="text-center text-gray-600 py-8 font-mono text-sm"><i class="fa-solid fa-check-circle mb-2 text-2xl opacity-50"></i><br>Hầm ngục trống.</div>';
+                return;
+            }
+
+            let html = '';
+            for (const [ip, info] of Object.entries(blacklist)) {
+                const expireDate = new Date(info.expires_at * 1000).toLocaleString('vi-VN', { hour: '2-digit', minute:'2-digit', day:'2-digit', month:'2-digit' });
+                
+                html += `
+                    <div class="bg-red-950/20 border border-red-500/20 p-3 rounded-lg flex justify-between items-center group hover:bg-red-950/40 transition">
+                        <div>
+                            <div class="font-mono font-bold text-red-400 flex items-center gap-2">
+                                <i class="fa-solid fa-skull-crossbones text-xs"></i> ${ip}
+                            </div>
+                            <div class="text-[10px] text-gray-400 mt-1 line-clamp-1" title="${info.reason}">${info.reason}</div>
+                            <div class="text-[10px] text-orange-300 font-mono mt-1"><i class="fa-regular fa-clock"></i> Khóa đến: ${expireDate}</div>
+                        </div>
+                        <button onclick="unbanIp('${ip}')" class="px-3 py-1.5 bg-gray-800 hover:bg-green-600 text-xs font-bold text-white rounded border border-gray-600 hover:border-green-500 transition opacity-50 group-hover:opacity-100">
+                            Phóng thích
+                        </button>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        // ==========================================
+        // 🔫 SÚNG MÁY KHAI HỎA THỦ CÔNG
+        // ==========================================
+        function quickBan(ip) {
+            document.getElementById('banIpInput').value = ip;
+            document.getElementById('banIpInput').focus();
+        }
+
+        async function executeBan() {
+            const ip = document.getElementById('banIpInput').value.trim();
+            const hours = parseInt(document.getElementById('banHoursInput').value) || 24;
+            const reason = document.getElementById('banReasonInput').value.trim() || "Tiêu diệt thủ công từ Radar";
+
+            if(!ip) {
+                showToast('error', 'Lỗi Nạp Đạn', 'Chưa nhập mục tiêu (IP) để khai hỏa!');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/security/ban', {
+                    method: 'POST',
+                    headers: API_HEADERS,
+                    body: JSON.stringify({ ip, hours, reason })
+                });
+                
+                if(res.ok) {
+                    document.getElementById('banIpInput').value = '';
+                    document.getElementById('banReasonInput').value = '';
+                    fetchBlacklist();
+                    
+                    // Nổ hiệu ứng màn hình & Hiện Toast Success
+                    const overlay = document.createElement('div');
+                    overlay.className = "fixed inset-0 bg-red-600/30 z-[999] pointer-events-none transition-opacity duration-500";
+                    document.body.appendChild(overlay);
+                    setTimeout(() => { overlay.style.opacity = '0'; setTimeout(()=>overlay.remove(), 500); }, 100);
+
+                    showToast('success', 'MỤC TIÊU ĐÃ BỊ HẠ', `Đã tống cổ IP ${ip} vào hầm ngục trong ${hours} giờ.`);
+                } else {
+                    const error = await res.json();
+                    showToast('error', 'KHAI HỎA THẤT BẠI', error.detail || "Không thể khóa IP này.");
+                }
+            } catch(e) { 
+                showToast('error', 'LỖI HỆ THỐNG VŨ KHÍ', 'Mất kết nối đến Trạm Chỉ Huy. Vui lòng thử lại.'); 
+            }
+        }
+
+        async function unbanIp(ip) {
+            if(!confirm(`Xác nhận phóng thích IP ${ip} khỏi hầm ngục?`)) return;
+            try {
+                const res = await fetch(`/api/security/unban/${ip}`, { method: 'POST', headers: API_HEADERS });
+                if(res.ok) {
+                    fetchBlacklist();
+                    showToast('success', 'ĐÃ PHÓNG THÍCH', `IP ${ip} đã được thả khỏi hầm ngục.`);
+                } else {
+                    showToast('error', 'LỖI', 'Không thể phóng thích IP này.');
+                }
+            } catch(e) {
+                showToast('error', 'LỖI MẠNG', 'Mất kết nối đến máy chủ.');
+            }
+        }
+    </script>
+</body>
+</html>

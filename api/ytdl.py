@@ -14,7 +14,6 @@ from mutagen.id3 import ID3, APIC, TIT2, TPE1, error
 from fastapi import Header
 import jwt
 
-
 # Import từ các module của sếp
 from api.audio_engine import WORKSPACE_DIR, process_audio_pipeline
 from api.cleanup import write_log, run_cleanup_task
@@ -117,11 +116,9 @@ def run_admin_audio_pipeline(full_file_path: str, safe_title: str, ext: str, ori
             embed_metadata(final_beat, f"{original_title} (Beat)", uploader, cover_jpg)
 
         # 👉 [NÂNG CẤP]: BẢO KÊ FILE MP4
-        # Đảm bảo file MP4 gốc đã tải về bằng yt-dlp không bị trôi đi đâu
         final_mp4 = os.path.join(target_dir, f"{safe_title}.mp4")
         if ext == ".mp4" and full_file_path != final_mp4:
             if os.path.exists(full_file_path):
-                # Copy đè file tải về vào đúng chuẩn format của 5 tài nguyên
                 import shutil
                 shutil.copy2(full_file_path, final_mp4)
 
@@ -133,7 +130,6 @@ def run_admin_audio_pipeline(full_file_path: str, safe_title: str, ext: str, ori
 class YTDLInfoRequest(BaseModel):
     url: str
 
-
 class YTDLDownloadRequest(BaseModel):
     url: str
     format: str
@@ -144,10 +140,8 @@ class YTDLDownloadRequest(BaseModel):
 @router.post("/info")
 async def get_video_info(req: YTDLInfoRequest):
     python_expanded = os.path.expanduser("~/myenv/bin/python3")
-    # Build argument list
     args = [python_expanded, "-m", "yt_dlp", "--dump-json", "--no-warnings", "--no-playlist", req.url]
     try:
-        # Run subprocess without shell
         result = await asyncio.to_thread(subprocess.run, args, capture_output=True, text=True)
         if result.returncode != 0:
             raise Exception(f"yt-dlp error: {result.stderr}")
@@ -191,7 +185,6 @@ async def get_video_info(req: YTDLInfoRequest):
 @router.post("/download")
 async def process_download(req: YTDLDownloadRequest, background_tasks: BackgroundTasks, authorization: str = Header(None)):
     try:
-        # 🚀 1. LẤY THÔNG TIN ROLE TỪ TOKEN ĐỂ CHECK ADMIN
         is_admin = False
         if authorization and authorization.startswith("Bearer "):
             token = authorization.split(" ")[1]
@@ -204,11 +197,9 @@ async def process_download(req: YTDLDownloadRequest, background_tasks: Backgroun
 
         safe_title = sanitize_title(req.title)
 
-        # Nếu là Admin, lưu file gốc vào MUSIC_DIR để chuẩn bị chạy AI
         if is_admin:
             save_dir = os.path.join(MUSIC_DIR, safe_title)
             out_tmpl = os.path.join(save_dir, f"{safe_title}.%(ext)s")
-        # Nếu là User thường, lưu vào PENDING_DIR như khách vãng lai
         else:
             folder_guest = f"{safe_title}_{datetime.now().strftime('%H%M%S')}"
             save_dir = os.path.join(PENDING_DIR, folder_guest)
@@ -241,7 +232,6 @@ async def process_download(req: YTDLDownloadRequest, background_tasks: Backgroun
             raise Exception("Hệ thống tải thành công nhưng tệp không xuất hiện.")
         full_file_path = os.path.join(save_dir, downloaded_file)
 
-        # 🚀 2. PHÂN LUỒNG XỬ LÝ (CHỈ ADMIN MỚI ĐƯỢC CHẠY PIPELINE 5 TÀI NGUYÊN)
         if is_admin:
             background_tasks.add_task(run_admin_audio_pipeline, full_file_path, safe_title, f".{req.format}", req.title, "YouTube Music")
             write_log("admin", safe_title, f"Sếp đã tải và bóc tách AI: {downloaded_file}")
@@ -260,9 +250,6 @@ async def process_download(req: YTDLDownloadRequest, background_tasks: Backgroun
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# ==========================================
-# 🚀 SMART SEARCH & TRENDING ĐÃ SỬA LỖI TRẮNG BÓC
-# ==========================================
 class YTDLSearchRequest(BaseModel):
     query: str
 
@@ -271,7 +258,6 @@ async def search_youtube(req: YTDLSearchRequest):
     """Tìm kiếm siêu tốc lấy 40 kết quả"""
     python_expanded = os.path.expanduser("~/myenv/bin/python3")
     safe_query = req.query.replace('"', '').replace("'", "")
-    # Build args
     args = [python_expanded, "-m", "yt_dlp", f"ytsearch40:{safe_query}", "--dump-json", "--no-warnings", "--flat-playlist"]
     try:
         result = await asyncio.to_thread(subprocess.run, args, capture_output=True, text=True)
@@ -295,11 +281,11 @@ async def search_youtube(req: YTDLSearchRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @router.get("/trending")
 async def get_trending():
     """Quét dữ liệu thịnh hành trực tiếp siêu bền bỉ bằng từ khóa"""
     python_expanded = os.path.expanduser("~/myenv/bin/python3")
-    # Build args
     args = [python_expanded, "-m", "yt_dlp", "ytsearch40:nhac tre thinh hanh moi nhat", "--dump-json", "--no-warnings", "--flat-playlist"]
     try:
         result = await asyncio.to_thread(subprocess.run, args, capture_output=True, text=True)
@@ -309,10 +295,8 @@ async def get_trending():
                 try:
                     data = json.loads(line)
                     v_id = data.get("id") or data.get("url")
-                    if not v_id:
-                        continue
+                    if not v_id: continue
 
-                    # Trích xuất ID thuần phòng trường hợp dính chuỗi URL dài
                     if "watch?v=" in str(v_id):
                         v_id = str(v_id).split("watch?v=")[1].split("&")[0]
 
@@ -322,7 +306,7 @@ async def get_trending():
                     results.append({
                         "id": v_id,
                         "title": data.get("title") or "YouTube Video",
-                        "thumbnail": f"https://i.ytimg.com/vi/{v_id}/mqdefault.jpg", # Ép tự sinh link ảnh chuẩn
+                        "thumbnail": f"https://i.ytimg.com/vi/{v_id}/mqdefault.jpg",
                         "uploader": data.get("uploader") or data.get("channel") or data.get("author") or "YouTube Music",
                         "duration": dur_str
                     })
@@ -332,3 +316,31 @@ async def get_trending():
     except Exception as e:
         print(f"❌ Error Trending: {e}")
         return {"status": "error", "results": []}
+
+
+# ==========================================
+# 🚀 ENDPOINT MỚI THÊM: XẢ FILE ÉP TẢI XUỐNG
+# ==========================================
+@router.get("/file/{folder_name}/{file_name}")
+async def serve_download_file(folder_name: str, file_name: str):
+    """Cửa xả file: Ép trình duyệt phải tải xuống thay vì Play trực tiếp"""
+    decoded_folder = unquote(folder_name)
+    decoded_file = unquote(file_name)
+    
+    # Quét thông minh cả 2 kho lưu trữ (Của Sếp và của Khách)
+    path_admin = os.path.join(MUSIC_DIR, decoded_folder, decoded_file)
+    path_guest = os.path.join(PENDING_DIR, decoded_folder, decoded_file)
+    
+    if os.path.exists(path_admin):
+        file_path = path_admin
+    elif os.path.exists(path_guest):
+        file_path = path_guest
+    else:
+        raise HTTPException(status_code=404, detail="Trái đất không tìm thấy file này! Có thể đã bị xóa.")
+    
+    # Lệnh ép tải xuống thay vì trình duyệt mở ra xem
+    return FileResponse(
+        path=file_path, 
+        filename=decoded_file, 
+        media_type='application/octet-stream'
+    )

@@ -8,6 +8,7 @@ node_modules/
 logs/
 *.log
 log.db
+auth/
 
 __pycache__/
 
@@ -30,4 +31,4 @@ yt-dlp/
 
 cloudflare.log
 avatar-server-backup.zip
-project_size_report.txt
+project_size_report.txtauth/

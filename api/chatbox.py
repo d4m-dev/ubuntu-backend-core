@@ -10,8 +10,8 @@ router = APIRouter(
     tags=["Chatbox AI"]
 )
 
-STATUS_FILE = "/storage/emulated/0/coder/media/ubuntu-backend-core/core/.ai_active"
-START_SCRIPT = "/storage/emulated/0/coder/media/ubuntu-backend-core/scripts/start_ai.py"
+STATUS_FILE = "/mnt/sdcard/ubuntu-backend-core/core/.ai_active"
+START_SCRIPT = "/mnt/sdcard/ubuntu-backend-core/scripts/start_ai.py"
 
 class ChatRequest(BaseModel):
     prompt: str

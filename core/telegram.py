@@ -13,7 +13,7 @@ from core.config import settings
 
 # Lấy đồ nghề từ các file vệ tinh
 from core.tg_utils import get_device_battery, create_backup_zip, send_telegram_message, send_telegram_menu
-from core.tg_handlers import trigger_audio_processing, trigger_ytdl_download
+from core.tg_handlers import trigger_audio_processing, trigger_ytdl_download, trigger_jarvis_ai
 
 # 🚀 IMPORT BỘ LẬP LỊCH TÁC VỤ NGẦM
 from core.tg_scheduler import run_scheduler
@@ -30,7 +30,7 @@ def get_web_ui_url(yt_url):
         tunnel_link = get_tunnel_url()
     except: pass
     
-    base_url = tunnel_link if tunnel_link else "http://192.168.110.123:16868"
+    base_url = tunnel_link if tunnel_link else "d4mdev.click"
     return f"{base_url}/yt-downloader.html?url={quote(yt_url)}"
 
 async def telegram_polling_task():
@@ -264,13 +264,7 @@ async def telegram_polling_task():
                                     except Exception as e: await send_telegram_message(f"❌ Lỗi tải mạng: {e}")
 
                                 else:
-                                    try:
-                                        from core.bot_ai import process_telegram_ai
-                                        ai_res = await process_telegram_ai(chat_id, text)
-                                        reply = f"🤖 <b>AI:</b>\n\n{ai_res['reply']}"
-                                        if ai_res.get('action_executed'): reply += f"\n\n⚡ <i>{ai_res['action_executed']}</i>"
-                                        await send_telegram_message(reply)
-                                    except: pass
+                                    asyncio.create_task(trigger_jarvis_ai(chat_id, text))
                                         
                         # ==========================================
                         # 3. XỬ LÝ NÚT BẤM (CALLBACK)

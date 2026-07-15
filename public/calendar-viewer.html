@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>D4M Calendar | 3D Native Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap');
+        
+        /* FIX KHÔNG TRÀN MÀN HÌNH CHUẨN 100% TỶ LỆ */
+        html, body { 
+            margin: 0; padding: 0; height: 100%; height: 100dvh; 
+            font-family: 'Inter', sans-serif; overflow: hidden; 
+            color: #fff;
+            /* Phông nền hắt sáng có chiều sâu */
+            background: radial-gradient(ellipse at top, #1e2030 0%, #050505 100%);
+        }
+        
+        .glass-header { 
+            background: rgba(10, 10, 15, 0.6); 
+            backdrop-filter: blur(20px); 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05); 
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Ẩn thanh cuộn tàng hình */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+
+        /* Animation cho Modal */
+        .modal-overlay { background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); }
+        .modal-box { background: linear-gradient(145deg, #16161a 0%, #0d0d12 100%); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255,255,255,0.05); }
+    </style>
+</head>
+<body class="flex flex-col">
+
+    <!-- LÁ CHẮN BẢO MẬT (Giữ nguyên cấu trúc) -->
+    <div id="unauthorizedState" class="hidden flex-col items-center justify-center h-full text-center px-4 w-full relative z-50 bg-[#050505]">
+        <div class="w-24 h-24 bg-red-500/10 rounded-full flex items-center justify-center mb-6 border border-red-500/20 shadow-[0_0_30px_rgba(239,68,68,0.2)]">
+            <i class="fa-solid fa-lock text-5xl text-red-400"></i>
+        </div>
+        <h2 id="unauthTitle" class="text-3xl font-black text-white mb-4 tracking-wide">Yêu Cầu Đăng Nhập</h2>
+        <p id="unauthDesc" class="text-gray-400 mb-8 leading-relaxed">Sếp chưa mang thẻ định danh D4M ID.<br>Vui lòng đăng nhập vào hệ sinh thái để sử dụng công cụ này.</p>
+        <button onclick="redirectToAuth()" class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold py-3.5 px-8 rounded-xl shadow-lg transition-all active:scale-95 flex items-center">
+            <i class="fa-solid fa-fingerprint mr-2 text-lg"></i> Đăng nhập D4M ID
+        </button>
+    </div>
+
+    <!-- KHUNG ỨNG DỤNG LỊCH CHÍNH -->
+    <div id="appContent" class="hidden flex-col h-full w-full">
+        <!-- Header bóng bẩy -->
+        <header class="glass-header h-16 flex items-center justify-between px-6 shrink-0 z-20">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600/30 to-purple-600/30 flex items-center justify-center border border-blue-400/30 shadow-[0_0_15px_rgba(37,99,235,0.3)]">
+                    <i class="fa-solid fa-calendar-days text-blue-400 text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-base font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">D4M NEXUS</h1>
+                    <p class="text-[9px] text-green-400 font-mono uppercase tracking-widest flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span> Sync Active</p>
+                </div>
+            </div>
+            <a href="/admin/omni" class="text-xs font-bold text-gray-300 hover:text-white px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg backdrop-blur-md transition-all"><i class="fa-solid fa-arrow-left mr-1"></i> Trở về</a>
+        </header>
+
+        <!-- Thanh điều hướng tháng -->
+        <div class="flex justify-between items-center px-6 py-4 shrink-0 z-10">
+            <button onclick="changeMonth(-1)" class="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center transition-all active:scale-90"><i class="fa-solid fa-chevron-left text-sm"></i></button>
+            <h2 id="monthYearDisplay" class="text-2xl font-black tracking-widest uppercase drop-shadow-lg text-white">THÁNG ...</h2>
+            <button onclick="changeMonth(1)" class="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center transition-all active:scale-90"><i class="fa-solid fa-chevron-right text-sm"></i></button>
+        </div>
+
+        <!-- KHU VỰC LƯỚI LỊCH (Fix tràn màn hình) -->
+        <div class="flex-1 flex flex-col p-4 pt-0 min-h-0 z-10 max-w-7xl w-full mx-auto">
+            
+            <!-- Hàng tiêu đề thứ (T2 -> CN) -->
+            <div class="grid grid-cols-7 gap-3 mb-3 shrink-0">
+                <div class="text-center text-[11px] font-bold text-gray-500 uppercase tracking-widest">Thứ 2</div>
+                <div class="text-center text-[11px] font-bold text-gray-500 uppercase tracking-widest">Thứ 3</div>
+                <div class="text-center text-[11px] font-bold text-gray-500 uppercase tracking-widest">Thứ 4</div>
+                <div class="text-center text-[11px] font-bold text-gray-500 uppercase tracking-widest">Thứ 5</div>
+                <div class="text-center text-[11px] font-bold text-gray-500 uppercase tracking-widest">Thứ 6</div>
+                <div class="text-center text-[11px] font-bold text-blue-400/70 uppercase tracking-widest">Thứ 7</div>
+                <div class="text-center text-[11px] font-bold text-red-400/70 uppercase tracking-widest">Chủ Nhật</div>
+            </div>
+
+            <!-- Khung chứa ngày (Coi giãn linh hoạt 100% chiều cao còn lại) -->
+            <div id="calendarGrid" class="flex-1 grid grid-cols-7 gap-3 min-h-0 pb-4">
+                <!-- JS sẽ bơm ô ngày vào đây -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CHỈNH SỬA LỊCH SIÊU ĐẸP -->
+    <div id="editModal" class="modal-overlay fixed inset-0 z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
+        <div class="modal-box p-7 rounded-3xl w-full max-w-sm transform scale-95 transition-transform duration-300 border border-white/10" id="modalContent">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h3 class="text-xl font-black text-white">Xếp Ca Làm Việc</h3>
+                    <p id="modalDateDisplay" class="text-sm font-medium text-blue-400 mt-1">Ngày: ...</p>
+                </div>
+                <div class="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
+                    <i class="fa-solid fa-clock-rotate-left text-blue-400 text-xl"></i>
+                </div>
+            </div>
+            
+            <input type="hidden" id="selectedDateInput">
+            
+            <div class="mb-8">
+                <label class="block text-[11px] text-gray-400 mb-2 font-bold uppercase tracking-widest">Lựa Chọn Ca Làm</label>
+                <div class="relative">
+                    <select id="shiftSelect" class="w-full bg-[#0a0a0f] border border-white/10 rounded-2xl px-4 py-4 text-white text-sm font-bold outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 appearance-none transition-all cursor-pointer shadow-inner">
+                        <option value="OFF" class="text-red-400 font-bold">🔴 NGHỈ LÀM (OFF)</option>
+                        <optgroup label="SÁNG (M - Xanh Dương)" class="text-blue-300">
+                            <option value="M5">M5 (05:00 - 13:00)</option><option value="M6">M6 (06:00 - 14:00)</option><option value="M7">M7 (07:00 - 15:00)</option>
+                            <option value="M8">M8 (08:00 - 16:00)</option><option value="M9">M9 (09:00 - 17:00)</option><option value="M10">M10 (10:00 - 18:00)</option>
+                        </optgroup>
+                        <optgroup label="CHIỀU (A - Vàng)" class="text-yellow-300">
+                            <option value="A11">A11 (11:00 - 19:00)</option><option value="A12">A12 (12:00 - 20:00)</option><option value="A1">A1 (13:00 - 21:00)</option>
+                            <option value="A2">A2 (14:00 - 22:00)</option><option value="A3">A3 (15:00 - 23:00)</option><option value="A4">A4 (16:00 - 00:00)</option>
+                            <option value="A5">A5 (17:00 - 01:00)</option><option value="A6">A6 (18:00 - 02:00)</option>
+                        </optgroup>
+                        <optgroup label="ĐÊM (N - Tím)" class="text-purple-300">
+                            <option value="N7">N7 (19:00 - 03:00)</option><option value="N8">N8 (20:00 - 04:00)</option>
+                            <option value="N9">N9 (21:00 - 05:00)</option><option value="N10">N10 (22:00 - 06:00)</option>
+                        </optgroup>
+                        <optgroup label="Tùy Chọn Khác">
+                            <option value="DELETE" class="text-red-600 font-bold">🗑️ XÓA DỮ LIỆU LỊCH NÀY</option>
+                        </optgroup>
+                    </select>
+                    <i class="fa-solid fa-chevron-down absolute right-5 top-5 text-gray-500 pointer-events-none"></i>
+                </div>
+            </div>
+            
+            <div class="flex gap-4">
+                <button onclick="closeModal()" class="w-1/3 py-3.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl font-bold transition-all active:scale-95 text-gray-300">Hủy</button>
+                <button onclick="saveSchedule()" id="saveBtn" class="flex-1 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl font-bold shadow-[0_10px_25px_rgba(37,99,235,0.4)] transition-all active:scale-95 flex items-center justify-center">
+                    <i class="fa-solid fa-cloud-arrow-up mr-2"></i> Đồng Bộ GCal
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- BỘ LỌC SSO ---
+        let validToken = localStorage.getItem('d4m_sso_token') || localStorage.getItem('token');
+        if(validToken) validToken = validToken.replace(/^["']|["']$/g, '');
+        else window.location.href = `/auth?redirect=${window.location.pathname}`;
+        
+        try {
+            const payload = JSON.parse(decodeURIComponent(atob(validToken.split('.')[1]).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
+            if(Number(payload.active) !== 1 || Number(payload.role) !== 1) window.location.href = "/admin/omni";
+            else {
+                document.getElementById('appContent').classList.remove('hidden');
+                document.getElementById('appContent').classList.add('flex');
+            }
+        } catch(e) { window.location.href = "/admin/omni"; }
+
+        // --- CALENDAR LOGIC VỚI DYNAMIC GRID ---
+        let currentDate = new Date();
+        let currentMonth = currentDate.getMonth() + 1; 
+        let currentYear = currentDate.getFullYear();
+        let dbSchedules = {}; 
+
+        const monthNames = ["Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"];
+
+        async function fetchSchedules() {
+            try {
+                const res = await fetch(`/api/ai-admin/schedules?month=${currentMonth}&year=${currentYear}`, {
+                    headers: { 'Authorization': `Bearer ${validToken}` }
+                });
+                const responseData = await res.json();
+                if(responseData.status === "success") {
+                    dbSchedules = responseData.data;
+                    renderCalendar();
+                }
+            } catch(e) { console.error("Lỗi kéo dữ liệu:", e); }
+        }
+
+        // Tự động gen style cho từng ca
+        function getBadgeStyle(shiftName) {
+            if(shiftName === 'OFF') return 'bg-red-500/10 text-red-400 border-red-500/30 shadow-[0_0_10px_rgba(239,68,68,0.2)]';
+            let firstChar = shiftName.charAt(0).toUpperCase();
+            if(firstChar === 'M') return 'bg-blue-500/10 text-blue-400 border-blue-500/30 shadow-[0_0_10px_rgba(59,130,246,0.2)]';
+            if(firstChar === 'A') return 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30 shadow-[0_0_10px_rgba(234,179,8,0.2)]';
+            if(firstChar === 'N') return 'bg-purple-500/10 text-purple-400 border-purple-500/30 shadow-[0_0_10px_rgba(168,85,247,0.2)]';
+            return 'bg-gray-800 text-gray-300 border-gray-600';
+        }
+
+        function renderCalendar() {
+            document.getElementById('monthYearDisplay').innerText = `${monthNames[currentMonth-1]} / ${currentYear}`;
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = '';
+
+            let firstDayOfMonth = new Date(currentYear, currentMonth - 1, 1).getDay();
+            let startOffset = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1; 
+            const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
+
+            // 🚀 THUẬT TOÁN GRID DYNAMIC: Tính chính xác số ô cần vẽ (bội số của 7)
+            const totalCells = Math.ceil((startOffset + daysInMonth) / 7) * 7;
+            const weeksCount = totalCells / 7;
+            
+            // Ép lưới chia đều không gian dọc để không bao giờ bị tràn
+            grid.style.gridTemplateRows = `repeat(${weeksCount}, minmax(0, 1fr))`;
+
+            let today = new Date();
+            
+            for (let i = 1; i <= totalCells; i++) {
+                if (i <= startOffset || i > startOffset + daysInMonth) {
+                    // Ô trống chìm vào nền (Padding ngày của tháng trước/sau)
+                    grid.innerHTML += `<div class="rounded-2xl border border-white/[0.02] bg-white/[0.01] pointer-events-none"></div>`;
+                } else {
+                    let day = i - startOffset;
+                    let dateStr = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    let isToday = (day === today.getDate() && currentMonth === today.getMonth() + 1 && currentYear === today.getFullYear());
+                    
+                    let shiftHtml = "";
+                    let existingShift = "OFF";
+                    
+                    if(dbSchedules[dateStr]) {
+                        let s = dbSchedules[dateStr];
+                        existingShift = s.is_off ? "OFF" : s.shift_name;
+                        let displayShift = s.is_off ? "OFF" : s.shift_name;
+                        let badgeStyle = getBadgeStyle(displayShift);
+                        let badgeText = displayShift === 'OFF' ? '🔴 NGHỈ (OFF)' : `💼 Ca ${displayShift}`;
+                        shiftHtml = `<div class="mt-auto w-full text-[10px] font-bold py-1.5 px-2 rounded-lg border backdrop-blur-md ${badgeStyle} flex items-center justify-center truncate">${badgeText}</div>`;
+                    }
+
+                    // CSS Logic có chiều sâu (Group Hover, Inner Shadow, Glow)
+                    let cellBaseClass = "relative flex flex-col p-3 rounded-2xl transition-all duration-300 ease-out cursor-pointer group overflow-hidden border";
+                    let stateClass = isToday 
+                        ? "bg-blue-900/20 border-blue-500/50 shadow-[inset_0_0_20px_rgba(37,99,235,0.1),_0_0_15px_rgba(37,99,235,0.2)] hover:bg-blue-900/30 hover:-translate-y-1 z-10" 
+                        : "bg-[#0b0c10] border-white/5 shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)] hover:bg-[#12141a] hover:border-white/20 hover:shadow-[0_10px_30px_rgba(0,0,0,0.8)] hover:-translate-y-1 z-10";
+                    
+                    let numClass = isToday 
+                        ? "bg-blue-500 text-white shadow-[0_0_10px_rgba(37,99,235,0.8)]" 
+                        : "text-gray-500 group-hover:text-white transition-colors";
+
+                    grid.innerHTML += `
+                        <div class="${cellBaseClass} ${stateClass}" onclick="openModal('${dateStr}', '${existingShift}')">
+                            <!-- Hiệu ứng hắt sáng nội bộ -->
+                            <div class="absolute inset-0 bg-gradient-to-br from-white/[0.05] to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+                            
+                            <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-black z-10 ${numClass}">${day}</div>
+                            <div class="z-10 flex-1 flex flex-col justify-end w-full">
+                                ${shiftHtml}
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        function changeMonth(step) {
+            currentMonth += step;
+            if (currentMonth > 12) { currentMonth = 1; currentYear++; }
+            else if (currentMonth < 1) { currentMonth = 12; currentYear--; }
+            fetchSchedules(); 
+        }
+
+        // --- MODAL LOGIC ---
+        const modal = document.getElementById('editModal');
+        const modalContent = document.getElementById('modalContent');
+        const saveBtn = document.getElementById('saveBtn');
+
+        function openModal(dateStr, existingShift) {
+            document.getElementById('selectedDateInput').value = dateStr;
+            let parts = dateStr.split('-');
+            document.getElementById('modalDateDisplay').innerText = `Ngày ${parts[2]}/${parts[1]}/${parts[0]}`;
+            
+            let select = document.getElementById('shiftSelect');
+            if(existingShift && existingShift !== 'OFF') select.value = existingShift;
+            else select.value = 'OFF';
+
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modalContent.classList.remove('scale-95');
+            }, 10);
+        }
+
+        function closeModal() {
+            modal.classList.add('opacity-0');
+            modalContent.classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        async function saveSchedule() {
+            saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Đang bộ hóa vệ tinh...';
+            saveBtn.disabled = true;
+
+            const dateStr = document.getElementById('selectedDateInput').value;
+            const shiftVal = document.getElementById('shiftSelect').value;
+
+            try {
+                const res = await fetch('/api/ai-admin/schedule', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${validToken}` },
+                    body: JSON.stringify({ date: dateStr, shift_name: shiftVal })
+                });
+
+                if(res.ok) {
+                    closeModal();
+                    await fetchSchedules(); 
+                } else {
+                    alert("Lỗi hạ tầng khi lưu lịch!");
+                }
+            } catch(e) { alert("Mất kết nối Lõi hệ thống!"); }
+            
+            saveBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up mr-2"></i> Đồng Bộ GCal';
+            saveBtn.disabled = false;
+        }
+
+        fetchSchedules();
+    </script>
+</body>
+</html>

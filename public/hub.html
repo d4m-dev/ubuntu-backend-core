@@ -1,143 +1,277 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>d4m-dev | Project Hub</title>
+    <title>D4M Cloud | Project Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Outfit:wght@300;400;600;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #0b0f19; }
-        .glass-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.05); transition: all 0.3s ease; }
-        .glass-card:hover { transform: translateY(-5px); border-color: rgba(59, 130, 246, 0.4); box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4); }
-        .frozen-card { opacity: 0.6; filter: grayscale(80%); }
-        .toast-enter { animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        :root { --bg-dark: #030712; --primary: #3b82f6; --secondary: #8b5cf6; }
+        body { background-color: var(--bg-dark); color: #f8fafc; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        h1, h2, h3, .font-heading { font-family: 'Outfit', sans-serif; }
+        .font-mono { font-family: 'Fira Code', monospace; }
 
-        /* 🚀 HIỆU ỨNG MODAL MỚI */
-        #logoutModal { transition: opacity 0.3s ease, visibility 0.3s ease; }
-        .modal-content { transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); transform: scale(0.95); }
-        #logoutModal:not(.hidden) .modal-content { transform: scale(1); }
+        /* 🌌 HIỆU ỨNG NỀN VŨ TRỤ LƯỚI */
+        .cyber-grid {
+            position: fixed; inset: 0; z-index: -2;
+            background-size: 50px 50px;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            mask-image: radial-gradient(circle at center, black 30%, transparent 80%);
+            -webkit-mask-image: radial-gradient(circle at top center, black 20%, transparent 100%);
+        }
+        
+        .orb { position: fixed; border-radius: 50%; filter: blur(100px); z-index: -1; pointer-events: none; animation: float-orb 20s infinite alternate ease-in-out; }
+        .orb-1 { width: 50vw; height: 50vh; background: rgba(59, 130, 246, 0.15); top: -20vh; left: -10vw; }
+        .orb-2 { width: 40vw; height: 40vh; background: rgba(139, 92, 246, 0.15); bottom: -10vh; right: -10vw; animation-delay: -5s; }
+        @keyframes float-orb { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(5%, 10%) scale(1.1); } }
+
+        /* 🃏 GLASS CARD CAO CẤP */
+        .glass-card { 
+            background: rgba(255, 255, 255, 0.02); 
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05); 
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+        }
+        .glass-card:hover { 
+            transform: translateY(-8px); 
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(99, 102, 241, 0.4); 
+            box-shadow: 0 20px 40px -10px rgba(79, 70, 229, 0.2), inset 0 1px 0 rgba(255,255,255,0.1); 
+        }
+        
+        /* 🧊 TRẠNG THÁI KHÓA */
+        .frozen-card { position: relative; overflow: hidden; }
+        .frozen-card::after { content: ''; position: absolute; inset: 0; backdrop-filter: grayscale(100%) blur(2px); background: rgba(0,0,0,0.4); z-index: 10; pointer-events: none; }
+        .frozen-badge { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 20; }
+
+        /* ✨ NÚT BẤM GRADIENT */
+        .btn-glow { position: relative; }
+        .btn-glow::before { content: ''; position: absolute; inset: -2px; background: linear-gradient(45deg, #3b82f6, #8b5cf6, #ec4899); border-radius: inherit; z-index: -1; filter: blur(10px); opacity: 0; transition: opacity 0.3s; }
+        .btn-glow:hover::before { opacity: 0.7; }
+
+        /* 📜 SCROLLBAR & SEARCH */
+        ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); } ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; } ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
+        .search-input { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); transition: all 0.3s; }
+        .search-input:focus { background: rgba(0,0,0,0.6); border-color: #8b5cf6; box-shadow: 0 0 20px rgba(139, 92, 246, 0.2); }
+
+        /* 🍞 TOAST ANIMATION */
+        @keyframes toast-slide { 0% { transform: translateX(120%); opacity: 0; } 100% { transform: translateX(0); opacity: 1; } }
+        .toast-enter { animation: toast-slide 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
     </style>
 </head>
-<body class="bg-gradient-to-br from-[#0b0f19] via-slate-900 to-[#0b0f19] min-h-screen text-white font-sans antialiased flex flex-col">
+<body class="flex flex-col min-h-screen">
 
-    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-3"></div>
+    <!-- KHÔNG GIAN NỀN -->
+    <div class="cyber-grid"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
 
-    <div id="logoutModal" class="fixed inset-0 z-[100] flex items-center justify-center hidden">
-        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="closeLogoutModal()"></div>
-        <div class="modal-content relative z-10 w-full max-w-sm mx-4 p-8 glass-card rounded-3xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+    <!-- 🍞 TOAST CONTAINER -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
+
+    <!-- 🚪 MODAL ĐĂNG XUẤT -->
+    <div id="logoutModal" class="fixed inset-0 z-[100] flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeLogoutModal()"></div>
+        <div class="relative z-10 w-full max-w-sm mx-4 p-8 glass-card rounded-3xl transform scale-95 transition-transform duration-300" id="logoutModalContent">
             <div class="text-center">
-                <div class="w-16 h-16 mx-auto bg-red-500/10 rounded-full flex items-center justify-center mb-5 border border-red-500/20">
-                    <i class="fa-solid fa-right-from-bracket text-3xl text-red-400"></i>
+                <div class="w-16 h-16 mx-auto bg-red-500/10 rounded-2xl flex items-center justify-center mb-5 border border-red-500/30 shadow-[0_0_20px_rgba(239,68,68,0.2)]">
+                    <i class="fa-solid fa-power-off text-3xl text-red-500 animate-pulse"></i>
                 </div>
-                <h3 class="text-2xl font-black text-white mb-2">Đăng Xuất?</h3>
-                <p class="text-gray-400 text-sm mb-8 leading-relaxed">Sếp có chắc chắn muốn ngắt kết nối thẻ định danh D4M ID khỏi thiết bị này không?</p>
+                <h3 class="text-2xl font-heading font-black text-white mb-2">Ngắt Kết Nối?</h3>
+                <p class="text-gray-400 text-sm mb-8">Bạn sẽ đăng xuất khỏi hệ sinh thái D4M ID trên thiết bị này.</p>
                 <div class="flex gap-3">
-                    <button onclick="closeLogoutModal()" class="flex-1 py-3 px-4 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl font-bold transition">Hủy bỏ</button>
-                    <button onclick="confirmLogout()" class="flex-1 py-3 px-4 bg-red-500/80 hover:bg-red-500 border border-red-500/50 text-white rounded-xl font-bold shadow-[0_0_15px_rgba(239,68,68,0.3)] transition">Xác Nhận</button>
+                    <button onclick="closeLogoutModal()" class="flex-1 py-3 px-4 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl font-bold transition">Hủy</button>
+                    <button onclick="confirmLogout()" class="flex-1 py-3 px-4 bg-red-600 hover:bg-red-500 border border-red-500 text-white rounded-xl font-bold shadow-[0_0_15px_rgba(239,68,68,0.4)] transition">Thoát</button>
                 </div>
             </div>
         </div>
     </div>
 
-
-    <header class="py-12 text-center relative z-10 flex flex-col items-center">
-        <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-3">
-            <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">Cloud Project Hub</span>
-        </h1>
-        <p class="text-gray-400 text-sm md:text-base font-mono tracking-wide mb-6">Mạng lưới ứng dụng Serverless cục bộ</p>
-        
-        <button id="btnHeaderAuth" onclick="redirectToAuth()" class="px-6 py-2.5 bg-white/5 hover:bg-white/10 text-white rounded-full backdrop-blur-md border border-white/10 transition shadow-lg flex items-center space-x-2 group">
-            <div class="w-6 h-6 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center shadow-[0_0_10px_rgba(59,130,246,0.5)] group-hover:scale-110 transition-transform">
-                <i class="fa-solid fa-fingerprint text-xs text-white"></i>
-            </div>
-            <span class="font-bold tracking-wide">Đăng nhập D4M ID</span>
-        </button>
-
-        <div id="userProfileWidget" class="hidden flex items-center space-x-3 bg-white/5 border border-white/10 rounded-full pr-2 pl-1 py-1 backdrop-blur-md shadow-lg transition hover:bg-white/10">
-            <a href="/profile" class="flex items-center space-x-3 pr-4 pl-1 py-1 rounded-full cursor-pointer group">
-                <img id="headerAvatar" src="/src/favicon/ubuntu-backend/favicon-96x96.png" class="w-9 h-9 rounded-full border-2 border-blue-500/50 object-cover shadow-[0_0_10px_rgba(59,130,246,0.4)] group-hover:border-blue-400 transition-colors">
-                <div class="text-left">
-                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-0.5">Xin chào,</p>
-                    <p id="headerUsername" class="font-bold text-sm text-white leading-none group-hover:text-blue-300 transition-colors">Loading...</p>
+    <!-- 🌌 NAVBAR (TOP BAR) -->
+    <nav class="w-full relative z-40 border-b border-white/5 bg-black/20 backdrop-blur-xl">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-[0_0_15px_rgba(139,92,246,0.5)]">
+                    <i class="fa-solid fa-cloud text-white text-sm"></i>
                 </div>
-            </a>
-            <div class="w-px h-6 bg-white/10"></div>
-            <button onclick="openLogoutModal()" class="w-8 h-8 rounded-full bg-red-500/10 hover:bg-red-500/30 text-red-400 flex items-center justify-center transition border border-red-500/20" title="Đăng xuất khỏi hệ sinh thái">
-                <i class="fa-solid fa-power-off text-xs"></i>
-            </button>
+                <span class="font-heading font-black text-xl tracking-wide">D4M<span class="text-gray-500">.HUB</span></span>
+            </div>
+
+            <!-- Auth Widget -->
+            <div>
+                <button id="btnHeaderAuth" onclick="redirectToAuth()" class="btn-glow relative px-5 py-2 bg-white/10 hover:bg-white/20 text-white text-sm rounded-full backdrop-blur-md border border-white/10 transition flex items-center gap-2 font-bold">
+                    <i class="fa-solid fa-fingerprint text-blue-400"></i> Xác Thực D4M
+                </button>
+
+                <div id="userProfileWidget" class="hidden flex items-center gap-3 bg-white/5 border border-white/10 rounded-full pr-1.5 pl-4 py-1.5 backdrop-blur-md shadow-lg transition hover:bg-white/10">
+                    <a href="/profile" class="flex items-center gap-3 cursor-pointer group">
+                        <div class="text-right hidden sm:block">
+                            <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest mb-0.5">Tư Lệnh</p>
+                            <p id="headerUsername" class="font-bold text-sm text-white leading-none group-hover:text-blue-400 transition-colors">Loading...</p>
+                        </div>
+                        <img id="headerAvatar" src="/src/favicon/ubuntu-backend/favicon-96x96.png" class="w-8 h-8 rounded-full border border-blue-500/50 object-cover">
+                    </a>
+                    <div class="w-px h-5 bg-white/20"></div>
+                    <button onclick="openLogoutModal()" class="w-8 h-8 rounded-full hover:bg-red-500/20 text-gray-400 hover:text-red-400 flex items-center justify-center transition" title="Đăng xuất">
+                        <i class="fa-solid fa-right-from-bracket text-sm"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 🛸 HERO SECTION & SEARCH -->
+    <header class="pt-16 pb-12 text-center relative z-10 flex flex-col items-center px-4">
+        <div class="inline-block mb-4 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold uppercase tracking-widest backdrop-blur-md">
+            <i class="fa-solid fa-bolt text-yellow-400 mr-1"></i> Mạng Lưới Serverless Nội Bộ
+        </div>
+        <h1 class="text-5xl md:text-7xl font-heading font-black tracking-tight mb-4 drop-shadow-2xl">
+            <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-500">Cloud Workspace</span>
+        </h1>
+        <p class="text-gray-400 text-sm md:text-base max-w-2xl mx-auto leading-relaxed mb-10">
+            Trung tâm quản lý, triển khai và vận hành các vi dịch vụ, ứng dụng nội bộ. Tất cả được đồng bộ và cô lập an toàn trong không gian D4M.
+        </p>
+
+        <!-- Search Bar -->
+        <div class="relative w-full max-w-xl group">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <i class="fa-solid fa-magnifying-glass text-gray-500 group-focus-within:text-purple-400 transition-colors"></i>
+            </div>
+            <input type="text" id="searchInput" onkeyup="filterProjects()" class="search-input w-full pl-11 pr-4 py-3.5 rounded-2xl text-white placeholder-gray-500 focus:outline-none backdrop-blur-md font-medium shadow-2xl" placeholder="Tìm kiếm ứng dụng, dự án, từ khóa...">
+            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                <span class="text-[10px] font-mono text-gray-500 bg-white/5 border border-white/10 px-2 py-1 rounded-md">Ctrl+K</span>
+            </div>
         </div>
     </header>
 
-    <main class="flex-grow max-w-7xl mx-auto px-6 w-full relative z-10">
+    <!-- 📦 MAIN CONTENT -->
+    <main class="flex-grow w-full max-w-7xl mx-auto px-6 relative z-10 pb-20">
+        
+        <!-- Loading State -->
         <div id="loading" class="text-center py-20 hidden">
-            <i class="fa-solid fa-circle-notch fa-spin text-4xl text-blue-500 mb-4"></i>
-            <p class="text-gray-400">Đang đồng bộ dữ liệu...</p>
+            <div class="w-16 h-16 mx-auto border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mb-4"></div>
+            <p class="text-blue-400 font-mono tracking-widest text-sm uppercase">Đang quét không gian...</p>
         </div>
 
-        <div id="empty-state" class="hidden text-center py-20">
-            <i class="fa-solid fa-folder-open text-6xl text-gray-600 mb-4"></i>
-            <h2 class="text-2xl font-bold text-gray-300">Không gian trống!</h2>
-            <p class="text-gray-500 mt-2">Hệ thống đang chờ lệnh triển khai dự án từ Dashboard.</p>
+        <!-- 🌟 SECTION 1: CORE APPS (Hệ Sinh Thái Lõi) -->
+        <div id="section-core" class="mb-16">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="h-px bg-gradient-to-r from-transparent to-purple-500/50 flex-1"></div>
+                <h2 class="text-xl font-heading font-black text-white uppercase tracking-widest flex items-center gap-2">
+                    <i class="fa-solid fa-layer-group text-purple-400"></i> Hệ Sinh Thái Lõi
+                </h2>
+                <div class="h-px bg-gradient-to-r from-purple-500/50 to-transparent flex-1"></div>
+            </div>
+            <div id="core-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
         </div>
 
-        <div id="project-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12"></div>
+        <!-- 🚀 SECTION 2: DEPLOYED PROJECTS (Dự án của User) -->
+        <div id="section-projects" class="mb-10">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="h-px bg-gradient-to-r from-transparent to-blue-500/50 flex-1"></div>
+                <h2 class="text-xl font-heading font-black text-white uppercase tracking-widest flex items-center gap-2">
+                    <i class="fa-solid fa-rocket text-blue-400"></i> Các Dự Án Triển Khai
+                </h2>
+                <div class="h-px bg-gradient-to-r from-blue-500/50 to-transparent flex-1"></div>
+            </div>
+            
+            <div id="empty-state" class="hidden text-center py-16 glass-card rounded-3xl border-dashed border-white/20">
+                <div class="w-20 h-20 mx-auto bg-white/5 rounded-full flex items-center justify-center mb-4">
+                    <i class="fa-solid fa-satellite text-3xl text-gray-500"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-300 mb-2">Không gian triển khai trống</h3>
+                <p class="text-gray-500 text-sm">Hệ thống đang chờ sếp tải lên và kích hoạt dự án từ Control Panel.</p>
+                <a href="/dashboard" class="inline-block mt-6 px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold rounded-full transition shadow-[0_0_15px_rgba(59,130,246,0.3)]">Đến Control Panel</a>
+            </div>
+
+            <div id="project-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </div>
+
     </main>
 
-    <footer class="py-6 border-t border-white/5 bg-black/40 backdrop-blur-md relative z-10">
-        <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center text-sm">
-            <p class="text-gray-400 mb-4 md:mb-0">Crafted with <i class="fa-solid fa-bolt text-yellow-500 mx-1"></i> by <span class="font-bold text-white tracking-wide">d4m-dev</span></p>
-            <a href="/dashboard" class="group flex items-center space-x-2 bg-white/5 hover:bg-white/10 px-4 py-2 rounded-full transition-all border border-white/10">
-                <i class="fa-solid fa-shield-halved text-lg text-gray-400 group-hover:text-blue-400 transition-colors"></i>
-                <span class="font-medium text-gray-300 group-hover:text-white transition-colors">Admin Login</span>
-            </a>
+    <!-- 🏁 FOOTER -->
+    <footer class="py-8 border-t border-white/5 bg-black/60 backdrop-blur-2xl relative z-40 mt-auto">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
+            <div class="flex items-center gap-2 text-gray-400">
+                <img src="/src/favicon/ubuntu-backend/favicon-32x32.png" class="w-6 h-6 grayscale opacity-50">
+                <span>© 2026 Crafted with <i class="fa-solid fa-heart text-red-500 mx-0.5 animate-pulse"></i> by <strong class="text-white">d4m-dev</strong></span>
+            </div>
+            <div class="flex gap-4">
+                <a href="/admin/dashboard" class="flex items-center gap-2 text-gray-400 hover:text-blue-400 transition font-medium">
+                    <i class="fa-solid fa-shield-halved"></i> Terminal Panel
+                </a>
+            </div>
         </div>
     </footer>
 
     <script>
+        // Bắt phím tắt Ctrl+K để focus vào thanh tìm kiếm
+        document.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                document.getElementById('searchInput').focus();
+            }
+        });
+
         // ==========================================
-        // 🚀 BỘ ĐIỀU KHIỂN MODAL ĐĂNG XUẤT MỚI
+        // 🚀 BỘ ĐIỀU KHIỂN UI / MODAL / TOAST
         // ==========================================
         function openLogoutModal() {
-            document.getElementById('logoutModal').classList.remove('hidden');
+            const modal = document.getElementById('logoutModal');
+            const content = document.getElementById('logoutModalContent');
+            modal.classList.remove('hidden');
+            // Dùng setTimeout để nhường 1 frame cho DOM render xong display:block, sau đó kích hoạt opacity
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                content.classList.remove('scale-95');
+            }, 10);
         }
 
         function closeLogoutModal() {
-            document.getElementById('logoutModal').classList.add('hidden');
+            const modal = document.getElementById('logoutModal');
+            const content = document.getElementById('logoutModalContent');
+            modal.classList.add('opacity-0');
+            content.classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 300);
         }
 
         function confirmLogout() {
             localStorage.removeItem('d4m_sso_token');
-            closeLogoutModal(); // Đóng Modal đi
-            window.location.reload(); // F5 lại trang để Hub mất trạng thái đăng nhập
+            closeLogoutModal();
+            setTimeout(() => window.location.reload(), 300);
         }
-        // ==========================================
 
-
-        // 🚀 Hàm hiển thị Toast Notifications
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
-            const icon = type === 'success' ? '<i class="fa-solid fa-circle-check text-green-400"></i>' : '<i class="fa-solid fa-circle-exclamation text-red-400"></i>';
-            const border = type === 'success' ? 'border-green-500/30 bg-green-500/10' : 'border-red-500/30 bg-red-500/10';
             
-            toast.className = `flex items-center gap-3 px-5 py-3.5 rounded-xl border ${border} backdrop-blur-md shadow-xl toast-enter min-w-[250px]`;
-            toast.innerHTML = `${icon} <span class="text-white text-sm font-medium">${message}</span>`;
+            const icon = type === 'success' ? '<i class="fa-solid fa-shield-check text-green-400 text-lg"></i>' : '<i class="fa-solid fa-triangle-exclamation text-red-400 text-lg"></i>';
+            const border = type === 'success' ? 'border-green-500/30 bg-black/80' : 'border-red-500/30 bg-black/80';
+            const glow = type === 'success' ? 'shadow-[0_0_20px_rgba(74,222,128,0.2)]' : 'shadow-[0_0_20px_rgba(239,68,68,0.2)]';
+
+            toast.className = `flex items-center gap-3 px-5 py-4 rounded-2xl border ${border} backdrop-blur-xl ${glow} toast-enter min-w-[280px] pointer-events-auto`;
+            toast.innerHTML = `${icon} <span class="text-white text-sm font-medium tracking-wide">${message}</span>`;
             
             container.appendChild(toast);
             setTimeout(() => {
+                toast.style.transform = 'translateX(120%)';
                 toast.style.opacity = '0';
-                toast.style.transform = 'translateX(100%)';
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
+                toast.style.transition = 'all 0.4s ease-in';
+                setTimeout(() => toast.remove(), 400);
+            }, 4000);
         }
 
-        // 🚀 KIỂM TRA TRẠNG THÁI LOGIN VÀ GỌI DỮ LIỆU PROFILE
+        // ==========================================
+        // 🚀 XÁC THỰC NGƯỜI DÙNG
+        // ==========================================
         async function checkLoginStatus() {
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('login') === 'success') {
-                showToast('✅ Xác thực D4M ID thành công! Chào mừng trở lại.');
+                showToast('Hệ thống Aegis nhận dạng thành công. Chào mừng Tư Lệnh!');
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
 
@@ -147,120 +281,131 @@
                 document.getElementById('userProfileWidget').classList.remove('hidden');
 
                 try {
-                    const res = await fetch('/api/auth/profile/me', {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
+                    const res = await fetch('/api/auth/profile/me', { headers: { 'Authorization': `Bearer ${token}` } });
                     if (res.ok) {
                         const data = await res.json();
                         document.getElementById('headerAvatar').src = data.data.avatar_url;
                         document.getElementById('headerUsername').innerText = data.data.full_name || data.data.username;
                     } else {
-                        // Nếu Token lỗi, ép thoát lặng lẽ không hiện thông báo
                         localStorage.removeItem('d4m_sso_token');
                         window.location.reload();
                     }
-                } catch (e) {
-                    console.log("Không thể kết nối máy chủ để lấy Profile");
-                }
+                } catch (e) { console.log("Lỗi mạng khi tải Profile"); }
             }
         }
 
-        // 🚀 HÀM ĐIỀU HƯỚNG ĐĂNG NHẬP
-        function redirectToAuth() {
-            window.location.href = `/auth?redirect=${window.location.pathname}`;
-        }
-
+        function redirectToAuth() { window.location.href = `/auth?redirect=${window.location.pathname}`; }
 
         // ==========================================
-        // DỮ LIỆU VÀ HÀM VẼ CÁC CARD DỰ ÁN
+        // 🚀 RENDER DỮ LIỆU CARD DỰ ÁN
         // ==========================================
         const coreApps = [
-            { name: "Glass Town", path: "glass-town", desc: "Game Nông Trại & Tương tác 2.5D", icon: "fa-gamepad", color: "#e94560" },
-            { name: "Music Pro", path: "music-pro", desc: "Trình phát nhạc chuẩn Premium", icon: "fa-compact-disc", color: "#3b82f6" },
-            { name: "Love Sync", path: "love-sync", desc: "Đồng bộ và ghép đôi tình yêu", icon: "fa-heart", color: "#ec4899" },
-            { name: "Thần Số Học", path: "numerology", desc: "Phân tích vận mệnh và đường đời", icon: "fa-star-and-crescent", color: "#8b5cf6" },
-            { name: "Documentation", path: "documentation", desc: "Tài liệu hệ thống cốt lõi", icon: "fa-book", color: "#10b981" },
-            { name: "Remove Audio", path: "vocal-remove", desc: "Công cụ tách âm", icon: "fa-headphones", color: "#f59e0b" },
-            { name: "YouTube Downloader", path: "yt-downloader", desc: "Tải MP4/MP3 YouTube Pro", icon: "fa-youtube", color: "#ff0033" }
+            { name: "Social Hub", path: "social-hub", desc: "Mạng xã hội & Tương tác", icon: "fa-solid fa-earth-asia", color: "from-rose-500 to-red-600" },
+            { name: "Generated code from IMG", path: "autocode", desc: "Tạo code từ ảnh", icon: "fa-solid fa-earth-asia", color: "from-rose-500 to-cyan-600" },
+            { name: "Music Pro", path: "music-pro", desc: "Trình phát nhạc chuẩn Premium", icon: "fa-compact-disc", color: "from-blue-500 to-indigo-600" },
+            { name: "Love Sync", path: "love-sync", desc: "Đồng bộ và ghép đôi tình yêu", icon: "fa-heart", color: "from-pink-500 to-rose-400" },
+            { name: "Thần Số Học", path: "numerology", desc: "Phân tích vận mệnh và đường đời", icon: "fa-star-and-crescent", color: "from-purple-500 to-indigo-500" },
+            { name: "Documentation", path: "documentation", desc: "Tài liệu hệ thống cốt lõi Backend", icon: "fa-book-journal-whills", color: "from-emerald-500 to-teal-600" },
+            { name: "Remove Audio", path: "vocal-remove", desc: "Công cụ tách âm thanh AI", icon: "fa-headphones-simple", color: "from-amber-500 to-orange-600" },
+            { name: "YT Downloader", path: "yt-downloader", desc: "Tải MP4/MP3 tốc độ cao", icon: "fa-solid fa-play", color: "from-red-600 to-red-800" }
         ];
 
-        function stringToColor(str) {
-            let hash = 0;
-            for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
-            return `hsl(${hash % 360}, 60%, 25%)`;
+        function stringToColorClass(str) {
+            const gradients = ['from-cyan-500 to-blue-500', 'from-purple-500 to-pink-500', 'from-emerald-400 to-cyan-500', 'from-orange-400 to-rose-400', 'from-indigo-500 to-purple-600'];
+            let hash = 0; for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+            return gradients[Math.abs(hash) % gradients.length];
         }
 
         async function loadProjects() {
             document.getElementById('loading').classList.remove('hidden');
-            const grid = document.getElementById('project-grid');
-            grid.innerHTML = '';
-
+            const coreGrid = document.getElementById('core-grid');
+            const projectGrid = document.getElementById('project-grid');
+            
+            // 1. Render Core Apps
             coreApps.forEach(app => {
-                const techBadge = `<span class="bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2.5 py-1 rounded-md text-xs font-bold"><i class="fa-solid fa-microchip mr-1"></i>Core App</span>`;
-                const coverHtml = `<div class="h-36 w-full rounded-t-2xl flex items-center justify-center" style="background: linear-gradient(135deg, ${app.color}, #0b0f19)"><i class="fa-solid ${app.icon} text-5xl text-white/20"></i></div>`;
-                
-                grid.innerHTML += `
-                <div class="glass-card rounded-2xl flex flex-col relative group">
-                    ${coverHtml}
-                    <div class="absolute top-4 left-4 bg-black/60 px-2.5 py-1 rounded-md backdrop-blur-md text-[10px] font-black uppercase tracking-wider text-purple-400 border border-purple-500/30">
-                        <i class="fa-solid fa-star mr-1"></i> Hệ thống
+                const searchStr = `${app.name} ${app.desc}`.toLowerCase();
+                coreGrid.innerHTML += `
+                <div class="project-card glass-card rounded-2xl flex flex-col p-5 group h-full" data-search="${searchStr}">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br ${app.color} flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform">
+                        <i class="fa-solid ${app.icon} text-white text-xl"></i>
                     </div>
-                    <div class="p-6 flex flex-col flex-grow">
-                        <div class="flex justify-between items-start mb-3">
-                            <h3 class="text-xl font-bold text-white capitalize truncate pr-2">${app.name}</h3>
-                            ${techBadge}
-                        </div>
-                        <p class="text-sm text-gray-400 flex-grow mb-5 line-clamp-2 leading-relaxed">${app.desc}</p>
-                        <div class="flex justify-between items-center mt-auto pt-4 border-t border-white/5">
-                            <span class="text-xs text-gray-500 font-mono bg-white/5 px-2 py-1 rounded">/${app.path}</span>
-                            <a href="/${app.path}" target="_blank" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-sm font-bold py-2 px-5 rounded-xl shadow-lg transition-all active:scale-95">Mở <i class="fa-solid fa-arrow-right ml-1"></i></a>
-                        </div>
+                    <h3 class="text-lg font-heading font-bold text-white mb-2 line-clamp-1">${app.name}</h3>
+                    <p class="text-sm text-gray-400 mb-6 flex-grow line-clamp-2">${app.desc}</p>
+                    <div class="mt-auto flex justify-between items-center pt-4 border-t border-white/5">
+                        <span class="text-[10px] text-purple-400 bg-purple-500/10 px-2 py-1 rounded font-bold border border-purple-500/20"><i class="fa-solid fa-microchip mr-1"></i>CORE</span>
+                        <a href="/${app.path}" class="text-sm font-bold text-white bg-white/5 hover:bg-white/20 px-4 py-1.5 rounded-lg transition-colors flex items-center gap-2">Mở <i class="fa-solid fa-arrow-right text-xs"></i></a>
                     </div>
-                </div>
-                `;
+                </div>`;
             });
 
+            // 2. Fetch & Render User Projects
             try {
                 const port = window.location.port ? `:${window.location.port}` : '';
-                const apiUrl = `${window.location.protocol}//${window.location.hostname}${port}/api/projects/`;
-                const response = await fetch(apiUrl);
-                const data = await response.json();
+                const res = await fetch(`${window.location.protocol}//${window.location.hostname}${port}/api/projects/`);
+                const data = await res.json();
                 document.getElementById('loading').classList.add('hidden');
 
-                if (data.projects.length === 0 && coreApps.length === 0) {
+                if (data.projects.length === 0) {
                     document.getElementById('empty-state').classList.remove('hidden');
                     return;
                 }
 
                 data.projects.forEach(proj => {
-                    let techBadge = proj.has_python ? `<span class="bg-green-500/10 text-green-400 border border-green-500/20 px-2.5 py-1 rounded-md text-xs font-bold flex items-center"><span class="w-2 h-2 rounded-full bg-green-500 animate-pulse mr-1.5"></span>Python/Flask</span>` : `<span class="bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2.5 py-1 rounded-md text-xs font-bold"><i class="fa-brands fa-html5 mr-1"></i>HTML5</span>`;
-                    let coverHtml = proj.thumbnail ? `<div class="h-36 w-full bg-cover bg-center rounded-t-2xl" style="background-image: url('${proj.thumbnail}')"></div>` : `<div class="h-36 w-full rounded-t-2xl flex items-center justify-center" style="background: linear-gradient(135deg, ${stringToColor(proj.name)}, #0b0f19)"><i class="fa-solid fa-code text-5xl text-white/10"></i></div>`;
-                    const cardClass = proj.is_frozen ? 'frozen-card pointer-events-none' : '';
-                    const linkButton = proj.is_frozen 
-                        ? `<button class="bg-gray-800 text-gray-400 text-sm font-bold py-2 px-4 rounded-xl cursor-not-allowed border border-gray-700">Đã Khóa</button>` 
-                        : `<a href="/projects/${proj.name}/index.html" target="_blank" class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white text-sm font-bold py-2 px-5 rounded-xl shadow-lg transition-all active:scale-95">Mở <i class="fa-solid fa-arrow-right ml-1"></i></a>`;
+                    const searchStr = `${proj.name.replace(/-/g, ' ')} ${proj.description}`.toLowerCase();
+                    const gradient = stringToColorClass(proj.name);
+                    const isFrozen = proj.is_frozen;
                     
-                    grid.innerHTML += `
-                    <div class="glass-card rounded-2xl flex flex-col relative group ${cardClass}">
+                    let techIcon = proj.has_python ? '<i class="fa-brands fa-python text-green-400 text-2xl"></i>' : '<i class="fa-brands fa-html5 text-blue-400 text-2xl"></i>';
+                    let badge = proj.has_python ? '<span class="text-[10px] text-green-400 bg-green-500/10 px-2 py-1 rounded font-bold border border-green-500/20">Python</span>' : '<span class="text-[10px] text-blue-400 bg-blue-500/10 px-2 py-1 rounded font-bold border border-blue-500/20">HTML5</span>';
+                    
+                    let coverHtml = proj.thumbnail 
+                        ? `<div class="w-full h-32 rounded-xl mb-4 bg-cover bg-center border border-white/5" style="background-image: url('${proj.thumbnail}')"></div>` 
+                        : `<div class="w-full h-32 rounded-xl mb-4 bg-gradient-to-br ${gradient} flex items-center justify-center opacity-80 border border-white/5 shadow-inner">${techIcon}</div>`;
+
+                    const cardStyles = isFrozen ? 'frozen-card' : '';
+                    const actionBtn = isFrozen 
+                        ? `<div class="frozen-badge bg-red-500/90 text-white text-xs font-black px-3 py-1.5 rounded uppercase tracking-widest border border-red-400 shadow-[0_0_15px_rgba(239,68,68,0.6)]"><i class="fa-solid fa-lock mr-1"></i> Bị Khóa</div>
+                           <button disabled class="text-sm font-bold text-gray-500 bg-white/5 px-4 py-1.5 rounded-lg cursor-not-allowed">Khóa</button>`
+                        : `<a href="/projects/${proj.name}/index.html" target="_blank" class="text-sm font-bold text-white bg-blue-600 hover:bg-blue-500 px-4 py-1.5 rounded-lg transition shadow-[0_0_10px_rgba(59,130,246,0.3)] flex items-center gap-2">Mở <i class="fa-solid fa-arrow-right text-xs"></i></a>`;
+
+                    projectGrid.innerHTML += `
+                    <div class="project-card glass-card rounded-2xl flex flex-col p-4 group ${cardStyles}" data-search="${searchStr}">
                         ${coverHtml}
-                        <div class="p-6 flex flex-col flex-grow">
-                            <div class="flex justify-between items-start mb-3">
-                                <h3 class="text-xl font-bold text-white capitalize truncate pr-2">${proj.name.replace(/-/g, ' ')}</h3>
-                                ${techBadge}
-                            </div>
-                            <p class="text-sm text-gray-400 flex-grow mb-5 line-clamp-2 leading-relaxed">${proj.description}</p>
-                            <div class="flex justify-between items-center mt-auto pt-4 border-t border-white/5">
-                                <span class="text-xs text-gray-500 font-mono bg-white/5 px-2 py-1 rounded">${proj.size}</span>
-                                ${linkButton}
-                            </div>
+                        <h3 class="text-lg font-heading font-bold text-white mb-1 truncate capitalize">${proj.name.replace(/-/g, ' ')}</h3>
+                        <p class="text-xs text-gray-400 mb-4 flex-grow line-clamp-2">${proj.description}</p>
+                        <div class="mt-auto flex justify-between items-center pt-4 border-t border-white/5 relative z-20">
+                            ${badge}
+                            ${actionBtn}
                         </div>
-                    </div>
-                    `;
+                    </div>`;
                 });
             } catch (err) { 
-                if(coreApps.length === 0) document.getElementById('loading').innerHTML = '<p class="text-red-400 font-bold"><i class="fa-solid fa-triangle-exclamation mr-2"></i>Mất kết nối máy chủ!</p>';
-                else document.getElementById('loading').classList.add('hidden');
+                document.getElementById('loading').innerHTML = '<p class="text-red-400 font-bold"><i class="fa-solid fa-triangle-exclamation mr-2"></i>Mất kết nối máy chủ!</p>';
             }
+        }
+
+        // ==========================================
+        // 🔍 LIVE SEARCH (BỘ LỌC TÌM KIẾM NHANH)
+        // ==========================================
+        function filterProjects() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const cards = document.querySelectorAll('.project-card');
+            let coreCount = 0, projCount = 0;
+
+            cards.forEach(card => {
+                const searchData = card.getAttribute('data-search');
+                if (searchData.includes(query)) {
+                    card.style.display = 'flex';
+                    if(card.closest('#core-grid')) coreCount++;
+                    if(card.closest('#project-grid')) projCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            // Ẩn/hiện nguyên cả Section nếu không có kết quả nào bên trong
+            document.getElementById('section-core').style.display = coreCount === 0 ? 'none' : 'block';
+            document.getElementById('section-projects').style.display = projCount === 0 && query !== '' ? 'none' : 'block';
         }
 
         document.addEventListener('DOMContentLoaded', () => {

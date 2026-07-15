@@ -88,15 +88,13 @@ async def trigger_ytdl_download(chat_id: str, task_info: dict, quality: str):
                 downloaded_file = os.path.join(task_dir, f)
                 break
                 
-        if not downloaded_file: raise Exception("Tải xong nhưng mất file (Vui lòng kiểm tra ffmpeg).")
+        if not downloaded_file: raise Exception("Tải xong nhưng mất file.")
         
-        # 🚀 CHỐT CHẶN CÂN FILE THỰC TẾ
         file_size_mb = os.path.getsize(downloaded_file) / (1024 * 1024)
         if file_size_mb > 49.5:
             from urllib.parse import quote
             tunnel_url = ""
             try:
-                # Ép lấy link trực tiếp từ lõi hệ thống Tunnel
                 from scripts.network_tunnel import get_tunnel_url
                 tunnel_url = get_tunnel_url()
             except: pass
@@ -107,28 +105,155 @@ async def trigger_ytdl_download(chat_id: str, task_info: dict, quality: str):
             kb = {"inline_keyboard": [[{"text": "🌐 Mở Web Tải Trực Tiếp", "url": web_deep_link}]]}
             await send_telegram_message(
                 f"⚠️ <b>File đã tải xong nhưng nặng {file_size_mb:.1f} MB!</b>\n"
-                f"Giới hạn của Telegram API là 50MB nên Bot không thể gửi trực tiếp vào tin nhắn.\n\n"
-                f"Vui lòng nhấn nút bên dưới để lưu thẳng vào máy từ Server nhé:", 
-                reply_markup=kb
-            )
+                f"Giới hạn của Telegram API là 50MB.", reply_markup=kb)
             return
             
         await send_telegram_message(f"✅ <b>Đã lưu kho ({file_size_mb:.1f} MB):</b> Đang bắn lên Telegram...")
         
         async with httpx.AsyncClient(timeout=None) as client:
             with open(downloaded_file, "rb") as f:
-                tg_res = await client.post(
-                    f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/{send_method}", 
-                    data={"chat_id": chat_id}, 
-                    files={file_key: f}
-                )
-                if tg_res.status_code != 200:
-                    raise Exception(f"Telegram từ chối nhận file: {tg_res.text}")
+                tg_res = await client.post(f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/{send_method}", data={"chat_id": chat_id}, files={file_key: f})
+                if tg_res.status_code != 200: raise Exception(f"Telegram từ chối: {tg_res.text}")
                     
     except Exception as e:
-        err_msg = str(e)
-        if "ReadTimeout" in repr(e) or "Timeout" in repr(e): 
-            err_msg = "Mạng yếu, quá thời gian gửi file lên Telegram."
-        elif not err_msg: 
-            err_msg = repr(e)
-        await send_telegram_message(f"❌ <b>Lỗi tải YouTube:</b> {err_msg}")
+        await send_telegram_message(f"❌ <b>Lỗi tải YouTube:</b> {e}")
+
+
+# ==========================================
+# 🚀 CHAT AI J.A.R.V.I.S TELEGRAM
+# ==========================================
+SHIFT_TIME_MAP = {
+    "M5": ("05:00", "13:00"), "M6": ("06:00", "14:00"), "M7": ("07:00", "15:00"), "M8": ("08:00", "16:00"), "M9": ("09:00", "17:00"), "M10": ("10:00", "18:00"),
+    "A11": ("11:00", "19:00"), "A12": ("12:00", "20:00"), "A1": ("13:00", "21:00"), "A2": ("14:00", "22:00"), "A3": ("15:00", "23:00"), "A4": ("16:00", "00:00"), "A5": ("17:00", "01:00"), "A6": ("18:00", "02:00"),
+    "N7": ("19:00", "03:00"), "N8": ("20:00", "04:00"), "N9": ("21:00", "05:00"), "N10": ("22:00", "06:00")
+}
+
+async def trigger_jarvis_ai(chat_id: str, text: str):
+    async with httpx.AsyncClient() as client:
+        await client.post(f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/sendChatAction", json={"chat_id": chat_id, "action": "typing"})
+    
+    try:
+        from google import genai
+        import json, re, time
+        from datetime import datetime
+        from core.database import db_inserter, db_executor
+        from api.dashboard import api_status_db
+        from scripts.network_tunnel import start_tunnel, stop_tunnel
+        
+        client_ai = genai.Client(api_key=settings.GEMINI_API_KEY)
+        try:
+            available_models = [m.name.replace('models/', '') for m in client_ai.models.list() if 'gemini' in m.name.lower()]
+            chosen_model = next((m for m in available_models if 'gemini-1.5-flash' in m), available_models[0])
+        except:
+            chosen_model = 'gemini-1.5-flash'
+
+        now = datetime.now()
+        weekdays = ["Chủ Nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"]
+        now_str = f"{weekdays[int(now.strftime('%w'))]}, ngày {now.strftime('%d/%m/%Y, %H:%M')}"
+        current_status = "\n".join([f"- {k}: {'ĐANG BẬT' if v['active'] else 'ĐANG TẮT'}" for k, v in api_status_db.items()])
+        
+        try:
+            sql_sch = """SELECT work_date, shift_name, start_time, end_time, is_off 
+                         FROM work_schedules 
+                         WHERE work_date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) 
+                         AND work_date <= DATE_ADD(CURDATE(), INTERVAL 21 DAY) 
+                         ORDER BY work_date ASC"""
+            raw_sch = db_executor.select_as_list_dict(sql_sch)
+            sch_text = "DỮ LIỆU LỊCH TRÌNH TRONG DB:\n"
+            if raw_sch:
+                for s in raw_sch:
+                    d_str = s['work_date'].strftime('%Y-%m-%d') if hasattr(s['work_date'], 'strftime') else str(s['work_date'])[:10]
+                    if s.get('is_off'): sch_text += f"- Ngày {d_str}: NGHỈ LÀM (OFF)\n"
+                    else: sch_text += f"- Ngày {d_str}: Ca {s.get('shift_name')}\n"
+            else:
+                sch_text += "- Chưa có lịch trình.\n"
+        except Exception:
+            sch_text = ""
+
+        system_prompt = f"""
+        Bạn là J.A.R.V.I.S.
+        Thời gian: {now_str}. 
+        {current_status}
+        {sch_text}
+
+        QUY TẮC:
+        1. BẬT/TẮT DỊCH VỤ: `[TOGGLE: ten_dich_vu]`
+        2. LỊCH LÀM: 18 ca (M5..M10, A11..A6, N7..N10). Nếu nghỉ là OFF.
+           Chèn JSON vào cuối (Chỉ cần date, shift_name, is_off):
+           [SCHEDULE_DATA: [{{"date": "YYYY-MM-DD", "shift_name": "N10", "is_off": false}}, ...]]
+
+        Yêu cầu Sếp: {text}
+        """
+
+        response = await asyncio.to_thread(client_ai.models.generate_content, model=chosen_model, contents=system_prompt)
+        reply_text = response.text
+        action_taken = ""
+
+        match_toggle = re.search(r'\[TOGGLE:\s*([a-zA-Z0-9_]+)\]', reply_text)
+        if match_toggle:
+            target_service = match_toggle.group(1).strip()
+            if target_service in api_status_db:
+                new_state = not api_status_db[target_service]["active"]
+                if target_service == "internet_tunnel": start_tunnel() if new_state else stop_tunnel()
+                api_status_db[target_service]["active"] = new_state
+                action_taken = f"Đã {'BẬT' if new_state else 'TẮT'} {target_service}"
+            reply_text = re.sub(r'\[TOGGLE:\s*([a-zA-Z0-9_]+)\]', '', reply_text).strip()
+
+        match_schedule = re.search(r'\[SCHEDULE_DATA:\s*(\[.*\])\s*\]', reply_text, re.DOTALL)
+        if match_schedule:
+            schedule_json_str = match_schedule.group(1)
+            try:
+                schedules = json.loads(schedule_json_str)
+                user_id = 1
+                inserted_count = 0
+                for sch in schedules:
+                    is_off = 1 if sch.get('is_off') else 0
+                    safe_shift = sch.get('shift_name') or 'OFF'
+                    work_date = sch.get('date')
+                    
+                    # 🚀 CORE XỬ LÝ GIỜ BẰNG DICTIONARY (KHÔNG CHO AI TÍNH NỮA)
+                    if is_off or safe_shift == 'OFF':
+                        s_time, e_time = None, None
+                    else:
+                        s_time, e_time = SHIFT_TIME_MAP.get(safe_shift.upper(), ("00:00", "08:00"))
+                    
+                    check_sql = f"SELECT id, gcal_event_id FROM work_schedules WHERE work_date='{work_date}'"
+                    existing_records = db_executor.select_as_list_dict(check_sql)
+                    
+                    existing_gcal_id = None
+                    if existing_records:
+                        for ex in existing_records:
+                            if ex.get('gcal_event_id'):
+                                existing_gcal_id = ex.get('gcal_event_id')
+                                break
+                        db_inserter.insert(f"DELETE FROM work_schedules WHERE work_date='{work_date}'", ())
+
+                    gcal_id = None
+                    try:
+                        from core.gcal import add_event
+                        gcal_id = add_event(
+                            date_str=work_date, shift_name=safe_shift,
+                            start_time=s_time, end_time=e_time,
+                            is_off=is_off, event_id=existing_gcal_id
+                        )
+                    except Exception: pass
+
+                    sql = '''INSERT INTO work_schedules 
+                             (user_id, work_date, shift_name, start_time, end_time, is_off, gcal_event_id) 
+                             VALUES (%s, %s, %s, %s, %s, %s, %s)'''
+                    db_inserter.insert(sql, (user_id, work_date, safe_shift, s_time, e_time, is_off, gcal_id))
+                    inserted_count += 1
+                
+                msg_sch = f"Đã cập nhật {inserted_count} lịch làm việc."
+                action_taken = f"{action_taken} | {msg_sch}" if action_taken else msg_sch
+            except Exception as json_err:
+                print(f"Lỗi JSON: {json_err}")
+            
+            reply_text = re.sub(r'\[SCHEDULE_DATA:\s*\[.*\]\s*\]', '', reply_text, flags=re.DOTALL).strip()
+
+        final_msg = f"🤖 <b>J.A.R.V.I.S:</b>\n\n{reply_text}"
+        if action_taken: final_msg += f"\n\n⚡ <i>{action_taken}</i>"
+            
+        await send_telegram_message(final_msg)
+    except Exception as e:
+        await send_telegram_message(f"❌ <b>Lỗi xử lý AI:</b> {str(e)}")

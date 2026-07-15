@@ -22,13 +22,14 @@ from middlewares.logger_tracker import LoggerTrackerMiddleware
 from middlewares.rate_limit import RateLimitMiddleware
 from middlewares.dynamic_hosting import DynamicHostingMiddleware
 from middlewares.auto_branding import AutoBrandingMiddleware
+from middlewares.ip_shield import IPShieldMiddleware
 from middlewares.security_headers import SecurityHeadersMiddleware # 🛡️ Bổ sung lá chắn thép
 
 # --- 3. ROUTERS ---
 from api import (
     player, dashboard, websockets, chatbox, social, auth, widgets, 
     projects, ai_admin, audio_engine, bio_premium, music, telegram_bot, astrology, ytdl,
-    admin_scripts
+    admin_scripts, admin_security, dldriver, autocode
 )
 
 # ==========================================
@@ -87,7 +88,8 @@ def setup_middlewares(app: FastAPI):
     app.add_middleware(SecurityHeadersMiddleware) # 🚀 Gắn khiên bảo vệ XSS/Clickjacking
     app.add_middleware(AutoBrandingMiddleware)
     app.add_middleware(DynamicHostingMiddleware) 
-    app.add_middleware(LoggerTrackerMiddleware)  
+    app.add_middleware(LoggerTrackerMiddleware) 
+    app.add_middleware(IPShieldMiddleware) 
     app.add_middleware(RateLimitMiddleware)
 
 def setup_static_mounts(app: FastAPI):
@@ -114,15 +116,16 @@ def setup_routers(app: FastAPI):
     api_routers = [
         auth.router, dashboard.router, websockets.router, chatbox.router, social.router,
         widgets.router, projects.router, ai_admin.router, audio_engine.router, bio_premium.router,
-        music.router, telegram_bot.router, astrology.router, ytdl.router, player.router, admin_scripts.router
+        music.router, telegram_bot.router, astrology.router, ytdl.router, player.router, admin_scripts.router,
+        admin_security.router, dldriver.router, autocode.router
     ]
     for r in api_routers:
         app.include_router(r)
 
 def setup_frontend_routes(app: FastAPI):
     FRONTEND_PAGES = {
-        "/": "hub.html", "/hub": "hub.html", "/auth": "auth.html",
-        "/admin/dashboard": "index.html", "/admin/dashboard/": "index.html",
+        "/": "index.html", "/hub": "hub.html", "/auth": "auth.html",
+        "/admin/dashboard": "dashboard.html", "/admin/dashboard/": "dashboard.html",
         "/admin/upload": "admin-upload.html", "/admin/upload/": "admin-upload.html",
         "/admin/scripts": "admin-scripts.html", "/admin/scripts/": "admin-scripts.html",
         "/audio-test": "audio-test.html", "/numerology": "numerology.html",
@@ -130,6 +133,10 @@ def setup_frontend_routes(app: FastAPI):
         "/music-pro": "music-pro.html", "/social-hub": "social-hub.html",
         "/documentation": "documentation.html", "/yt-downloader": "yt-downloader.html",
         "/profile": "profile.html", "/test-tracks": "test-tracks.html",
+        "/admin/security": "admin-security.html",
+        "/admin/dldriver": "download-ggdriver.html",
+        "/admin/omni": "admin-master.html", "/admin/calendar": "calendar-viewer.html",
+        "/autocode": "autocode.html", "/admin/jarvis": "jarvis-chat.html"
     }
     
     PUBLIC_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "public")

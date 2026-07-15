@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify Clone - React & Tailwind</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #000000;
+            color: white;
+            overflow: hidden;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .spotify-card:hover .play-button {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .glass-nav {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const SidebarItem = ({ icon, text, active = false, subtext = "" }) => (
+            <div className={`flex items-center gap-4 px-4 py-2 rounded-md cursor-pointer transition-all hover:bg-[#1A1A1A] ${active ? 'text-white' : 'text-gray-400'}`}>
+                <div className="w-12 h-12 rounded bg-[#282828] flex items-center justify-center overflow-hidden">
+                    {typeof icon === 'string' ? <img src={icon} alt="" className="w-full h-full object-cover" /> : icon}
+                </div>
+                <div className="flex flex-col">
+                    <span className="font-medium text-sm text-white truncate w-32">{text}</span>
+                    {subtext && <span className="text-xs text-gray-400">{subtext}</span>}
+                </div>
+            </div>
+        );
+
+        const MusicCard = ({ title, desc, img, type = "circle" }) => (
+            <div className="bg-[#181818] p-4 rounded-lg hover:bg-[#282828] transition-all duration-300 group cursor-pointer">
+                <div className="relative mb-4">
+                    <img src={img} alt={title} className={`w-full aspect-square object-cover shadow-lg ${type === 'circle' ? 'rounded-full' : 'rounded-md'}`} />
+                    <button className="play-button absolute bottom-2 right-2 w-12 h-12 bg-[#1ed760] rounded-full flex items-center justify-center shadow-xl opacity-0 translate-y-2 transition-all duration-300 hover:scale-105">
+                        <i className="fa-solid fa-play text-black text-xl ml-1"></i>
+                    </button>
+                </div>
+                <h3 className="font-bold text-white mb-1 truncate">{title}</h3>
+                <p className="text-gray-400 text-sm line-clamp-2">{desc}</p>
+            </div>
+        );
+
+        const App = () => {
+            return (
+                <div className="flex flex-col h-screen overflow-hidden bg-black p-2 gap-2">
+                    {/* Header */}
+                    <div className="flex items-center justify-between px-4 py-1">
+                        <div className="flex items-center gap-2">
+                            <i className="fa-brands fa-spotify text-3xl text-white"></i>
+                        </div>
+                        
+                        <div className="flex items-center gap-2 flex-1 max-w-xl mx-4">
+                            <div className="bg-[#1F1F1F] rounded-full p-3 flex items-center justify-center hover:scale-105 cursor-pointer">
+                                <i className="fa-solid fa-house text-xl text-white"></i>
+                            </div>
+                            <div className="flex-1 bg-[#1F1F1F] rounded-full flex items-center px-4 py-3 gap-3 border border-transparent focus-within:border-white transition-all">
+                                <i className="fa-solid fa-magnifying-glass text-gray-400 text-lg"></i>
+                                <input 
+                                    type="text" 
+                                    placeholder="Bạn muốn phát nội dung gì?" 
+                                    className="bg-transparent border-none outline-none text-sm w-full text-white placeholder-gray-400"
+                                />
+                                <div className="h-6 w-[1px] bg-gray-600 mx-2"></div>
+                                <i className="fa-solid fa-box-archive text-gray-400 hover:text-white cursor-pointer"></i>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-4">
+                            <button className="bg-white text-black font-bold py-2 px-4 rounded-full text-sm hover:scale-105 transition-all">Khám phá Premium</button>
+                            <button className="flex items-center gap-2 text-white font-bold text-sm hover:scale-105"><i className="fa-regular fa-circle-down"></i> Cài đặt Ứng dụng</button>
+                            <div className="flex items-center gap-4 text-gray-400 text-xl">
+                                <i className="fa-regular fa-bell hover:text-white cursor-pointer"></i>
+                                <i className="fa-solid fa-users hover:text-white cursor-pointer"></i>
+                                <div className="w-8 h-8 rounded-full bg-[#FF4500] text-black font-bold text-xs flex items-center justify-center">L</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex flex-1 gap-2 overflow-hidden">
+                        {/* Sidebar */}
+                        <div className="w-[350px] bg-[#121212] rounded-lg flex flex-col overflow-hidden">
+                            <div className="p-4 flex items-center justify-between text-gray-400">
+                                <div className="flex items-center gap-3 hover:text-white transition-colors cursor-pointer">
+                                    <i className="fa-solid fa-layer-group text-xl"></i>
+                                    <span className="font-bold">Thư viện</span>
+                                </div>
+                                <div className="flex items-center gap-4">
+                                    <i className="fa-solid fa-plus hover:bg-[#1A1A1A] p-2 rounded-full cursor-pointer"></i>
+                                    <i className="fa-solid fa-arrow-right hover:bg-[#1A1A1A] p-2 rounded-full cursor-pointer"></i>
+                                </div>
+                            </div>
+                            
+                            <div className="flex gap-2 px-4 mb-4">
+                                <button className="bg-[#282828] text-white text-xs font-medium px-3 py-1.5 rounded-full hover:bg-[#3E3E3E]">Danh sách phát</button>
+                                <button className="bg-[#282828] text-white text-xs font-medium px-3 py-1.5 rounded-full hover:bg-[#3E3E3E]">Nghệ sĩ</button>
+                                <button className="bg-[#282828] text-white text-xs font-medium px-3 py-1.5 rounded-full hover:bg-[#3E3E3E]">Album</button>
+                            </div>
+
+                            <div className="px-4 py-2 flex items-center justify-between text-gray-400 mb-2">
+                                <i className="fa-solid fa-magnifying-glass hover:bg-[#1A1A1A] p-2 rounded-full cursor-pointer text-sm"></i>
+                                <div className="flex items-center gap-1 text-sm cursor-pointer hover:scale-105">
+                                    <span>Gần đây</span>
+                                    <i className="fa-solid fa-list-ul"></i>
+                                </div>
+                            </div>
+
+                            <div className="flex-1 overflow-y-auto custom-scrollbar px-2">
+                                <SidebarItem icon={<i className="fa-solid fa-podcast text-white"></i>} text="Podcast của bạn" subtext="Podcast" />
+                                <SidebarItem icon="https://i.scdn.co/image/ab67616d0000b27376044738411d7e335555e510" text="Nhạc game cuốn vãi l" subtext="Danh sách phát • Minh bevis😎" />
+                                <SidebarItem icon="https://i.scdn.co/image/ab67616d0000b273618177341e3d2f2d9f783f9f" text="REMIX CỰC CHÁY🔥🔥" subtext="Danh sách phát • Anh Hào Trần" />
+                                <SidebarItem icon="https://i.scdn.co/image/ab67616d0000b2733d7d7f780829871539268305" text="Tình Đầu Quá Chén Ver 2 (Remix)" subtext="Đĩa đơn • Cukak" />
+                                <SidebarItem icon="https://i.scdn.co/image/ab6761610000e5eb981885834927b282362b535d" text="Cukak" subtext="Nghệ sĩ" />
+                                <SidebarItem icon="https://i.scdn.co/image/ab6761610000e5eb5d64388e63b655938833924f" text="BD Media Music" subtext="Nghệ sĩ" />
+                                <SidebarItem icon="https://i.scdn.co/image/ab6761610000e5eb03e1e69b329432f8319f3900" text="H2O Remix" subtext="Nghệ sĩ" />
+                            </div>
+                        </div>
+
+                        {/* Main Content */}
+                        <div className="flex-1 bg-[#121212] rounded-lg overflow-hidden flex flex-col relative">
+                            <div className="flex gap-2 p-4 glass-nav sticky top-0 z-10">
+                                <button className="bg-white text-black text-sm px-3 py-1.5 rounded-full font-medium">Tất cả</button>
+                                <button className="bg-[#282828] text-white text-sm px-3 py-1.5 rounded-full font-medium hover:bg-[#3E3E3E]">Âm nhạc</button>
+                                <button className="bg-[#282828] text-white text-sm px-3 py-1.5 rounded-full font-medium hover:bg-[#3E3E3E]">Podcasts</button>
+                            </div>
+
+                            <div className="flex-1 overflow-y-auto custom-scrollbar p-6 pt-2">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+                                    {/* Getting Started Banner */}
+                                    <div>
+                                        <div className="flex items-center justify-between mb-4">
+                                            <h2 className="text-2xl font-bold">Bắt đầu</h2>
+                                            <div className="flex gap-2">
+                                                <div className="bg-black/40 w-8 h-8 rounded-full flex items-center justify-center text-gray-400 cursor-not-allowed"><i className="fa-solid fa-chevron-left"></i></div>
+                                                <div className="bg-black/40 w-8 h-8 rounded-full flex items-center justify-center hover:text-white cursor-pointer"><i className="fa-solid fa-chevron-right"></i></div>
+                                            </div>
+                                        </div>
+                                        <div className="bg-gradient-to-br from-[#7D7000] to-[#4D4500] rounded-lg p-6 h-[220px] relative overflow-hidden group">
+                                            <div className="relative z-10 w-2/3">
+                                                <h1 className="text-4xl font-black mb-2 italic">1. Bắt đầu phát</h1>
+                                                <p className="text-sm text-gray-200 mb-6">Tìm kiếm, duyệt xem và phát nội dung của nghệ sĩ cũng như nhà sáng tạo bạn yêu thích.</p>
+                                                <div className="flex items-center gap-4">
+                                                    <button className="bg-[#1ed760] text-black font-bold px-6 py-2 rounded-full hover:scale-105 transition-all">Tìm kiếm</button>
+                                                    <button className="text-white font-bold hover:underline">Hiện thêm mẹo</button>
+                                                </div>
+                                            </div>
+                                            <div className="absolute right-[-20px] bottom-4 flex gap-2 rotate-12">
+                                                 <img src="https://seed-mix-image.spotifycdn.com/v6/img/desc/lofi%20beats/vi" className="w-24 h-24 rounded shadow-2xl" />
+                                                 <img src="https://seed-mix-image.spotifycdn.com/v6/img/desc/serotonin/vi" className="w-24 h-24 rounded shadow-2xl" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Discover Weekly Card */}
+                                    <div>
+                                        <div className="flex items-center justify-between mb-4">
+                                            <div className="flex flex-col">
+                                                <span className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Dành Cho</span>
+                                                <h2 className="text-2xl font-bold">Lý Thừa Ân</h2>
+                                            </div>
+                                            <span className="text-gray-400 text-sm font-bold hover:underline cursor-pointer">Hiện tất cả</span>
+                                        </div>
+                                        <div className="flex gap-4">
+                                            <div className="bg-[#181818] p-4 rounded-lg hover:bg-[#282828] transition-all w-full max-w-[200px]">
+                                                <img src="https://newjams-images.scdn.co/image/ab6764770000718d/dt/v1/discover-weekly/P-p-H5H6uYf2f8L2qP2G6g==/amF6enp5LWJlYXRz" className="w-full aspect-square rounded shadow-lg mb-4" />
+                                                <h3 className="font-bold text-white text-sm mb-1">Discover Weekly</h3>
+                                                <p className="text-gray-400 text-xs line-clamp-2">Khám phá những cực phẩm bạn sẽ mê, được...</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Popular Albums Section */}
+                                <div className="mb-8">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h2 className="text-2xl font-bold">Album và đĩa đơn nổi tiếng</h2>
+                                        <span className="text-gray-400 text-sm font-bold hover:underline cursor-pointer">Hiện tất cả</span>
+                                    </div>
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                                        <MusicCard title="Đánh Đổi" desc="Obito, Shiki" type="square" img="https://i.scdn.co/image/ab67616d0000b27376044738411d7e335555e510" />
+                                        <MusicCard title="Lặng" desc="Shiki" type="square" img="https://i.scdn.co/image/ab67616d0000b273618177341e3d2f2d9f783f9f" />
+                                        <MusicCard title="Ai Cũng Phải Bắt Đầu Từ Đâu Đó" desc="HIEUTHUHAI" type="square" img="https://i.scdn.co/image/ab67616d0000b2733d7d7f780829871539268305" />
+                                        <MusicCard title="Dữ Liệu Quý" desc="Dương Domic" type="square" img="https://i.scdn.co/image/ab67616d0000b273ef339945110d70b555073042" />
+                                        <MusicCard title="THE WXRDIES" desc="Wxrdie" type="square" img="https://i.scdn.co/image/ab67616d0000b27303e1e69b329432f8319f3900" />
+                                        <MusicCard title="rosie" desc="ROSÉ" type="square" img="https://i.scdn.co/image/ab67616d0000b273c5970c792193b216503c80be" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Player Control Bar */}
+                    <div className="h-20 bg-black flex items-center justify-between px-4">
+                        <div className="w-[30%] flex items-center gap-4">
+                            <div className="w-14 h-14 bg-[#282828] rounded overflow-hidden">
+                                <img src="https://i.scdn.co/image/ab67616d0000b273c5970c792193b216503c80be" className="w-full h-full object-cover" />
+                            </div>
+                            <div>
+                                <h4 className="text-sm font-medium hover:underline cursor-pointer">Number One Girl</h4>
+                                <p className="text-xs text-gray-400 hover:underline hover:text-white cursor-pointer">ROSÉ</p>
+                            </div>
+                            <i className="fa-regular fa-heart text-gray-400 hover:text-white cursor-pointer"></i>
+                        </div>
+
+                        <div className="w-[40%] flex flex-col items-center">
+                            <div className="flex items-center gap-6 mb-2">
+                                <i className="fa-solid fa-shuffle text-gray-400 hover:text-white cursor-pointer"></i>
+                                <i className="fa-solid fa-backward-step text-2xl text-gray-400 hover:text-white cursor-pointer"></i>
+                                <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center cursor-pointer hover:scale-105 transition-all">
+                                    <i className="fa-solid fa-play text-black ml-1"></i>
+                                </div>
+                                <i className="fa-solid fa-forward-step text-2xl text-gray-400 hover:text-white cursor-pointer"></i>
+                                <i className="fa-solid fa-repeat text-gray-400 hover:text-white cursor-pointer"></i>
+                            </div>
+                            <div className="flex items-center gap-2 w-full">
+                                <span className="text-[10px] text-gray-400">1:42</span>
+                                <div className="h-1 flex-1 bg-[#4d4d4d] rounded-full group cursor-pointer overflow-hidden">
+                                    <div className="h-full bg-white group-hover:bg-[#1ed760]" style={{width: '45%'}}></div>
+                                </div>
+                                <span className="text-[10px] text-gray-400">3:24</span>
+                            </div>
+                        </div>
+
+                        <div className="w-[30%] flex items-center justify-end gap-3 text-gray-400">
+                            <i className="fa-solid fa-microphone-lines text-xs hover:text-white cursor-pointer"></i>
+                            <i className="fa-solid fa-list-ul text-xs hover:text-white cursor-pointer"></i>
+                            <i className="fa-solid fa-laptop text-xs hover:text-white cursor-pointer"></i>
+                            <div className="flex items-center gap-2 w-24">
+                                <i className="fa-solid fa-volume-high text-xs"></i>
+                                <div className="h-1 flex-1 bg-[#4d4d4d] rounded-full overflow-hidden">
+                                    <div className="h-full bg-white hover:bg-[#1ed760]" style={{width: '70%'}}></div>
+                                </div>
+                            </div>
+                            <i className="fa-solid fa-maximize text-xs hover:text-white cursor-pointer"></i>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

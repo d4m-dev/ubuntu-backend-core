@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D4M OMNI-PANEL | God Mode</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;600;800;900&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root { --bg-dark: #050505; --glass-bg: rgba(15, 15, 20, 0.6); --glass-border: rgba(255, 255, 255, 0.08); --primary: #3b82f6; }
+        body { background-color: var(--bg-dark); color: white; font-family: 'Inter', sans-serif; overflow: hidden; height: 100vh; }
+        h1, h2, h3, .font-heading { font-family: 'Outfit', sans-serif; }
+        .font-mono { font-family: 'Fira Code', monospace; }
+
+        /* VŨ TRỤ NỀN TẢNG */
+        .orb { position: fixed; border-radius: 50%; filter: blur(120px); z-index: -1; pointer-events: none; animation: float 20s infinite alternate ease-in-out; }
+        .orb-1 { width: 500px; height: 500px; background: rgba(59, 130, 246, 0.15); top: -100px; left: -100px; }
+        .orb-2 { width: 400px; height: 400px; background: rgba(168, 85, 247, 0.15); bottom: -150px; right: -100px; animation-delay: -5s; }
+        .orb-3 { width: 300px; height: 300px; background: rgba(239, 68, 68, 0.1); top: 40%; left: 30%; animation-delay: -10s; }
+        @keyframes float { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(50px, 50px) scale(1.1); } }
+
+        /* COMPONENTS CHUNG */
+        .glass-panel { background: var(--glass-bg); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid var(--glass-border); border-radius: 1.5rem; }
+        .glass-card { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--glass-border); border-radius: 1rem; transition: all 0.3s ease; }
+        .glass-card:hover { background: rgba(255, 255, 255, 0.04); border-color: rgba(59, 130, 246, 0.3); box-shadow: 0 10px 30px -10px rgba(59, 130, 246, 0.2); }
+        .glass-input { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 12px 16px; border-radius: 0.75rem; outline: none; width: 100%; transition: all 0.3s; }
+        .glass-input:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); }
+
+        /* SIDEBAR NAVIGATION */
+        .nav-item { display: flex; items-center; gap: 12px; padding: 12px 20px; border-radius: 12px; font-weight: 600; color: #9ca3af; transition: all 0.3s; border: 1px solid transparent; cursor: pointer; }
+        .nav-item:hover { color: white; background: rgba(255,255,255,0.05); }
+        .nav-item.active { color: white; background: linear-gradient(90deg, rgba(59, 130, 246, 0.15), transparent); border-left: 3px solid #3b82f6; border-right: 1px solid rgba(59,130,246,0.2); border-top: 1px solid rgba(59,130,246,0.1); border-bottom: 1px solid rgba(59,130,246,0.1); box-shadow: inset 10px 0 20px -10px rgba(59,130,246,0.2); }
+        .nav-item.active-red { border-left-color: #ef4444; background: linear-gradient(90deg, rgba(239, 68, 68, 0.15), transparent); }
+
+        /* SCROLLBAR & ANIMATION */
+        ::-webkit-scrollbar { width: 6px; height: 6px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 10px; } ::-webkit-scrollbar-thumb:hover { background: rgba(59, 130, 246, 0.5); }
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .toast-enter { animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes slideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        /* CSS TÙY CHỈNH TỪ CÁC MODULE CŨ */
+        .progress-striped { background-image: linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent); background-size: 1rem 1rem; animation: progress-bar-stripes 1s linear infinite; }
+        @keyframes progress-bar-stripes { from { background-position: 1rem 0; } to { background-position: 0 0; } }
+        .cyber-check { accent-color: #3b82f6; width: 1.25rem; height: 1.25rem; cursor: pointer; }
+        .terminal-box { font-family: 'Fira Code', monospace; color: #4ade80; text-shadow: 0 0 8px rgba(74, 222, 128, 0.4); }
+    </style>
+</head>
+<body class="flex">
+
+    <!-- 🌌 BACKGROUND -->
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div id="toast-container" class="fixed bottom-6 right-6 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
+
+    <!-- 🛑 LOCK SCREEN CHUẨN SSO -->
+    <div id="unauthorizedState" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-xl transition-opacity duration-500">
+        <div class="glass-panel p-10 rounded-3xl w-full max-w-md mx-4 shadow-2xl relative overflow-hidden text-center">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500"></div>
+            
+            <div class="relative inline-block mb-6">
+                <i class="fa-solid fa-fingerprint text-7xl text-red-500 drop-shadow-[0_0_20px_rgba(239,68,68,0.6)] animate-pulse"></i>
+                <i class="fa-solid fa-ban absolute -bottom-2 -right-2 text-3xl text-white drop-shadow-md"></i>
+            </div>
+            
+            <h2 id="unauthTitle" class="text-3xl font-heading font-black tracking-widest uppercase text-white mb-4">KHÔNG PHẬN CẤM</h2>
+            <p id="unauthDesc" class="text-gray-400 mb-8 font-mono text-sm leading-relaxed">Hệ thống từ chối quyền truy cập.</p>
+            
+            <button onclick="redirectToAuth()" class="w-full py-4 bg-gradient-to-r from-red-600 to-red-800 hover:from-red-500 hover:to-red-700 text-white font-black tracking-widest uppercase rounded-xl shadow-[0_0_20px_rgba(239,68,68,0.4)] transition-transform active:scale-[0.98]">
+                <i class="fa-solid fa-id-card mr-2"></i> Xác Thực D4M ID
+            </button>
+            <button onclick="window.location.href='/hub'" class="w-full mt-3 py-3 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white font-bold rounded-xl transition-colors">
+                Quay Lại Trạm Hub
+            </button>
+        </div>
+    </div>
+
+    <!-- 📦 SIDEBAR NAVIGATION (TRẠM ĐIỀU HƯỚNG) -->
+    <aside class="w-72 h-full glass-panel rounded-none border-y-0 border-l-0 flex flex-col shrink-0 relative z-50 bg-black/40">
+        <div class="p-6 border-b border-white/5 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-[0_0_20px_rgba(59,130,246,0.5)]">
+                <i class="fa-solid fa-infinity text-white text-lg"></i>
+            </div>
+            <div>
+                <h1 class="font-heading font-black text-xl tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-white to-blue-400">OMNI-PANEL</h1>
+                <p class="text-[10px] text-green-400 font-mono uppercase tracking-widest flex items-center gap-1"><i class="fa-solid fa-circle text-[8px] animate-pulse"></i> System Active</p>
+            </div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto py-6 px-4 space-y-2">
+            <div class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3 ml-2">Trung Tâm Lõi</div>
+            <div onclick="switchView('dashboard')" id="nav-dashboard" class="nav-item active"><i class="fa-solid fa-chart-pie w-5 text-center"></i> Tổng Quan (Dashboard)</div>
+            <div onclick="switchView('upload')" id="nav-upload" class="nav-item"><i class="fa-solid fa-cloud-arrow-up w-5 text-center"></i> Kho Dữ Liệu (Upload)</div>
+            
+            <div class="text-xs font-bold text-gray-500 uppercase tracking-widest mt-8 mb-3 ml-2">Vận Hành & Tác Chiến</div>
+            <div onclick="switchView('scripts')" id="nav-scripts" class="nav-item"><i class="fa-solid fa-terminal w-5 text-center"></i> Bộ Tư Lệnh (Cronjobs)</div>
+            <div onclick="switchView('security')" id="nav-security" class="nav-item hover:text-red-400"><i class="fa-solid fa-shield-cat w-5 text-center"></i> Aegis Shield (Radar)</div>
+        </div>
+
+        <div class="p-4 border-t border-white/5">
+            <div class="flex items-center gap-3 bg-white/5 p-3 rounded-xl border border-white/5">
+                <img id="adminAvatar" src="/src/favicon/ubuntu-backend/favicon-96x96.png" class="w-10 h-10 rounded-lg border border-blue-500/50 object-cover">
+                <div class="flex-1 overflow-hidden">
+                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-0.5">Tư Lệnh</p>
+                    <p id="adminName" class="font-bold text-sm text-white truncate">Loading...</p>
+                </div>
+                <button onclick="logout()" class="w-8 h-8 rounded-lg hover:bg-red-500/20 text-gray-400 hover:text-red-400 flex items-center justify-center transition" title="Ngắt kết nối">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- 🚀 MAIN CONTENT AREA (KHÔNG GIAN LÀM VIỆC) -->
+    <main class="flex-1 h-full flex flex-col relative z-40 overflow-hidden bg-black/20">
+        
+        <!-- HEADER TRÊN CÙNG -->
+        <header class="h-20 border-b border-white/5 px-8 flex justify-between items-center bg-black/30 backdrop-blur-md shrink-0">
+            <div class="flex items-center gap-4">
+                <button class="lg:hidden text-gray-400 hover:text-white"><i class="fa-solid fa-bars text-xl"></i></button>
+                <h2 id="viewTitle" class="text-2xl font-heading font-black text-white uppercase tracking-widest">Tổng Quan Hệ Thống</h2>
+            </div>
+            <div class="flex gap-3">
+                <a href="/hub" class="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 text-sm font-bold rounded-lg transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-satellite-dish text-blue-400"></i> Trạm Hub
+                </a>
+            </div>
+        </header>
+
+        <!-- KHOANG CHỨA CÁC MODULES (SCROLLABLE) -->
+        <div class="flex-1 overflow-y-auto p-6 md:p-8 custom-scrollbar relative">
+            
+                        <!-- ========================================================================= -->
+            <!-- 📊 MODULE 1: DASHBOARD LÕI (BẢN FULL KHÔNG CHE) -->
+            <!-- ========================================================================= -->
+            <div id="view-dashboard" class="omni-view space-y-8 animate-fade-in block">
+                
+                <!-- TÀI NGUYÊN PHẦN CỨNG -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="glass-panel p-6 flex flex-col items-center justify-center relative overflow-hidden group">
+                        <div class="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <i class="fa-solid fa-microchip text-4xl text-blue-400 mb-3 group-hover:scale-110 transition-transform"></i>
+                        <h3 class="text-gray-400 text-xs font-bold uppercase tracking-wider">CPU Load</h3>
+                        <p class="text-4xl font-black text-white mt-1" id="cpu-val">--%</p>
+                    </div>
+                    <div class="glass-panel p-6 flex flex-col items-center justify-center relative overflow-hidden group">
+                        <div class="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <i class="fa-solid fa-memory text-4xl text-purple-400 mb-3 group-hover:scale-110 transition-transform"></i>
+                        <h3 class="text-gray-400 text-xs font-bold uppercase tracking-wider">RAM Usage</h3>
+                        <p class="text-4xl font-black text-white mt-1" id="ram-val">--%</p>
+                        <p class="text-xs text-purple-300/70 mt-2 font-mono" id="ram-detail">-- / -- GB</p>
+                    </div>
+                    <div class="glass-panel p-6 flex flex-col items-center justify-center relative overflow-hidden group">
+                        <div class="absolute inset-0 bg-gradient-to-br from-green-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <i class="fa-solid fa-hard-drive text-4xl text-green-400 mb-3 group-hover:scale-110 transition-transform"></i>
+                        <h3 class="text-gray-400 text-xs font-bold uppercase tracking-wider">Storage</h3>
+                        <p class="text-4xl font-black text-white mt-1" id="disk-val">--%</p>
+                        <p class="text-xs text-green-300/70 mt-2 font-mono" id="disk-detail">Free: -- GB</p>
+                    </div>
+                </div>
+
+                <!-- LƯU LƯỢNG TRUY CẬP (CHART) -->
+                <div class="glass-panel p-6">
+                    <h2 class="text-lg font-bold text-white mb-4"><i class="fa-solid fa-chart-area text-pink-500 mr-2"></i>Lưu Lượng Truy Cập Mạng</h2>
+                    <div class="relative h-64 w-full"><canvas id="trafficChart"></canvas></div>
+                </div>
+
+                <!-- BIO PREMIUM TRACKING KHÔI PHỤC FULL BẢNG -->
+                <div class="glass-panel p-6 border-yellow-500/30 shadow-[0_0_20px_rgba(234,179,8,0.05)]">
+                    <div class="flex justify-between items-center mb-5">
+                        <h2 class="text-lg font-bold text-white"><i class="fa-solid fa-link text-yellow-400 mr-2"></i>Bio Link Tracking</h2>
+                        <button onclick="fetchBioStats()" class="text-xs bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-lg border border-white/10 transition"><i class="fa-solid fa-rotate-right"></i> Làm mới</button>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="flex flex-col gap-4">
+                            <div class="bg-black/30 p-4 rounded-2xl text-center border border-white/5">
+                                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Tổng Click</p>
+                                <p id="totalBioClicks" class="text-5xl font-black text-green-400 mt-2">--</p>
+                            </div>
+                            <div class="bg-black/30 p-4 rounded-2xl flex items-center justify-center border border-white/5 h-48 flex-1">
+                                <canvas id="bioPlatformChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="lg:col-span-2 bg-black/30 rounded-2xl overflow-hidden border border-white/5 flex flex-col h-full min-h-[250px]">
+                            <div class="p-3 bg-white/5 border-b border-white/5"><h3 class="text-xs font-bold text-blue-400 uppercase tracking-wider">🕵️ Hoạt động gần đây</h3></div>
+                            <div class="overflow-y-auto custom-scrollbar flex-grow">
+                                <table class="w-full text-left text-xs whitespace-nowrap">
+                                    <thead class="bg-black/40 text-gray-400 sticky top-0">
+                                        <tr><th class="px-4 py-3 font-semibold">Thời gian</th><th class="px-4 py-3 font-semibold">Nền tảng</th><th class="px-4 py-3 font-semibold">Link ID</th><th class="px-4 py-3 font-semibold">IP Address</th></tr>
+                                    </thead>
+                                    <tbody id="bioHistoryTable" class="divide-y divide-white/5 text-gray-300">
+                                        <tr><td colspan="4" class="px-4 py-8 text-center text-gray-500">Đang tải dữ liệu...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CÁC MODULE KHÁC ĐƯỢC KHÔI PHỤC -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- ĐIỀU KHIỂN API -->
+                    <div class="glass-panel p-6">
+                        <h2 class="text-lg font-bold text-white mb-5"><i class="fa-solid fa-toggle-on text-green-400 mr-2"></i>Điều Khiển API</h2>
+                        <div class="space-y-3" id="services-container"></div>
+                    </div>
+
+                    <!-- GEMINI AI -->
+                    <div class="glass-panel flex flex-col h-[400px] overflow-hidden border border-purple-500/20 shadow-[0_0_30px_rgba(147,51,234,0.1)] relative">
+                        <div class="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-purple-900/40 to-transparent pointer-events-none"></div>
+                        <div class="px-5 py-4 border-b border-white/5 flex items-center justify-between bg-black/20 z-10">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-lg"><i class="fa-solid fa-robot text-white"></i></div>
+                                <div><h3 class="font-bold text-white text-sm">Gemini SysAdmin</h3><p class="text-[10px] text-green-400 font-mono tracking-wide">Trợ lý Trí tuệ Nhân tạo</p></div>
+                            </div>
+                        </div>
+                        <div id="ai-chat-box" class="flex-grow p-5 overflow-y-auto space-y-5 text-sm bg-black/40 z-10 scroll-smooth">
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center"><i class="fa-solid fa-robot text-white text-xs"></i></div>
+                                <div class="bg-white/10 border border-white/5 p-3 rounded-2xl rounded-tl-none text-gray-200">Hệ thống đã sẵn sàng. Sếp cần tôi thực thi lệnh gì?</div>
+                            </div>
+                        </div>
+                        <div class="p-4 bg-gray-900/80 backdrop-blur-md z-10 border-t border-white/5">
+                            <form id="ai-form" class="flex space-x-2 relative">
+                                <input type="text" id="ai-input" class="flex-grow bg-black/50 border border-gray-700 rounded-xl pl-4 pr-12 py-3 focus:outline-none focus:border-purple-500 text-sm text-white placeholder-gray-500" placeholder="Nhập lệnh thao tác..." required autocomplete="off">
+                                <button type="submit" class="absolute right-2 top-2 bottom-2 bg-gradient-to-r from-purple-600 to-blue-600 w-9 h-9 rounded-lg flex items-center justify-center transition-all hover:scale-105"><i class="fa-solid fa-paper-plane text-white text-xs"></i></button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TRẠM QUÉT AI NHẠC -->
+                <div class="glass-panel p-6 border border-cyan-500/20 shadow-[0_0_20px_rgba(6,182,212,0.1)]">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-bold text-white"><i class="fa-solid fa-music text-cyan-400 mr-2"></i>Trạm Quét AI Nhạc</h2>
+                        <span class="relative flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-cyan-500"></span></span>
+                    </div>
+                    <div id="ai-task-list" class="flex flex-col gap-3 min-h-[120px] max-h-[300px] overflow-y-auto custom-scrollbar pr-2">
+                        <p class="text-gray-500 text-sm italic py-8 text-center"><i class="fa-solid fa-check-double text-2xl mb-2 block"></i>Hàng đợi đang trống rỗng.</p>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- ========================================================================= -->
+            <!-- ☁️ MODULE 2: KHO DỮ LIỆU UPLOAD -->
+            <!-- ========================================================================= -->
+            <div id="view-upload" class="omni-view hidden animate-fade-in max-w-4xl mx-auto">
+                <div class="glass-panel p-8 shadow-2xl relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                    
+                    <div class="flex space-x-4 mb-8 relative z-10">
+                        <button onclick="switchUploadTab('music')" id="tab-up-music" class="flex-1 py-3 rounded-xl border border-blue-500/50 bg-blue-500/10 text-blue-400 font-bold transition-all"><i class="fa-solid fa-music mr-2"></i>Upload Nhạc (Trọn Bộ)</button>
+                        <button onclick="switchUploadTab('image')" id="tab-up-image" class="flex-1 py-3 rounded-xl border border-white/10 bg-white/5 text-gray-400 hover:text-white transition-all"><i class="fa-solid fa-images mr-2"></i>Upload Ảnh (Hàng Loạt)</button>
+                    </div>
+
+                    <!-- Form Upload Nhạc -->
+                    <div id="form-music" class="space-y-6 relative z-10">
+                        <div>
+                            <label class="block text-sm font-bold text-blue-400 mb-2 uppercase tracking-wider">Tên bài hát (Định danh Core)</label>
+                            <input type="text" id="music-name" oninput="checkFolderExistence('music', this.value)" class="glass-input" placeholder="VD: aihongnhan (Viết liền không dấu)" required>
+                            <p id="music-warning" class="text-sm font-bold mt-2 hidden p-2 rounded-lg"></p>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <!-- Các block upload (Rút gọn class để giữ cấu trúc) -->
+                            <div class="bg-black/40 p-4 rounded-xl border border-white/5 relative">
+                                <div class="flex justify-between items-center mb-2"><label class="text-xs font-bold text-gray-400">1. Nhạc Gốc (.mp3)</label><span id="st-audio" class="hidden"></span></div>
+                                <div id="pv-audio" class="hidden mb-3 w-full"></div><input type="file" id="m-audio" accept=".mp3" class="w-full text-sm mt-2 text-gray-400">
+                            </div>
+                            <div class="bg-black/40 p-4 rounded-xl border border-white/5 relative">
+                                <div class="flex justify-between items-center mb-2"><label class="text-xs font-bold text-gray-400">2. Nhạc Beat (.mp3)</label><span id="st-beat" class="hidden"></span></div>
+                                <div id="pv-beat" class="hidden mb-3 w-full"></div><input type="file" id="m-beat" accept=".mp3" class="w-full text-sm mt-2 text-gray-400">
+                            </div>
+                            <div class="bg-black/40 p-4 rounded-xl border border-white/5 relative">
+                                <div class="flex justify-between items-center mb-2"><label class="text-xs font-bold text-gray-400">3. Video (.mp4)</label><span id="st-video" class="hidden"></span></div>
+                                <div id="pv-video" class="hidden mb-3 w-full"></div><input type="file" id="m-video" accept=".mp4" class="w-full text-sm mt-2 text-gray-400">
+                            </div>
+                            <div class="bg-black/40 p-4 rounded-xl border border-white/5 relative">
+                                <div class="flex justify-between items-center mb-2"><label class="text-xs font-bold text-gray-400">4. Ảnh Bìa (.jpg)</label><span id="st-cover" class="hidden"></span></div>
+                                <div id="pv-cover" class="hidden mb-3 flex justify-center w-full"></div><input type="file" id="m-cover" accept="image/*" class="w-full text-sm mt-2 text-gray-400">
+                            </div>
+                            <div class="bg-black/40 p-4 rounded-xl border border-white/5 md:col-span-2 relative">
+                                <div class="flex justify-between items-center mb-2"><label class="text-xs font-bold text-gray-400">5. Lời Bài Hát (.lrc)</label><span id="st-lyric" class="hidden"></span></div>
+                                <div id="pv-lyric" class="hidden mb-3 w-full"></div><input type="file" id="m-lyric" accept=".lrc" class="w-full text-sm mt-2 text-gray-400">
+                            </div>
+                        </div>
+                        <button onclick="uploadMusic()" class="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 rounded-xl font-bold shadow-[0_0_20px_rgba(59,130,246,0.4)] transition-transform active:scale-[0.98]">
+                            <i class="fa-solid fa-rocket mr-2"></i>Bắn Dữ Liệu Lên Cloud
+                        </button>
+                    </div>
+
+                    <!-- Form Upload Ảnh -->
+                    <div id="form-image" class="space-y-6 hidden relative z-10">
+                        <div>
+                            <label class="block text-sm font-bold text-emerald-400 mb-2 uppercase tracking-wider">Tên thư mục ảnh</label>
+                            <input type="text" id="image-folder" oninput="checkFolderExistence('image', this.value)" class="glass-input focus:border-emerald-500" placeholder="VD: album_mua_he" required>
+                            <p id="image-warning" class="text-sm font-bold mt-2 hidden p-2 rounded-lg"></p>
+                        </div>
+                        <div class="bg-black/40 p-6 rounded-xl border border-dashed border-white/20 text-center hover:border-emerald-500 transition-colors cursor-pointer">
+                            <i class="fa-solid fa-cloud-arrow-up text-4xl text-emerald-500 mb-3"></i>
+                            <input type="file" id="i-files" accept="image/*" multiple class="w-full text-sm text-gray-400">
+                        </div>
+                        <button onclick="uploadImages()" class="w-full py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 rounded-xl font-bold shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-transform active:scale-[0.98]">
+                            <i class="fa-solid fa-images mr-2"></i>Tải Lên Thư Viện Ảnh
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================================================= -->
+            <!-- ⚙️ MODULE 3: BỘ TƯ LỆNH CRONJOBS -->
+            <!-- ========================================================================= -->
+            <div id="view-scripts" class="omni-view hidden h-[calc(100vh-140px)] animate-fade-in">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
+                    <!-- Danh sách Scripts -->
+                    <div class="lg:col-span-4 glass-panel p-5 flex flex-col h-full overflow-hidden">
+                        <div class="flex justify-between items-center mb-5 border-b border-white/5 pb-4">
+                            <h2 class="font-bold text-lg text-white"><i class="fa-solid fa-folder-tree text-purple-400 mr-2"></i> Kịch Bản Vận Hành</h2>
+                            <button onclick="fetchScripts()" class="text-gray-400 hover:text-white transition"><i class="fa-solid fa-rotate-right"></i></button>
+                        </div>
+                        <div id="scriptList" class="flex-1 overflow-y-auto pr-2 flex flex-col gap-3 custom-scrollbar"></div>
+                    </div>
+                    <!-- Control & Terminal -->
+                    <div class="lg:col-span-8 flex flex-col gap-6 h-full overflow-hidden">
+                        <div class="glass-panel p-6 shrink-0 bg-gradient-to-r from-black/40 to-purple-900/10">
+                            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                                <div class="flex-1">
+                                    <h2 class="text-2xl font-black text-white mb-1" id="ctrlTitle">Chưa chọn Script</h2>
+                                    <div class="flex items-center gap-3 text-sm font-mono text-gray-400">
+                                        <span id="ctrlStatus"><i class="fa-solid fa-circle text-[10px] text-gray-500 mr-1"></i> Dừng</span> |
+                                        <span id="ctrlCron"><i class="fa-regular fa-clock mr-1"></i> Trống</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-4">
+                                    <label id="manualAutoYesLabel" class="hidden flex items-center gap-2 cursor-pointer text-sm text-gray-400 hover:text-white">
+                                        <input type="checkbox" id="manualAutoYes" class="cyber-check"><span title="Tự động truyền phím y">Auto-Yes (-y)</span>
+                                    </label>
+                                    <button id="btnPlayStop" onclick="toggleCurrentScript()" disabled class="px-6 py-2.5 rounded-xl font-bold transition-all flex items-center bg-gray-600 text-gray-300 disabled:opacity-50">Khởi Động</button>
+                                    <button onclick="openCronModal()" id="btnCron" disabled class="px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-purple-400 transition-all disabled:opacity-50"><i class="fa-solid fa-calendar-days"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Terminal MAC Style -->
+                        <div class="flex-1 flex flex-col bg-[#1a1b26] rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
+                            <div class="bg-[#101014] border-b border-[#2d3748] px-4 py-3 flex items-center shrink-0">
+                                <div class="flex gap-2 mr-4"><div class="w-3 h-3 rounded-full bg-[#ff5f56]"></div><div class="w-3 h-3 rounded-full bg-[#ffbd2e]"></div><div class="w-3 h-3 rounded-full bg-[#27c93f]"></div></div>
+                                <span class="text-xs font-mono text-gray-500" id="terminalTitle">root@d4m-server:~</span>
+                            </div>
+                            <div id="terminalBody" class="terminal-box flex-1 p-6 text-[13px] leading-relaxed whitespace-pre-wrap overflow-y-auto">> Chuẩn bị nhận lệnh...\n</div>
+                            <div id="terminalInputBox" class="hidden bg-[#101014] border-t border-[#2d3748] p-3 flex items-center shrink-0">
+                                <span class="text-green-400 font-mono font-bold mr-3">❯</span>
+                                <input type="text" id="terminalInput" class="flex-1 bg-transparent text-white font-mono text-sm outline-none placeholder-gray-600" placeholder="Gửi lệnh tới tiến trình đang chạy..." autocomplete="off">
+                                <button onclick="sendTerminalInput()" class="ml-3 px-4 py-1.5 bg-purple-600 hover:bg-purple-500 rounded text-white text-xs font-bold transition"><i class="fa-solid fa-paper-plane"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================================================= -->
+            <!-- 🛡️ MODULE 4: AEGIS SECURITY SHIELD (RADAR) -->
+            <!-- ========================================================================= -->
+            <div id="view-security" class="omni-view hidden animate-fade-in">
+                <!-- TOP STATS -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <div class="glass-panel p-5 relative overflow-hidden group">
+                        <i class="fa-solid fa-network-wired absolute -right-4 -bottom-4 text-7xl text-white/5 group-hover:text-red-500/10 transition"></i>
+                        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Tổng Lượng Ping</h3>
+                        <div class="text-4xl font-black text-white" id="statTotal">--</div>
+                    </div>
+                    <div class="glass-panel p-5 relative overflow-hidden group">
+                        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Giờ Cao Điểm</h3>
+                        <div class="text-3xl font-black text-white mt-1" id="statPeak">--:--</div>
+                    </div>
+                    <div class="glass-panel p-5 relative overflow-hidden group">
+                        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Phân Tán Thiết Bị</h3>
+                        <div class="flex items-end gap-4 mt-2" id="statDevices"><div class="text-gray-500 text-sm animate-pulse">Đang quét...</div></div>
+                    </div>
+                    <div class="glass-panel p-5 relative overflow-hidden border-red-500/40 bg-red-950/20">
+                        <div class="absolute top-0 left-0 w-1 h-full bg-red-500 shadow-[0_0_15px_#ef4444]"></div>
+                        <h3 class="text-xs font-bold text-red-400 uppercase tracking-wider mb-1"><i class="fa-solid fa-triangle-exclamation animate-pulse"></i> Mức Độ Đe Dọa</h3>
+                        <div class="text-2xl font-black text-white mt-1" id="statThreat">AN TOÀN</div>
+                        <div class="text-[10px] text-gray-400 font-mono mt-2" id="statBannedCount">0 IP bị giam</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[500px]">
+                    <!-- Radar IP -->
+                    <div class="lg:col-span-7 glass-panel flex flex-col overflow-hidden relative border-red-500/20">
+                        <div class="p-5 border-b border-red-500/10 flex justify-between items-center bg-black/40">
+                            <h2 class="text-lg font-black text-white uppercase tracking-widest flex items-center gap-3"><i class="fa-solid fa-radar text-red-500 animate-[spin_4s_linear_infinite]"></i> Tần Số Radar (Top IP)</h2>
+                            <button onclick="fetchRadarData()" class="text-red-400 hover:text-white transition"><i class="fa-solid fa-rotate-right"></i></button>
+                        </div>
+                        <div class="flex-1 overflow-y-auto p-5 space-y-4 custom-scrollbar" id="topIpList"></div>
+                    </div>
+                    <!-- Ban Panel & Blacklist -->
+                    <div class="lg:col-span-5 flex flex-col gap-6 overflow-hidden">
+                        <div class="glass-panel p-5 shrink-0 border border-red-500/40 bg-red-950/20">
+                            <h2 class="text-sm font-black text-red-400 uppercase tracking-widest mb-4"><i class="fa-solid fa-crosshairs"></i> Khóa Mục Tiêu (Manual Ban)</h2>
+                            <div class="space-y-3">
+                                <div class="flex gap-2">
+                                    <input type="text" id="banIpInput" class="glass-input text-sm flex-1 focus:border-red-500" placeholder="Nhập IP (VD: 192.168.1.1)">
+                                    <input type="number" id="banHoursInput" class="glass-input text-sm w-20 text-center focus:border-red-500" placeholder="Giờ" value="24">
+                                </div>
+                                <button onclick="executeBan()" class="w-full py-3 bg-red-600 hover:bg-red-500 text-white font-black tracking-widest uppercase rounded-lg shadow-[0_0_15px_rgba(239,68,68,0.4)] transition-transform active:scale-[0.98]">Khai Hỏa</button>
+                                <p class="text-[10px] text-green-400 font-mono text-center">Whitelist: 192.168.110.123 (Backend Core)</p>
+                            </div>
+                        </div>
+                        <div class="glass-panel flex-1 flex flex-col overflow-hidden border border-red-500/10">
+                            <div class="p-4 border-b border-red-500/10 bg-black/40 flex justify-between items-center">
+                                <h2 class="text-xs font-black text-white uppercase"><i class="fa-solid fa-lock text-gray-400 mr-2"></i> Hầm Ngục (Blacklist)</h2>
+                                <span class="text-[10px] bg-red-900/50 text-red-400 px-2 py-0.5 rounded border border-red-500/30" id="blacklistCount">0 Bị Giam</span>
+                            </div>
+                            <div class="flex-1 overflow-y-auto p-3 space-y-2 custom-scrollbar" id="blacklistContainer"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- 🗓️ CRON MODAL (Dùng chung cho Module Scripts) -->
+    <div id="cronModal" class="fixed inset-0 z-[999] flex items-center justify-center bg-black/80 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
+        <!-- Đã rút gọn nội dung HTML của CronModal từ code cũ ghép vào, đảm bảo giữ nguyên class và id -->
+        <div class="glass-panel w-full max-w-xl p-8 relative transform scale-95 transition-transform duration-300 max-h-[90vh] overflow-y-auto custom-scrollbar" id="cronModalContent">
+            <button onclick="closeCronModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+            <div class="mb-6 border-b border-white/10 pb-4">
+                <h3 class="text-2xl font-black text-white"><i class="fa-solid fa-stopwatch text-blue-400 mr-2"></i>Cấu Hình Tự Động Hóa</h3>
+                <p class="text-sm text-gray-400 font-mono mt-1">Thiết lập cho: <span id="cronFileName" class="text-blue-300 font-bold">script.py</span></p>
+            </div>
+            <!-- ... Nguyên xi ruột Cron Modal của sếp ... -->
+            <div class="space-y-4">
+                <select id="cronTypeSelect" class="glass-input text-sm font-bold text-blue-400 cursor-pointer" onchange="handleCronTypeChange()">
+                    <option value="daily">Hằng Ngày</option><option value="interval">Hằng Giờ</option><option value="weekly">Hằng Tuần</option><option value="monthly">Hằng Tháng</option><option value="custom">Tùy Chỉnh Nâng Cao</option>
+                </select>
+                <div id="panel-interval" class="cron-sub-panel hidden bg-black/30 p-4 rounded-xl"><input type="number" id="cronIntervalHours" value="3" class="glass-input w-20 inline-block" oninput="compileCronFromUI()"> tiếng</div>
+                <div id="panel-daily" class="cron-sub-panel hidden bg-black/30 p-4 rounded-xl"><input type="time" id="cronDailyTime" value="02:00" class="glass-input w-40" onchange="compileCronFromUI()"></div>
+                <div id="panel-weekly" class="cron-sub-panel hidden bg-black/30 p-4 rounded-xl">
+                    <div class="flex flex-wrap gap-2 text-xs"><label><input type="checkbox" name="cronWeekDays" value="1" onchange="compileCronFromUI()"> T2</label> <label><input type="checkbox" name="cronWeekDays" value="0" onchange="compileCronFromUI()"> CN</label></div>
+                    <input type="time" id="cronWeeklyTime" value="02:00" class="glass-input w-40 mt-3" onchange="compileCronFromUI()">
+                </div>
+                <div id="panel-monthly" class="cron-sub-panel hidden bg-black/30 p-4 rounded-xl"><div id="cronMonthlyDaysGrid" class="grid grid-cols-7 gap-2"></div><input type="time" id="cronMonthlyTime" value="02:00" class="glass-input w-40 mt-3" onchange="compileCronFromUI()"></div>
+                <div id="panel-custom" class="cron-sub-panel hidden bg-black/30 p-4 rounded-xl"><input type="text" id="cronInput" class="glass-input text-yellow-400 text-center font-mono" placeholder="* * * * *" oninput="compileCronFromUI()"></div>
+                <div class="bg-black/40 border border-white/5 rounded-xl p-4 font-mono text-xs"><span class="text-gray-500">MÃ CRON: </span><span id="computedCronString" class="text-blue-400 font-bold">0 2 * * *</span><ul id="cronPreviewList" class="mt-2 text-gray-400"></ul></div>
+                <div class="flex gap-2 mt-4"><input type="checkbox" id="cronAutoYes"> Bật Auto-Yes (-y) | Args: <input type="text" id="cronArgsInput" class="glass-input text-xs w-48 inline-block p-1"></div>
+                <div class="flex gap-3 pt-2"><button onclick="removeCron()" class="flex-1 py-3 bg-red-500/10 text-red-400 rounded-lg font-bold">Xóa Lịch</button><button onclick="saveCron()" class="flex-[2] py-3 bg-blue-600 text-white rounded-lg font-bold">Lưu & Kích Hoạt</button></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/app.js?v=3"></script>
+    <script src="/js/chart.js"></script>
+</body>
+</html>

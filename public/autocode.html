@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoCode AI Promax | Image to Code</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Highlight.js for Code Formatting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <!-- FontAwesome 6.4.0 Đỉnh cao ổn định -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = { 
+            theme: { 
+                extend: { 
+                    colors: { 
+                        dark: { 900: '#0b0f19', 800: '#151924', 700: '#1e2436' }, 
+                        primary: '#6366f1' 
+                    } 
+                } 
+            } 
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0b0f19; color: #e2e8f0; min-height: 100vh; overflow-x: hidden;}
+        
+        /* Ambient Background Orbs */
+        .orb { position: fixed; border-radius: 50%; filter: blur(100px); z-index: -1; pointer-events: none; opacity: 0.4; animation: float 15s infinite alternate ease-in-out; }
+        .orb-1 { width: 400px; height: 400px; background: rgba(99, 102, 241, 0.4); top: -100px; left: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: rgba(168, 85, 247, 0.3); bottom: -150px; right: -50px; animation-delay: -5s; }
+        @keyframes float { 0% { transform: translate(0, 0); } 100% { transform: translate(50px, 50px); } }
+
+        .glass-panel { background: rgba(21, 25, 36, 0.6); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.05); }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* IDE Style Code Block */
+        pre code.hljs { border-radius: 0 0 0.75rem 0.75rem; padding: 1.5rem; background: #0d1117 !important; }
+        
+        /* Hiệu ứng loading viền gradient */
+        .loading-border { position: relative; }
+        .loading-border::before { content: ""; position: absolute; inset: -2px; border-radius: 1.1rem; background: linear-gradient(45deg, #3b82f6, #8b5cf6, #ec4899, #3b82f6); background-size: 400%; z-index: -1; animation: gradient-spin 3s linear infinite; opacity: 0; transition: opacity 0.3s; }
+        .loading-border.active::before { opacity: 1; }
+        @keyframes gradient-spin { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
+
+        /* 🚀 HIỆU ỨNG AI SCANNING */
+        .ai-scanner { position: absolute; inset: 0; background: rgba(0,0,0,0.75); z-index: 30; display: none; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; border-radius: inherit; }
+        .ai-scanner.active { display: flex; }
+        .scanner-laser { position: absolute; width: 100%; height: 3px; background: #ff0050; box-shadow: 0 0 20px 5px rgba(255, 0, 80, 0.7); top: 0; animation: scan-laser 2s linear infinite alternate; }
+        @keyframes scan-laser { 0% { top: 0%; } 100% { top: 100%; } }
+        .typing-text { font-family: 'Fira Code', monospace; color: #4ade80; font-size: 13px; font-weight: bold; text-align: center; text-shadow: 0 0 8px rgba(74, 222, 128, 0.5); }
+        
+        /* Shimmer Button */
+        @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+    </style>
+</head>
+<body class="flex flex-col relative">
+
+    <!-- Vũ trụ quang học -->
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <header class="glass-panel sticky top-0 z-50 border-b border-gray-800 shadow-lg">
+        <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center shadow-[0_0_15px_rgba(99,102,241,0.5)]">
+                    <i class="fa-solid fa-wand-magic-sparkles text-white text-xl"></i>
+                </div>
+                <h1 class="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400 tracking-wide">
+                    AutoCode AI <span class="text-sm font-bold text-gray-400 ml-1 uppercase tracking-widest border border-gray-600 px-1.5 py-0.5 rounded-md">Promax</span>
+                </h1>
+            </div>
+            <div class="flex items-center gap-4">
+                <div id="status-badge" class="flex items-center gap-2 px-4 py-1.5 rounded-full bg-yellow-500/10 text-yellow-400 text-xs font-bold border border-yellow-500/20 shadow-inner">
+                    <i class="fa-solid fa-circle-notch fa-spin"></i> Kiểm tra thẻ...
+                </div>
+                <button onclick="window.location.href='/admin/omni'" class="px-4 py-1.5 text-xs font-bold text-white bg-white/5 hover:bg-white/20 rounded-lg border border-white/10 transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-house"></i> Về Omni-Panel
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-[1400px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col lg:flex-row gap-6 relative z-10">
+        
+        <!-- CỘT TRÁI (CONFIG) -->
+        <div class="w-full lg:w-4/12 flex flex-col gap-6">
+            
+            <div class="glass-panel rounded-3xl p-6 loading-border shadow-xl" id="upload-container">
+                <h2 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <i class="fa-regular fa-image text-indigo-400"></i> Nạp Hình Ảnh UI
+                </h2>
+                <input type="file" id="file-upload" class="hidden" accept="image/*" />
+                <label for="file-upload" id="drop-zone" class="cursor-pointer border-2 border-dashed border-gray-700 hover:border-indigo-500 rounded-2xl bg-dark-900/50 flex flex-col items-center justify-center p-8 transition-all relative overflow-hidden group min-h-[280px]">
+                    <img id="image-preview" class="absolute inset-0 w-full h-full object-contain hidden bg-dark-900 z-10" />
+                    
+                    <!-- 🚀 LỚP PHỦ SCANNER MATRIX -->
+                    <div id="ai-scanner" class="ai-scanner">
+                        <div class="scanner-laser"></div>
+                        <i class="fa-solid fa-robot text-5xl text-indigo-400 mb-5 animate-bounce shadow-indigo-500 drop-shadow-[0_0_15px_rgba(99,102,241,0.8)]"></i>
+                        <div id="scan-text" class="typing-text">Khởi tạo tầm nhìn nhân tạo...</div>
+                    </div>
+
+                    <div class="z-0 flex flex-col items-center text-center">
+                        <div class="w-16 h-16 rounded-full bg-indigo-500/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-cloud-arrow-up text-3xl text-indigo-400"></i>
+                        </div>
+                        <p class="text-sm text-gray-300 font-bold">Click hoặc Kéo thả ảnh vào đây</p>
+                        <p class="text-xs text-gray-500 mt-2 font-mono">Hỗ trợ PNG, JPG, WebP</p>
+                    </div>
+                    <button type="button" id="btn-remove-image" class="absolute top-3 right-3 bg-red-500/80 text-white w-8 h-8 rounded-full z-20 hidden items-center justify-center hover:bg-red-500 transition-colors backdrop-blur shadow-lg">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </label>
+            </div>
+
+            <div class="glass-panel rounded-3xl p-6 shadow-xl">
+                <h2 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-gear text-indigo-400"></i> Tham số Cấu hình
+                </h2>
+                
+                <div class="mb-5">
+                    <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">Động cơ AI (AI Model)</label>
+                    <div class="relative">
+                        <select id="model-select" class="w-full bg-black/40 border border-gray-700 text-gray-200 text-sm rounded-xl focus:ring-2 focus:ring-indigo-500 block p-3 outline-none appearance-none cursor-pointer font-medium">
+                            <option value="">Đang tải danh sách...</option>
+                        </select>
+                        <i class="fa-solid fa-chevron-down absolute right-4 top-4 text-gray-500 pointer-events-none"></i>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">Yêu cầu bổ sung (Prompt)</label>
+                    <textarea id="custom-prompt" rows="4" class="w-full bg-black/40 border border-gray-700 text-gray-200 text-sm rounded-xl focus:ring-2 focus:ring-indigo-500 block p-3 resize-none outline-none leading-relaxed" placeholder="VD: Code bằng ReactJS Tailwind, thêm hiệu ứng hover màu đỏ, tạo game Rắn săn mồi bằng Python..."></textarea>
+                </div>
+
+                <button id="btn-generate" class="w-full relative overflow-hidden bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-black tracking-widest py-4 px-4 rounded-xl shadow-[0_0_20px_rgba(99,102,241,0.4)] transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed uppercase text-sm group">
+                    <div class="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></div>
+                    <i id="btn-icon" class="fa-solid fa-wand-magic-sparkles text-lg"></i>
+                    <span id="btn-text">Bắt Đầu Viết Code</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- CỘT PHẢI (EDITOR IDE) -->
+        <div class="w-full lg:w-8/12 flex flex-col">
+            <div class="glass-panel rounded-3xl flex flex-col h-[calc(100vh-140px)] min-h-[600px] shadow-2xl overflow-hidden border-gray-700/50">
+                
+                <!-- Toolbar VS Code Style -->
+                <div class="flex items-center justify-between p-3 border-b border-gray-800 bg-[#161b22]">
+                    <div class="flex items-center gap-4">
+                        <div class="flex gap-2 ml-2">
+                            <div class="w-3 h-3 rounded-full bg-[#ff5f56]"></div>
+                            <div class="w-3 h-3 rounded-full bg-[#ffbd2e]"></div>
+                            <div class="w-3 h-3 rounded-full bg-[#27c93f]"></div>
+                        </div>
+                        <!-- File Tab -->
+                        <div class="flex items-center bg-[#0d1117] text-gray-300 text-xs px-4 py-2 rounded-t-lg border border-b-0 border-gray-700/50 font-mono mt-2 mb-[-12px] relative z-10 transition-all">
+                            <i id="file-tab-icon" class="fa-brands fa-html5 text-orange-500 mr-2 text-sm"></i> 
+                            <span id="file-tab-name">index.html</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-2 relative z-20">
+                        <button id="btn-copy" class="flex items-center gap-2 text-xs font-bold text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-lg transition">
+                            <i class="fa-regular fa-copy"></i> Copy
+                        </button>
+                        <button id="btn-download" class="flex items-center gap-2 text-xs font-bold text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-lg transition">
+                            <i class="fa-solid fa-download"></i> Save
+                        </button>
+                        <!-- Nút Preview bảo vệ -->
+                        <button id="btn-preview" data-allow="true" class="flex items-center gap-2 text-xs font-bold text-indigo-400 hover:text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 px-3 py-1.5 rounded-lg border border-indigo-500/20 transition">
+                            <i class="fa-regular fa-eye"></i> Xem thử
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Khu vực Code -->
+                <div class="flex-grow overflow-auto relative bg-[#0d1117]">
+                    <div id="empty-state" class="absolute inset-0 flex flex-col items-center justify-center text-gray-600 z-10 bg-[#0d1117]">
+                        <i class="fa-solid fa-code text-6xl mb-4 opacity-30"></i>
+                        <p class="font-mono text-sm">Mã nguồn sẽ được kết xuất tại đây...</p>
+                    </div>
+                    
+                    <pre id="code-container" class="m-0 h-full scrollbar-hide text-[13px] leading-relaxed"><code id="code-output" class="block h-full"></code></pre>
+                    <iframe id="preview-frame" class="w-full h-full bg-white hidden border-0"></iframe>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed bottom-6 right-6 flex flex-col gap-3 z-[999]"></div>
+
+    <script>
+        // 🚀 BẢO MẬT & API
+        const token = localStorage.getItem('d4m_sso_token');
+        if(!token) window.location.href = '/auth?redirect=/admin/autocode';
+
+        const headers = { 'Authorization': `Bearer ${token}` };
+
+        // DOM Elements
+        const statusBadge = document.getElementById('status-badge');
+        const modelSelect = document.getElementById('model-select');
+        const fileInput = document.getElementById('file-upload');
+        const imagePreview = document.getElementById('image-preview');
+        const btnRemoveImage = document.getElementById('btn-remove-image');
+        const btnGenerate = document.getElementById('btn-generate');
+        const scanOverlay = document.getElementById('ai-scanner');
+        const scanText = document.getElementById('scan-text');
+        
+        let currentFile = null;
+        let generatedCodeStr = "";
+        let isPreviewMode = false;
+
+        async function fetchModels() {
+            try {
+                const res = await fetch('/api/autocode/models', { headers });
+                if (!res.ok) throw new Error('Hết phiên đăng nhập hoặc Lỗi API');
+                const data = await res.json();
+                modelSelect.innerHTML = '';
+                data.models.forEach(m => { modelSelect.innerHTML += `<option value="${m.name}">${m.display}</option>`; });
+                statusBadge.innerHTML = '<i class="fa-solid fa-circle-check"></i> Xác thực Admin OK';
+                statusBadge.className = 'flex items-center gap-2 px-4 py-1.5 rounded-full bg-green-500/10 text-green-400 text-xs font-bold border border-green-500/20 shadow-inner';
+            } catch (e) {
+                showToast('Lỗi bảo mật: Vui lòng đăng nhập lại.', 'error');
+                statusBadge.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Từ chối truy cập';
+                statusBadge.className = 'flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-500/10 text-red-400 text-xs font-bold border border-red-500/20 shadow-inner';
+            }
+        }
+
+        // Xử lý Ảnh
+        function handleFile(file) {
+            if (file && file.type.startsWith('image/')) {
+                currentFile = file;
+                const reader = new FileReader();
+                reader.onload = (e) => { 
+                    imagePreview.src = e.target.result; 
+                    imagePreview.classList.remove('hidden'); 
+                    btnRemoveImage.classList.remove('hidden'); 
+                    btnRemoveImage.classList.add('flex'); 
+                };
+                reader.readAsDataURL(file);
+            } else showToast('Vui lòng chọn ảnh hợp lệ!', 'error');
+        }
+        
+        fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
+        const dropZone = document.getElementById('drop-zone');
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('border-indigo-500', 'bg-indigo-500/10'); });
+        dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('border-indigo-500', 'bg-indigo-500/10'); });
+        dropZone.addEventListener('drop', (e) => { e.preventDefault(); dropZone.classList.remove('border-indigo-500', 'bg-indigo-500/10'); handleFile(e.dataTransfer.files[0]); });
+        btnRemoveImage.addEventListener('click', (e) => { 
+            e.preventDefault(); e.stopPropagation(); currentFile = null; fileInput.value = ''; imagePreview.src = ''; 
+            imagePreview.classList.add('hidden'); btnRemoveImage.classList.add('hidden'); btnRemoveImage.classList.remove('flex'); 
+        });
+
+        // 🚀 HIỆU ỨNG TEXT SCANNER
+        const scanMessages = [
+            "Đang bóc tách Cấu trúc DOM...",
+            "Đang phân tích Bảng màu & Typography...",
+            "Đang dịch ngược giao diện sang Code...",
+            "Đang tối ưu hóa UI/UX...",
+            "Sắp xong rồi sếp, đang làm sạch mã nguồn..."
+        ];
+        let scanInterval;
+
+        btnGenerate.addEventListener('click', async () => {
+            if (!currentFile) return showToast('Vui lòng tải ảnh lên trước!', 'error');
+
+            btnGenerate.disabled = true;
+            document.getElementById('btn-text').textContent = 'AI Đang Viết Code...';
+            document.getElementById('btn-icon').className = 'fa-solid fa-circle-notch fa-spin text-lg';
+            document.getElementById('upload-container').classList.add('active');
+            
+            scanOverlay.classList.add('active');
+            let msgIdx = 0; scanText.innerText = scanMessages[0];
+            scanInterval = setInterval(() => { msgIdx = (msgIdx + 1) % scanMessages.length; scanText.innerText = scanMessages[msgIdx]; }, 2500);
+
+            const formData = new FormData();
+            formData.append('image', currentFile);
+            formData.append('model', modelSelect.value);
+            formData.append('prompt', document.getElementById('custom-prompt').value);
+
+            try {
+                const res = await fetch('/api/autocode/generate', { method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, body: formData });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || "Lỗi máy chủ");
+                
+                showToast('Hoàn tất! Code đã sẵn sàng.', 'success');
+                generatedCodeStr = data.code;
+                document.getElementById('empty-state').classList.add('hidden');
+                
+                const codeOutput = document.getElementById('code-output');
+                codeOutput.textContent = generatedCodeStr;
+                
+                // Highlight JS Reset & Parse
+                delete codeOutput.dataset.highlighted;
+                codeOutput.className = 'block h-full text-[13px] leading-relaxed'; 
+                hljs.highlightElement(codeOutput);
+
+                // 🚀 NHẬN DIỆN VÀ KHÓA NÚT
+                const detectedClasses = Array.from(codeOutput.classList);
+                let lang = "html";
+                const langClass = detectedClasses.find(c => c.startsWith('language-'));
+                if (langClass) lang = langClass.replace('language-', '');
+                updateFileTab(lang, generatedCodeStr);
+
+                // 🚀 CHỈ RENDER NẾU KHÔNG BỊ KHÓA
+                if (isPreviewMode && document.getElementById('btn-preview').dataset.allow !== "false") {
+                    document.getElementById('preview-frame').srcdoc = generatedCodeStr;
+                }
+                
+            } catch (error) { showToast(error.message, 'error'); } 
+            finally {
+                btnGenerate.disabled = false;
+                document.getElementById('btn-text').textContent = 'Bắt Đầu Viết Code';
+                document.getElementById('btn-icon').className = 'fa-solid fa-wand-magic-sparkles text-lg';
+                document.getElementById('upload-container').classList.remove('active');
+                scanOverlay.classList.remove('active');
+                clearInterval(scanInterval);
+            }
+        });
+
+        // Tiện ích Copy & Tải
+        document.getElementById('btn-copy').addEventListener('click', () => {
+            if (!generatedCodeStr) return showToast('Chưa có code!', 'error');
+            navigator.clipboard.writeText(generatedCodeStr).then(() => showToast('Đã chép vào Clipboard!'));
+        });
+        
+        document.getElementById('btn-download').addEventListener('click', () => {
+            if (!generatedCodeStr) return showToast('Chưa có code để tải về!', 'error');
+            const blob = new Blob([generatedCodeStr], { type: 'text/html' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = 'd4m_autocode_result.html'; a.click();
+            window.URL.revokeObjectURL(url);
+        });
+
+        // 🚀 NÚT PREVIEW CÓ BẢO VỆ
+        document.getElementById('btn-preview').addEventListener('click', () => {
+            if (!generatedCodeStr) return showToast('Chưa có code!', 'error');
+            const btn = document.getElementById('btn-preview');
+            
+            // CHỐT CHẶN AN TOÀN
+            if (btn.dataset.allow === "false") {
+                return showToast('Trình duyệt chỉ hỗ trợ xem trước tập tin Web (HTML)!', 'error');
+            }
+
+            isPreviewMode = !isPreviewMode;
+            if (isPreviewMode) {
+                document.getElementById('code-container').classList.add('hidden');
+                document.getElementById('preview-frame').classList.remove('hidden');
+                document.getElementById('preview-frame').srcdoc = generatedCodeStr;
+                btn.innerHTML = '<i class="fa-solid fa-code"></i> Xem Code'; 
+                btn.className = "flex items-center gap-2 text-xs font-bold text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 px-3 py-1.5 rounded-lg border border-emerald-500/20 transition";
+            } else {
+                document.getElementById('preview-frame').classList.add('hidden');
+                document.getElementById('code-container').classList.remove('hidden');
+                btn.innerHTML = '<i class="fa-regular fa-eye"></i> Xem thử'; 
+                btn.className = "flex items-center gap-2 text-xs font-bold text-indigo-400 hover:text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 px-3 py-1.5 rounded-lg border border-indigo-500/20 transition";
+            }
+        });
+
+        // 🚀 CỖ MÁY NHẬN DIỆN NGÔN NGỮ ĐỂ ĐỔI TÊN FILE VÀ BẢO VỆ XEM TRƯỚC
+        window.updateFileTab = function(lang, codeStr) {
+            const iconEl = document.getElementById('file-tab-icon');
+            const nameEl = document.getElementById('file-tab-name');
+            const btnPreview = document.getElementById('btn-preview');
+            
+            let fileExt = 'html'; let fileName = 'index';
+            let iconClass = 'fa-brands fa-html5 text-orange-500';
+            let isRenderable = true;
+
+            const langMap = {
+                'xml': { ext: 'html', icon: 'fa-brands fa-html5 text-orange-500', render: true },
+                'html': { ext: 'html', icon: 'fa-brands fa-html5 text-orange-500', render: true },
+                'javascript': { ext: 'js', icon: 'fa-brands fa-square-js text-yellow-400', name: 'script', render: false },
+                'js': { ext: 'js', icon: 'fa-brands fa-square-js text-yellow-400', name: 'script', render: false },
+                'typescript': { ext: 'ts', icon: 'fa-solid fa-file-code text-blue-400', name: 'app', render: false },
+                'python': { ext: 'py', icon: 'fa-brands fa-python text-blue-500', name: 'main', render: false },
+                'css': { ext: 'css', icon: 'fa-brands fa-css3-alt text-blue-400', name: 'style', render: false },
+                'json': { ext: 'json', icon: 'fa-solid fa-code text-gray-400', name: 'data', render: false },
+                'php': { ext: 'php', icon: 'fa-brands fa-php text-purple-400', name: 'index', render: false },
+                'java': { ext: 'java', icon: 'fa-brands fa-java text-red-500', name: 'Main', render: false },
+                'cpp': { ext: 'cpp', icon: 'fa-solid fa-file-code text-blue-600', name: 'main', render: false },
+                'bash': { ext: 'sh', icon: 'fa-solid fa-terminal text-green-400', name: 'script', render: false }
+            };
+
+            if (langMap[lang]) {
+                fileExt = langMap[lang].ext; iconClass = langMap[lang].icon; isRenderable = langMap[lang].render;
+                if(langMap[lang].name) fileName = langMap[lang].name;
+            } else {
+                fileExt = 'txt'; fileName = 'snippet'; iconClass = 'fa-solid fa-file-code text-gray-400'; isRenderable = false;
+            }
+
+            // SIÊU NHẬN DIỆN FRAMEWORK
+            if ((lang === 'javascript' || lang === 'typescript' || lang === 'xml') && 
+                (codeStr.includes('React') || codeStr.includes('import React') || codeStr.includes('className='))) {
+                fileExt = (lang === 'typescript' || codeStr.includes('interface ') || codeStr.includes('type ')) ? 'tsx' : 'jsx';
+                fileName = 'App';
+                iconClass = 'fa-brands fa-react text-cyan-400 animate-[spin_4s_linear_infinite]';
+                isRenderable = false; 
+            }
+
+            iconEl.className = `${iconClass} mr-2 text-sm transition-all duration-500`;
+            nameEl.innerText = `${fileName}.${fileExt}`;
+
+            // XỬ LÝ KHÓA NÚT XEM TRƯỚC NẾU KHÔNG PHẢI HTML
+            if (isRenderable) {
+                btnPreview.dataset.allow = "true";
+                btnPreview.classList.remove('opacity-40', 'grayscale');
+            } else {
+                btnPreview.dataset.allow = "false";
+                btnPreview.classList.add('opacity-40', 'grayscale');
+                
+                if (isPreviewMode) {
+                    isPreviewMode = false;
+                    document.getElementById('preview-frame').classList.add('hidden');
+                    document.getElementById('code-container').classList.remove('hidden');
+                    btnPreview.innerHTML = '<i class="fa-regular fa-eye"></i> Xem thử'; 
+                    btnPreview.className = "flex items-center gap-2 text-xs font-bold text-indigo-400 hover:text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 px-3 py-1.5 rounded-lg border border-indigo-500/20 transition opacity-40 grayscale";
+                }
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            const bg = type === 'success' ? 'bg-dark-800 text-green-400' : 'bg-red-900/50 border-red-500/20 border text-red-400';
+            const icon = type === 'success' ? 'fa-circle-check' : 'fa-triangle-exclamation';
+            toast.className = `${bg} p-4 rounded-xl shadow-2xl flex items-center gap-3 transform transition-all duration-300 translate-y-10 opacity-0 min-w-[250px] border border-gray-700`;
+            toast.innerHTML = `<i class="fa-solid ${icon} text-xl"></i><p class="text-sm font-bold text-gray-200">${message}</p>`;
+            document.getElementById('toast-container').appendChild(toast);
+            setTimeout(() => toast.classList.remove('translate-y-10', 'opacity-0'), 10);
+            setTimeout(() => { toast.classList.add('opacity-0', 'translate-x-10'); setTimeout(() => toast.remove(), 300); }, 3000);
+        }
+
+        window.addEventListener('DOMContentLoaded', fetchModels);
+    </script>
+</body>
+</html>
