@@ -6,7 +6,7 @@ bash /sdcard/ubuntu-backend-core/scripts/auto_start.sh
 python3 scripts/deploy.py -y
 
 
-python3 scripts/fcc.py -d hosted_projects/MusicPro
+python3 scripts/fcc.py -d avatar_server
 
 
 
