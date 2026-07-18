@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D4M OMNI-PANEL | Bảng Phong Thần</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;600;800;900&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+
+    <style>
+        :root { --bg-dark: #050505; --glass-bg: rgba(15, 15, 20, 0.6); --glass-border: rgba(255, 255, 255, 0.08); --primary: #3b82f6; }
+        body { background-color: var(--bg-dark); color: white; font-family: 'Inter', sans-serif; overflow: hidden; height: 100vh; }
+        h1, h2, h3, .font-heading { font-family: 'Outfit', sans-serif; }
+        .font-mono { font-family: 'Fira Code', monospace; }
+
+        /* VŨ TRỤ NỀN TẢNG */
+        .orb { position: fixed; border-radius: 50%; filter: blur(120px); z-index: -1; pointer-events: none; animation: float 20s infinite alternate ease-in-out; }
+        .orb-1 { width: 500px; height: 500px; background: rgba(59, 130, 246, 0.15); top: -100px; left: -100px; }
+        .orb-2 { width: 400px; height: 400px; background: rgba(168, 85, 247, 0.15); bottom: -150px; right: -100px; animation-delay: -5s; }
+        @keyframes float { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(50px, 50px) scale(1.1); } }
+
+        /* COMPONENTS CHUNG */
+        .glass-panel { background: var(--glass-bg); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid var(--glass-border); border-radius: 1.5rem; }
+        .glass-input { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 12px 16px; border-radius: 0.75rem; outline: none; transition: all 0.3s; }
+        .glass-input:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); }
+
+        /* SIDEBAR NAVIGATION */
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 20px; border-radius: 12px; font-weight: 600; color: #9ca3af; transition: all 0.3s; border: 1px solid transparent; cursor: pointer; text-decoration: none;}
+        .nav-item:hover { color: white; background: rgba(255,255,255,0.05); }
+        .nav-item.active { color: white; background: linear-gradient(90deg, rgba(168, 85, 247, 0.15), transparent); border-left: 3px solid #a855f7; border-right: 1px solid rgba(168,85,247,0.2); border-top: 1px solid rgba(168,85,247,0.1); border-bottom: 1px solid rgba(168,85,247,0.1); box-shadow: inset 10px 0 20px -10px rgba(168,85,247,0.2); }
+
+        /* SCROLLBAR & ANIMATION */
+        ::-webkit-scrollbar { width: 6px; height: 6px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 10px; } ::-webkit-scrollbar-thumb:hover { background: rgba(168, 85, 247, 0.5); }
+        
+        .toast-enter { animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes slideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    </style>
+</head>
+<body class="flex">
+
+    <!-- 🌌 BACKGROUND & TOAST -->
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div id="toast-container" class="fixed bottom-6 right-6 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
+
+    <!-- 🛑 LOCK SCREEN CHUẨN SSO -->
+    <div id="unauthorizedState" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-xl transition-opacity duration-500 hidden">
+        <div class="glass-panel p-10 rounded-3xl w-full max-w-md mx-4 shadow-2xl relative overflow-hidden text-center">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500"></div>
+            <div class="relative inline-block mb-6">
+                <i class="fa-solid fa-fingerprint text-7xl text-red-500 drop-shadow-[0_0_20px_rgba(239,68,68,0.6)] animate-pulse"></i>
+                <i class="fa-solid fa-ban absolute -bottom-2 -right-2 text-3xl text-white drop-shadow-md"></i>
+            </div>
+            <h2 id="unauthTitle" class="text-3xl font-heading font-black tracking-widest uppercase text-white mb-4">KHÔNG PHẬN CẤM</h2>
+            <p id="unauthDesc" class="text-gray-400 mb-8 font-mono text-sm leading-relaxed">Hệ thống từ chối quyền truy cập.</p>
+            <button onclick="redirectToAuth()" class="w-full py-4 bg-gradient-to-r from-red-600 to-red-800 hover:from-red-500 hover:to-red-700 text-white font-black tracking-widest uppercase rounded-xl shadow-[0_0_20px_rgba(239,68,68,0.4)] transition-transform active:scale-[0.98]">
+                Xác Thực Lại
+            </button>
+            <button onclick="window.location.href='/hub'" class="w-full mt-3 py-3 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white font-bold rounded-xl transition-colors">
+                Quay Lại Trạm Hub
+            </button>
+        </div>
+    </div>
+
+    <!-- 🔮 CUSTOM CONFIRM MODAL (SANG TRỌNG) -->
+    <div id="customConfirmModal" class="fixed inset-0 z-[500] flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeConfirmModal()"></div>
+        <div id="customConfirmContent" class="glass-panel p-8 rounded-3xl w-full max-w-sm mx-4 relative z-10 transform scale-95 transition-transform duration-300 text-center border border-white/10 shadow-2xl">
+            <div id="confirmIconBox" class="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center mb-5 border shadow-lg">
+                <i id="confirmIcon" class="fa-solid fa-question text-3xl"></i>
+            </div>
+            <h3 id="confirmTitle" class="text-2xl font-heading font-black text-white mb-2">Xác nhận?</h3>
+            <p id="confirmMessage" class="text-gray-400 text-sm mb-8 leading-relaxed">Bạn có chắc chắn muốn thực hiện hành động này?</p>
+            <div class="flex gap-3">
+                <button onclick="closeConfirmModal()" class="flex-1 py-3 px-4 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl font-bold transition">Hủy Bỏ</button>
+                <button id="confirmBtn" onclick="executeConfirmAction()" class="flex-1 py-3 px-4 text-white rounded-xl font-bold transition-all shadow-lg hover:scale-105">Xác Nhận</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 📦 SIDEBAR NAVIGATION (TRẠM ĐIỀU HƯỚNG) -->
+    <aside class="w-72 h-full glass-panel rounded-none border-y-0 border-l-0 flex flex-col shrink-0 relative z-50 bg-black/40">
+        <div class="p-6 border-b border-white/5 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-[0_0_20px_rgba(59,130,246,0.5)]">
+                <i class="fa-solid fa-infinity text-white text-lg"></i>
+            </div>
+            <div>
+                <h1 class="font-heading font-black text-xl tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-white to-blue-400">OMNI-PANEL</h1>
+                <p class="text-[10px] text-green-400 font-mono uppercase tracking-widest flex items-center gap-1"><i class="fa-solid fa-circle text-[8px] animate-pulse"></i> System Active</p>
+            </div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto py-6 px-4 space-y-2">
+            <div class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3 ml-2">Quản Trị Hệ Thống</div>
+            <a href="#" class="nav-item active"><i class="fa-solid fa-users-viewfinder w-5 text-center text-purple-400"></i> Bảng Phong Thần</a>
+        </div>
+
+        <div class="p-4 border-t border-white/5">
+            <div class="flex items-center gap-3 bg-white/5 p-3 rounded-xl border border-white/5">
+                <img id="adminAvatar" src="/src/favicon/ubuntu-backend/favicon-96x96.png" class="w-10 h-10 rounded-lg border border-blue-500/50 object-cover">
+                <div class="flex-1 overflow-hidden">
+                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-0.5">Tư Lệnh</p>
+                    <p id="adminName" class="font-bold text-sm text-white truncate">Loading...</p>
+                </div>
+                <button onclick="logout()" class="w-8 h-8 rounded-lg hover:bg-red-500/20 text-gray-400 hover:text-red-400 flex items-center justify-center transition" title="Ngắt kết nối">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- 🚀 MAIN CONTENT AREA (KHÔNG GIAN LÀM VIỆC) -->
+    <main id="appContent" class="flex-1 h-full flex flex-col relative z-40 overflow-hidden bg-black/20 hidden">
+        <!-- HEADER -->
+        <header class="h-20 border-b border-white/5 px-8 flex justify-between items-center bg-black/30 backdrop-blur-md shrink-0">
+            <div class="flex items-center gap-4">
+                <h2 class="text-2xl font-heading font-black text-white uppercase tracking-widest">Quản Lý Người Dùng</h2>
+            </div>
+            <div class="flex gap-3">
+                <a href="/hub" class="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 text-sm font-bold rounded-lg transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-satellite-dish text-blue-400"></i> Trạm Hub
+                </a>
+            </div>
+        </header>
+
+        <!-- KHOANG CHỨA TABLE -->
+        <div class="flex-1 overflow-y-auto p-6 md:p-8 custom-scrollbar">
+            <div class="space-y-6 max-w-7xl mx-auto animate-fade-in">
+                
+                <!-- TOP BANNER -->
+                <div class="glass-panel p-6 flex flex-col md:flex-row justify-between items-center bg-gradient-to-r from-purple-900/20 to-transparent border-purple-500/20 shadow-[0_0_30px_rgba(168,85,247,0.1)] gap-4">
+                    <div>
+                        <h2 class="text-3xl font-black text-white flex items-center"><i class="fa-solid fa-crown text-yellow-400 mr-3 drop-shadow-[0_0_10px_rgba(250,204,21,0.5)]"></i>Bảng Phong Thần</h2>
+                        <p class="text-sm text-gray-400 mt-2 font-mono"><i class="fa-solid fa-terminal mr-2"></i>Quyền sinh quyền sát tài khoản trên toàn hệ sinh thái D4M</p>
+                    </div>
+                    <div class="flex gap-3 w-full md:w-auto">
+                        <div class="relative w-full md:w-72">
+                            <i class="fa-solid fa-magnifying-glass absolute left-4 top-3.5 text-gray-500"></i>
+                            <input type="text" id="userSearchInput" onkeyup="filterUsers()" class="glass-input w-full pl-10 pr-4 py-3 text-sm focus:border-purple-500" placeholder="Tìm tên, email, @username...">
+                        </div>
+                        <button onclick="fetchAdminUsers()" class="px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl transition shadow-lg"><i class="fa-solid fa-rotate-right"></i></button>
+                    </div>
+                </div>
+
+                <!-- TABLE DATA -->
+                <div class="glass-panel overflow-hidden border border-white/10 bg-black/40 shadow-2xl">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm whitespace-nowrap">
+                            <thead class="bg-white/5 text-gray-400 border-b border-white/10 uppercase tracking-wider text-[11px] font-black">
+                                <tr>
+                                    <th class="px-6 py-5">Định Danh D4M</th>
+                                    <th class="px-6 py-5">Thông Tin Liên Hệ</th>
+                                    <th class="px-6 py-5">Tước Vị</th>
+                                    <th class="px-6 py-5">Trạng Thái</th>
+                                    <th class="px-6 py-5 text-right">Quyền Lực Thao Tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody" class="divide-y divide-white/5 text-gray-300">
+                                <tr><td colspan="5" class="px-6 py-16 text-center text-gray-500 font-mono text-lg"><i class="fa-solid fa-circle-notch animate-spin mr-3 text-purple-500"></i>Đang kết nối Database...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- 🚀 SCRIPTS VẬN HÀNH BẢNG PHONG THẦN -->
+    <script>
+        let globalUsersList = [];
+        let pendingActionCallback = null;
+
+        // ==========================================
+        // 🚀 KIỂM TRA QUYỀN TRUY CẬP (AUTH CHECKER)
+        // ==========================================
+        function redirectToAuth() {
+            window.location.href = `/auth?redirect=${window.location.pathname}`;
+        }
+
+        // Hàm giải mã JWT Token để đọc chức vụ (Role) và Active
+        function parseJwt(token) {
+            try {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+                return JSON.parse(jsonPayload);
+            } catch (e) {
+                return null;
+            }
+        }
+
+        async function checkAuthorization() {
+            const token = localStorage.getItem('d4m_sso_token') || localStorage.getItem('token');
+            const appContent = document.getElementById('appContent');
+            const unauthorizedState = document.getElementById('unauthorizedState');
+            const unauthTitle = document.getElementById('unauthTitle');
+            const unauthDesc = document.getElementById('unauthDesc');
+
+            // Hàm gom hiển thị màn hình khóa
+            const showLock = (title, desc) => {
+                if(unauthTitle && title) unauthTitle.innerText = title;
+                if(unauthDesc && desc) unauthDesc.innerHTML = desc;
+                unauthorizedState.classList.remove('hidden');
+                unauthorizedState.classList.add('flex');
+                if(appContent) appContent.classList.add('hidden');
+            };
+
+            // 1. Nếu không có token -> Yêu cầu đăng nhập
+            if (!token) {
+                showLock("Cần Đăng Nhập", "Sếp chưa mang thẻ định danh D4M ID.<br>Vui lòng đăng nhập vào hệ sinh thái để tiếp tục.");
+                return false;
+            }
+
+            const payload = parseJwt(token);
+            if (!payload) {
+                showLock("Lỗi Định Danh", "Thẻ D4M ID của sếp bị hỏng hoặc đã hết hạn.<br>Vui lòng đăng xuất và đăng nhập lại.");
+                return false;
+            }
+
+            // 🚀 2. ĐÂY LÀ CHỐT CHẶN ACTIVE
+            if (Number(payload.active) !== 1) {
+                showLock(
+                    "Tài Khoản Bị Đóng Băng", 
+                    "Tài khoản của sếp <b>chưa đăng ký</b>.<br>Vui lòng liên hệ Tư Lệnh để kích hoạt tài khoản!"
+                );
+                return false;
+            }
+
+            // 🚀 3. CHỐT CHẶN ROLE DÀNH RIÊNG CHO BẢNG PHONG THẦN
+            if (Number(payload.role) !== 1 && payload.role !== 'admin') {
+                showLock(
+                    "Không Đủ Thẩm Quyền", 
+                    "CẢNH BÁO: Chỉ có Tư Lệnh mới được phép tiến vào Bảng Phong Thần."
+                );
+                return false;
+            }
+
+            // Hợp lệ -> Mở khóa giao diện và gọi dữ liệu
+            if (appContent) appContent.classList.remove('hidden');
+            document.getElementById('adminName').innerText = payload.full_name || payload.sub;
+            
+            // Fetch Avatar (Chạy nền)
+            try {
+                const res = await fetch('/api/auth/profile/me', { headers: { 'Authorization': `Bearer ${token}` } });
+                const data = await res.json();
+                if(data.status === 'success') {
+                    document.getElementById('adminAvatar').src = data.data.avatar_url;
+                }
+            } catch(e) {}
+
+            fetchAdminUsers();
+            return true;
+        }
+
+        // =====================================
+        // HỆ THỐNG GIAO DIỆN CHUNG & MODAL
+        // =====================================
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const icon = type === 'success' ? '<i class="fa-solid fa-shield-check text-green-400 text-lg"></i>' : '<i class="fa-solid fa-triangle-exclamation text-red-400 text-lg"></i>';
+            const border = type === 'success' ? 'border-green-500/30' : 'border-red-500/30';
+            const glow = type === 'success' ? 'shadow-[0_0_20px_rgba(74,222,128,0.2)]' : 'shadow-[0_0_20px_rgba(239,68,68,0.2)]';
+
+            toast.className = `flex items-center gap-3 px-5 py-4 rounded-2xl border ${border} bg-black/80 backdrop-blur-xl ${glow} toast-enter min-w-[280px] pointer-events-auto`;
+            toast.innerHTML = `${icon} <span class="text-white text-sm font-medium tracking-wide">${message}</span>`;
+            
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.transform = 'translateX(120%)';
+                toast.style.opacity = '0';
+                toast.style.transition = 'all 0.4s ease-in';
+                setTimeout(() => toast.remove(), 400);
+            }, 4000);
+        }
+
+        function logout() {
+            localStorage.removeItem('d4m_sso_token');
+            window.location.href = '/auth';
+        }
+
+        function openConfirmModal(title, message, iconClass, colorTheme, btnText, callback) {
+            document.getElementById('confirmTitle').innerText = title;
+            document.getElementById('confirmMessage').innerText = message;
+            
+            const iconBox = document.getElementById('confirmIconBox');
+            const icon = document.getElementById('confirmIcon');
+            const btn = document.getElementById('confirmBtn');
+
+            iconBox.className = `w-16 h-16 mx-auto rounded-2xl flex items-center justify-center mb-5 border shadow-lg bg-${colorTheme}-500/10 border-${colorTheme}-500/30 shadow-[0_0_20px_rgba(var(--tw-color-${colorTheme}-500),0.3)]`;
+            icon.className = `fa-solid ${iconClass} text-3xl text-${colorTheme}-500`;
+            btn.className = `flex-1 py-3 px-4 text-white rounded-xl font-bold transition-all shadow-[0_0_15px_rgba(var(--tw-color-${colorTheme}-500),0.4)] bg-${colorTheme}-600 hover:bg-${colorTheme}-500 hover:scale-105`;
+            btn.innerText = btnText;
+
+            if(colorTheme === 'orange') {
+                iconBox.classList.add('bg-orange-500/10', 'border-orange-500/30'); icon.classList.add('text-orange-500'); btn.classList.add('bg-orange-600', 'hover:bg-orange-500');
+            } else if(colorTheme === 'green') {
+                iconBox.classList.add('bg-green-500/10', 'border-green-500/30'); icon.classList.add('text-green-500'); btn.classList.add('bg-green-600', 'hover:bg-green-500');
+            } else if(colorTheme === 'purple') {
+                iconBox.classList.add('bg-purple-500/10', 'border-purple-500/30'); icon.classList.add('text-purple-500'); btn.classList.add('bg-purple-600', 'hover:bg-purple-500');
+            } else if(colorTheme === 'red') {
+                iconBox.classList.add('bg-red-500/10', 'border-red-500/30'); icon.classList.add('text-red-500'); btn.classList.add('bg-red-600', 'hover:bg-red-500');
+            }
+
+            pendingActionCallback = callback;
+            const modal = document.getElementById('customConfirmModal');
+            const content = document.getElementById('customConfirmContent');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                content.classList.remove('scale-95');
+            }, 10);
+        }
+
+        function closeConfirmModal() {
+            const modal = document.getElementById('customConfirmModal');
+            const content = document.getElementById('customConfirmContent');
+            modal.classList.add('opacity-0');
+            content.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                pendingActionCallback = null;
+                document.getElementById('confirmIconBox').className = "w-16 h-16 mx-auto rounded-2xl flex items-center justify-center mb-5 border shadow-lg";
+                document.getElementById('confirmIcon').className = "fa-solid fa-question text-3xl";
+                document.getElementById('confirmBtn').className = "flex-1 py-3 px-4 text-white rounded-xl font-bold transition-all shadow-lg hover:scale-105";
+            }, 300);
+        }
+
+        function executeConfirmAction() {
+            if (pendingActionCallback) {
+                pendingActionCallback();
+                closeConfirmModal();
+            }
+        }
+
+        // =====================================
+        // LÕI XỬ LÝ DỮ LIỆU BẢNG PHONG THẦN
+        // =====================================
+        async function fetchAdminUsers() {
+            const token = localStorage.getItem('d4m_sso_token') || localStorage.getItem('token');
+            document.getElementById('usersTableBody').innerHTML = `<tr><td colspan="5" class="px-6 py-16 text-center text-gray-500 font-mono text-lg"><i class="fa-solid fa-circle-notch animate-spin mr-3 text-purple-500"></i>Đang triệu hồi dữ liệu...</td></tr>`;
+            try {
+                const res = await fetch('/api/auth/admin/users', { headers: { 'Authorization': `Bearer ${token}` } });
+                const data = await res.json();
+                if(data.status === 'success') {
+                    globalUsersList = data.users;
+                    renderUsersTable(globalUsersList);
+                } else { showToast(data.detail, "error"); }
+            } catch(e) { showToast("Lỗi kết nối máy chủ", "error"); }
+        }
+
+        function renderUsersTable(users) {
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = '';
+            
+            if(users.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-10 text-center text-gray-500">Hệ thống chưa có người dùng nào.</td></tr>`;
+                return;
+            }
+
+            users.forEach(u => {
+                const roleBadge = u.role === 1 || u.role === 'admin' 
+                    ? `<span class="bg-purple-500/20 text-purple-400 border border-purple-500/30 px-3 py-1.5 rounded-lg text-[10px] font-black tracking-widest shadow-[0_0_15px_rgba(168,85,247,0.3)]"><i class="fa-solid fa-crown mr-1"></i>ADMIN</span>`
+                    : `<span class="bg-gray-500/10 text-gray-400 border border-gray-500/20 px-3 py-1.5 rounded-lg text-[10px] font-bold tracking-widest">USER</span>`;
+                    
+                const activeBadge = u.active === 1
+                    ? `<span class="text-green-400 text-xs font-bold flex items-center gap-2"><i class="fa-solid fa-circle-check"></i> Được Phép</span>`
+                    : `<span class="text-red-400 text-xs font-bold flex items-center gap-2"><i class="fa-solid fa-ban"></i> Bị Khóa Ngục</span>`;
+
+                tbody.innerHTML += `
+                    <tr class="border-b border-white/5 hover:bg-white/5 transition-colors user-row" data-search="${(u.full_name + ' ' + u.username + ' ' + u.email).toLowerCase()}">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-4">
+                                <img src="${u.avatar_url}" class="w-12 h-12 rounded-xl border border-white/10 object-cover shadow-lg">
+                                <div>
+                                    <p class="font-black text-base text-white tracking-wide">${u.full_name || u.username}</p>
+                                    <p class="text-[11px] font-mono text-blue-400 bg-blue-500/10 inline-block px-2 py-0.5 mt-1 rounded border border-blue-500/20">@${u.username}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <p class="text-sm text-gray-300 font-medium mb-1"><i class="fa-solid fa-envelope text-gray-500 w-4"></i> ${u.email}</p>
+                            <span class="text-[10px] font-bold ${u.is_verified ? 'text-green-400' : 'text-orange-400'}">${u.is_verified ? '<i class="fa-solid fa-shield-check"></i> Đã xác thực' : '<i class="fa-solid fa-triangle-exclamation"></i> Chờ xác thực'}</span>
+                        </td>
+                        <td class="px-6 py-4">${roleBadge}</td>
+                        <td class="px-6 py-4">${activeBadge}</td>
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex gap-2 justify-end">
+                                <button onclick="actionToggleStatus(${u.id}, ${u.active})" class="w-10 h-10 rounded-xl border border-white/10 bg-black/40 hover:bg-white/10 text-gray-300 transition-all flex items-center justify-center hover:scale-110" title="Khóa / Mở Khóa">
+                                    <i class="fa-solid ${u.active === 1 ? 'fa-lock text-orange-400' : 'fa-unlock text-green-400'}"></i>
+                                </button>
+                                <button onclick="actionToggleRole(${u.id}, ${u.role})" class="w-10 h-10 rounded-xl border border-white/10 bg-black/40 hover:bg-white/10 text-gray-300 transition-all flex items-center justify-center hover:scale-110" title="Phong Tước / Giáng Chức">
+                                    <i class="fa-solid fa-user-shield ${u.role === 1 ? 'text-red-400' : 'text-purple-400'}"></i>
+                                </button>
+                                <button onclick="actionDeleteUser(${u.id})" class="w-10 h-10 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 transition-all flex items-center justify-center hover:scale-110 shadow-[0_0_10px_rgba(239,68,68,0.2)]" title="Thanh Trừng">
+                                    <i class="fa-solid fa-skull"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function filterUsers() {
+            const query = document.getElementById('userSearchInput').value.toLowerCase();
+            document.querySelectorAll('.user-row').forEach(row => {
+                row.style.display = row.getAttribute('data-search').includes(query) ? '' : 'none';
+            });
+        }
+
+        function actionToggleStatus(id, currentActive) {
+            const isLocking = currentActive === 1;
+            openConfirmModal(
+                isLocking ? "Giam Cầm Tài Khoản?" : "Ân Xá Tài Khoản?",
+                isLocking ? "Người này sẽ bị mất toàn quyền truy cập vào dự án và Hub. Xác nhận khóa?" : "Khôi phục lại quyền truy cập cho tài khoản này vào hệ thống?",
+                isLocking ? "fa-lock" : "fa-unlock",
+                isLocking ? "orange" : "green",
+                isLocking ? "Khóa Ngay" : "Mở Khóa",
+                async () => {
+                    const token = localStorage.getItem('d4m_sso_token') || localStorage.getItem('token');
+                    try {
+                        const res = await fetch(`/api/auth/admin/users/${id}/toggle-active`, { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` } });
+                        const data = await res.json();
+                        if(data.status === 'success') { showToast("Lệnh thay đổi Trạng Thái đã được thi hành!"); fetchAdminUsers(); }
+                        else showToast(data.detail, "error");
+                    } catch(e) { showToast("Lỗi mạng", "error"); }
+                }
+            );
+        }
+
+        function actionToggleRole(id, currentRole) {
+            const isPromoting = currentRole !== 1;
+            openConfirmModal(
+                isPromoting ? "Phong Tước Tư Lệnh?" : "Giáng Chức Dân Thường?",
+                isPromoting ? "Tài khoản này sẽ có quyền hạn tối cao, kiểm soát sinh tử các user khác. Sếp chắc chứ?" : "Tước bỏ quyền Admin của tài khoản này, đưa về trạng thái User bình thường?",
+                "fa-crown",
+                isPromoting ? "purple" : "orange",
+                isPromoting ? "Sắc Phong" : "Giáng Chức",
+                async () => {
+                    const token = localStorage.getItem('d4m_sso_token') || localStorage.getItem('token');
+                    try {
+                        const res = await fetch(`/api/auth/admin/users/${id}/change-role`, { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` } });
+                        const data = await res.json();
+                        if(data.status === 'success') { showToast("Chiếu chỉ Tước Vị đã được ban hành!"); fetchAdminUsers(); }
+                        else showToast(data.detail, "error");
+                    } catch(e) { showToast("Lỗi mạng", "error"); }
+                }
+            );
+        }
+
+        function actionDeleteUser(id) {
+            openConfirmModal(
+                "LỆNH THANH TRỪNG",
+                "CẢNH BÁO MỨC ĐỘ 1: Tài khoản này sẽ bị xóa VĨNH VIỄN khỏi Database. Không thể hoàn tác!",
+                "fa-skull-crossbones",
+                "red",
+                "Khai Đao",
+                async () => {
+                    const token = localStorage.getItem('d4m_sso_token') || localStorage.getItem('token');
+                    try {
+                        const res = await fetch(`/api/auth/admin/users/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+                        const data = await res.json();
+                        if(data.status === 'success') { showToast("Kẻ phản nghịch đã bị loại bỏ khỏi hệ thống!"); fetchAdminUsers(); }
+                        else showToast(data.detail, "error");
+                    } catch(e) { showToast("Lỗi mạng", "error"); }
+                }
+            );
+        }
+
+        // KÍCH HOẠT HỆ THỐNG
+        document.addEventListener('DOMContentLoaded', checkAuthorization);
+    </script>
+</body>
+</html>

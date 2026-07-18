@@ -139,6 +139,7 @@ def setup_frontend_routes(app: FastAPI):
         "/admin/scripts": "admin/admin-scripts.html", 
         "/admin/scripts/": "admin/admin-scripts.html",
         "/admin/security": "admin/admin-security.html",
+        "/admin/users": "admin/admin-users.html",
         "/admin/omni": "admin/admin-master.html", 
         "/profile": "admin/profile.html", 
 

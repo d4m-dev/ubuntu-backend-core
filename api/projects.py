@@ -3,6 +3,7 @@ import json
 import math
 import shutil
 import zipfile
+import logging
 from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 from core.security import verify_token 
 
@@ -98,10 +99,29 @@ def upload_project_zip(file: UploadFile = File(...)):
     extract_path = os.path.join(HOSTING_DIR, project_name)
     
     try:
-        with open(temp_zip, "wb") as buffer: shutil.copyfileobj(file.file, buffer)
-        with zipfile.ZipFile(temp_zip, 'r') as zip_ref: zip_ref.extractall(extract_path)
+        # Ghi file Zip xuống ổ cứng tạm thời
+        with open(temp_zip, "wb") as buffer: 
+            shutil.copyfileobj(file.file, buffer)
+            
+        # 🛡️ THUẬT TOÁN KHIÊN CHẮN ZIP SLIP
+        with zipfile.ZipFile(temp_zip, 'r') as zip_ref:
+            # Lấy thư mục đích tuyệt đối (Absolute Path) làm ranh giới cách ly
+            target_abs_path = os.path.abspath(extract_path)
+            
+            for member in zip_ref.namelist():
+                # Lấy đường dẫn dự kiến của file sau khi giải nén
+                member_abs_path = os.path.abspath(os.path.join(extract_path, member))
+                
+                # NGUYÊN TẮC: Mọi file giải nén ra phải NẰM BÊN TRONG thư mục đích
+                if not member_abs_path.startswith(target_abs_path + os.sep) and member_abs_path != target_abs_path:
+                    raise Exception(f"Phát hiện mã độc Zip Slip: Tệp '{member}' đang cố thoát khỏi vùng cách ly!")
+            
+            # Nếu vượt qua vòng quét bảo mật 100%, mới tiến hành giải nén
+            zip_ref.extractall(extract_path)
+            
         os.remove(temp_zip)
         return {"status": "success", "message": "Triển khai thành công"}
     except Exception as e:
+        logging.error(f"ZIP SECURITY BLOCK: {str(e)}")
         if os.path.exists(temp_zip): os.remove(temp_zip)
-        raise HTTPException(status_code=500, detail=f"Lỗi giải nén: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Lỗi bảo mật giải nén: {str(e)}")

@@ -1,0 +1,44 @@
+🛡️ 2. ĐÁNH GIÁ TÍNH BẢO MẬT (SECURITY POSTURE)
+Hiện tại, hệ thống của sếp đạt mức Bảo mật Khá Tốt (7.5/10) nhờ các chốt chặn sau:
+
+Ẩn bản đồ kho báu: Đã tắt hoàn toàn OpenAPI, Swagger UI (/docs), tránh hacker dòm ngó cấu trúc API.
+
+Xác thực JWT (SSO): Phân luồng tốt giữa Frontend (parse base64 để lấy Role mở khóa UI) và Backend (Dùng Bearer Token để chặn API loadUserProjects).
+
+Lá chắn GitHub: Giữ thành công file auth/credentials.json (chìa khóa Google Cloud) ở lại máy Local thông qua .gitignore.
+
+⚠️ TUY NHIÊN, VẪN CÒN 3 "TỬ HUYỆT" CẦN NÂNG CẤP BẢO MẬT:
+
+Lỗ hổng "Zip Slip" (Trong chức năng tải lên Dự án): Sếp có module giải nén thư mục dự án .ZIP (projects.py). Nếu hacker upload 1 file Zip chứa đường dẫn độc hại (VD: ../../../etc/passwd), lệnh giải nén có thể chèn file đè lên hệ điều hành Ubuntu. -> Cần viết hàm kiểm duyệt đường dẫn an toàn trước khi giải nén.
+
+Rate Limit đang dùng RAM tạm: Nếu sếp dùng bộ nhớ trong của FastAPI để chống Spam (Rate Limit), khi server khởi động lại, bộ đếm sẽ reset. Nếu bị DDoS liên tục, RAM sẽ tràn. -> Cần đẩy Rate Limit ra Redis.
+
+Lộ IP Gốc: Sếp dùng Cloudflare Tunnel là rất tốt, nhưng nếu Máy chủ Ubuntu mở thẳng cổng ra ngoài Internet (Port Forwarding ở router) thay vì chỉ chạy qua Tunnel, hacker có thể scan thấy IP nhà sếp.
+
+🚀 3. NHỮNG TÍNH NĂNG CÒN THIẾU & CẦN BỔ SUNG NGAY
+Để biến hệ thống này thành một "Pháo đài" hoàn hảo 100%, đây là lộ trình tôi đề xuất sếp nên làm tiếp:
+
+A. Tối ưu hóa Luồng nặng (Message Queue):
+
+Tình trạng hiện tại: Tải YouTube và bóc tách Demucs AI đang dùng asyncio.to_thread. Nếu sếp (và gia đình) ném 3-4 video vào cùng lúc, CPU của Máy chủ sẽ gào thét lên 100% và treo hệ thống.
+
+Giải pháp: Tích hợp Celery + Redis. Biến các tác vụ âm thanh thành "Hàng đợi" (Task Queue). Có video mới -> Xếp hàng -> Xử lý từng cái một.
+
+B. Giao diện Quản trị Người dùng (User Manager UI):
+
+Sếp đã có SSO và bắt đầu nhận diện được "Tư Lệnh" (Role = 1), "Active = 1". Nhưng sếp chưa có giao diện nào (trên Web) để Phê duyệt, Đóng băng, hoặc Đổi Quyền cho người dùng khác (gia đình, bạn bè) khi họ đăng ký tài khoản.
+
+C. Quản lý trạng thái hệ thống (api_status_db):
+
+Trong ai_admin.py, J.A.R.V.I.S có thể nhận lệnh BẬT/TẮT dịch vụ (VD: [TOGGLE: internet_tunnel]). Nhưng nếu cái api_status_db này chỉ là 1 Dictionary (biến trong Python), khi sếp khởi động lại Server, mọi cấu hình sẽ bị reset về mặc định.
+
+Giải pháp: Phải cho cái Status này lưu thẳng xuống Database (hoặc file .json local) để giữ nguyên trạng thái dẫu cúp điện.
+
+D. Backup tự động (Nightly Backup):
+
+Hệ thống đang chứa rất nhiều chất xám và dữ liệu Lịch trình quan trọng của sếp ở Database (social_hub).
+
+Cần thêm: Một tác vụ trong core/scheduler.py cứ đúng 02:00 sáng tự động dump database ra file .sql và nén lại thành .zip, lưu vào thư mục an toàn hoặc đẩy lên Google Drive.
+
+
+"/admin/users": "admin/admin-users.html",

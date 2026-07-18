@@ -1,14 +1,11 @@
 import os
 import psutil
 import time
+import json
 from fastapi import APIRouter, Depends
 from core.security import verify_token
 from scripts.network_tunnel import get_tunnel_url, start_tunnel, stop_tunnel
-
-# Nhập hàm trích xuất log và db_manager từ database
 from core.database import get_request_stats, db_manager 
-
-# 🚀 NÂNG CẤP: Import thư mục làm việc của Audio Engine
 from api.audio_engine import WORKSPACE_DIR
 
 router = APIRouter(
@@ -17,23 +14,51 @@ router = APIRouter(
     dependencies=[Depends(verify_token)] 
 )
 
-# Khai báo kho nhạc để radar quét
 MUSIC_DIR = os.path.join(WORKSPACE_DIR, "music")
 
-# Cơ sở dữ liệu tạm (RAM) lưu trạng thái API
-api_status_db = {
+# ==========================================
+# 🧠 TRÍ NHỚ VĨNH CỬU CHO J.A.R.V.I.S VÀ DASHBOARD
+# ==========================================
+STATUS_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "core", "api_status.json")
+
+DEFAULT_STATUS = {
     "internet_tunnel": {"active": False, "description": "Đường hầm Cloudflare bảo mật", "public_url": ""},
     "chatbox_ai": {"active": True, "description": "Module Chatbot AI & Phân tích Log", "public_url": ""},
     "social_db": {"active": True, "description": "Kết nối Database MariaDB Social Hub", "public_url": ""}
 }
 
+def load_status():
+    """Khôi phục trạng thái từ ổ cứng khi Server vừa khởi động"""
+    if os.path.exists(STATUS_FILE):
+        try:
+            with open(STATUS_FILE, "r", encoding="utf-8") as f:
+                saved_status = json.load(f)
+                # Ghép dữ liệu đã lưu với cấu trúc mặc định (đề phòng sếp thêm module mới)
+                for key in DEFAULT_STATUS:
+                    if key not in saved_status:
+                        saved_status[key] = DEFAULT_STATUS[key]
+                return saved_status
+        except:
+            pass
+    return DEFAULT_STATUS.copy()
+
+def save_status(status_dict):
+    """Lưu trạng thái xuống ổ cứng mỗi khi có thay đổi"""
+    os.makedirs(os.path.dirname(STATUS_FILE), exist_ok=True)
+    with open(STATUS_FILE, "w", encoding="utf-8") as f:
+        json.dump(status_dict, f, ensure_ascii=False, indent=4)
+
+# 🔥 Khởi tạo não bộ từ ổ cứng thay vì hardcode bằng RAM
+api_status_db = load_status()
+
+# ==========================================
+# 📊 API DASHBOARD LÕI
+# ==========================================
 @router.get("/system-stats")
 async def get_system_stats():
-    """Lấy thông số phần cứng Real-time để vẽ biểu đồ lên Dashboard"""
     cpu_percent = psutil.cpu_percent(interval=0.1)
     ram = psutil.virtual_memory()
     disk = psutil.disk_usage('/')
-
     return {
         "status": "success",
         "cpu_usage_percent": cpu_percent,
@@ -51,15 +76,12 @@ async def get_system_stats():
 
 @router.get("/services")
 async def get_services():
-    """Lấy danh sách và trạng thái của các API Service"""
     if api_status_db["internet_tunnel"]["active"] and not api_status_db["internet_tunnel"]["public_url"]:
         api_status_db["internet_tunnel"]["public_url"] = get_tunnel_url()
-        
     return {"status": "success", "services": api_status_db}
 
 @router.post("/services/toggle/{service_name}")
 async def toggle_service(service_name: str):
-    """Bật/Tắt công tắc của một dịch vụ API"""
     if service_name in api_status_db:
         current_state = api_status_db[service_name]["active"]
         new_state = not current_state
@@ -77,6 +99,9 @@ async def toggle_service(service_name: str):
             else:
                 stop_tunnel()
                 api_status_db["internet_tunnel"]["public_url"] = ""
+        
+        # 🚀 GHI NHỚ VÀO Ổ CỨNG SAU MỖI LẦN GẠT CÔNG TẮC
+        save_status(api_status_db)
                 
         return {
             "status": "success", 
@@ -89,7 +114,6 @@ async def toggle_service(service_name: str):
 
 @router.get("/analytics")
 async def get_traffic_analytics():
-    """Cung cấp dữ liệu Log thực tế để vẽ biểu đồ Traffic Chart"""
     try:
         stats = get_request_stats()
         return {"status": "success", "data": stats["timeline"]}
@@ -97,11 +121,10 @@ async def get_traffic_analytics():
         return {"status": "error", "message": str(e)}
 
 # ==========================================
-# API Thống kê Tracking Bio
+# 🔗 API Thống kê Tracking Bio
 # ==========================================
 @router.get("/bio-stats")
 async def get_bio_stats():
-    """Lấy dữ liệu Tracking ngầm từ MariaDB cho Link-in-Bio"""
     if not getattr(db_manager, "connection", None):
         return {"status": "error", "message": "Mất kết nối tới MariaDB"}
 
@@ -146,11 +169,10 @@ async def get_bio_stats():
         return {"status": "error", "message": str(e)}
 
 # ==========================================
-# 🚀 NÂNG CẤP MỚI: THEO DÕI HÀNG ĐỢI AI (MUSIC HUB)
+# 🚀 THEO DÕI HÀNG ĐỢI AI (MUSIC HUB)
 # ==========================================
 @router.get("/tasks")
 async def get_active_tasks():
-    """Quét các thư mục ngầm để báo cáo tiến trình xử lý AI"""
     tasks = []
     if not os.path.exists(MUSIC_DIR):
         return {"status": "success", "tasks": tasks}
@@ -159,17 +181,14 @@ async def get_active_tasks():
         folder_path = os.path.join(MUSIC_DIR, folder_name)
         if not os.path.isdir(folder_path): continue
         
-        # Kiểm tra xem bài hát đã hoàn thành cả 3 tài nguyên gốc chưa (mp3, beat, lrc)
         final_mp3 = os.path.join(folder_path, f"{folder_name}.mp3")
         final_beat = os.path.join(folder_path, f"{folder_name}_beat.mp3")
         final_lrc = os.path.join(folder_path, f"{folder_name}.lrc")
         
         is_complete = os.path.exists(final_mp3) and os.path.exists(final_beat) and os.path.exists(final_lrc)
         
-        if is_complete:
-            continue # Bài nào xong rồi thì loại khỏi Radar hàng đợi
+        if is_complete: continue
             
-        # Xác định AI đang chạy công đoạn nào dựa vào file tạm thời
         status = "Đang xử lý..."
         progress = 10
         color = "blue"

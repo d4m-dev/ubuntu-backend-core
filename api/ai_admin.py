@@ -13,7 +13,8 @@ from datetime import datetime
 from core.security import verify_token
 from core.config import settings
 from core.database import get_raw_logs, db_inserter, db_executor
-from api.dashboard import api_status_db
+# 🚀 IMPORT THÊM HÀM save_status TỪ DASHBOARD
+from api.dashboard import api_status_db, save_status 
 from scripts.network_tunnel import start_tunnel, stop_tunnel
 
 router = APIRouter(
@@ -33,16 +34,12 @@ def get_user_id_from_token(authorization: str):
     except:
         return 1
 
-# TỪ ĐIỂN MAP GIỜ CHUẨN XÁC THEO QUY TẮC CỦA SẾP
 SHIFT_TIME_MAP = {
     "M5": ("05:00", "13:00"), "M6": ("06:00", "14:00"), "M7": ("07:00", "15:00"), "M8": ("08:00", "16:00"), "M9": ("09:00", "17:00"), "M10": ("10:00", "18:00"),
     "A11": ("11:00", "19:00"), "A12": ("12:00", "20:00"), "A1": ("13:00", "21:00"), "A2": ("14:00", "22:00"), "A3": ("15:00", "23:00"), "A4": ("16:00", "00:00"), "A5": ("17:00", "01:00"), "A6": ("18:00", "02:00"),
     "N7": ("19:00", "03:00"), "N8": ("20:00", "04:00"), "N9": ("21:00", "05:00"), "N10": ("22:00", "06:00")
 }
 
-# ==========================================
-# 🚀 API CHO GIAO DIỆN NATIVE CALENDAR 
-# ==========================================
 @router.get("/schedules")
 async def get_schedules(month: int, year: int, authorization: str = Header(None)):
     try:
@@ -118,9 +115,7 @@ async def save_manual_schedule(req: ManualScheduleRequest, authorization: str = 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# ==========================================
-# 🚀 CHAT AI J.A.R.V.I.S 
-# ==========================================
+
 @router.post("/chat")
 async def ai_admin_chat(request: ChatRequest, authorization: str = Header(None)):
     if not settings.GEMINI_API_KEY:
@@ -199,13 +194,21 @@ async def ai_admin_chat(request: ChatRequest, authorization: str = Header(None))
                     continue
                 raise ValueError(f"Lỗi API Model {chosen_model}: {error_message}")
 
+        # 🧠 BỘ XỬ LÝ NHẬN LỆNH J.A.R.V.I.S (ĐÃ GẮN CHIP GHI NHỚ)
         match_toggle = re.search(r'\[TOGGLE:\s*([a-zA-Z0-9_]+)\]', reply_text)
         if match_toggle:
             target_service = match_toggle.group(1).strip()
             if target_service in api_status_db:
                 new_state = not api_status_db[target_service]["active"]
-                if target_service == "internet_tunnel": start_tunnel() if new_state else stop_tunnel()
+                if target_service == "internet_tunnel": 
+                    start_tunnel() if new_state else stop_tunnel()
+                
+                # J.A.R.V.I.S gạt công tắc trên RAM
                 api_status_db[target_service]["active"] = new_state
+                
+                # 🚀 J.A.R.V.I.S GHI NHỚ VĨNH CỬU XUỐNG Ổ CỨNG
+                save_status(api_status_db)
+                
                 action_taken = f"Đã {'BẬT' if new_state else 'TẮT'} {target_service}"
             reply_text = re.sub(r'\[TOGGLE:\s*([a-zA-Z0-9_]+)\]', '', reply_text).strip()
 
@@ -220,7 +223,6 @@ async def ai_admin_chat(request: ChatRequest, authorization: str = Header(None))
                     safe_shift = sch.get('shift_name') or 'OFF'
                     work_date = sch.get('date')
                     
-                    # 🚀 CORE XỬ LÝ GIỜ: Ép cứng hệ thống, không tin tưởng AI
                     if is_off or safe_shift == 'OFF':
                         s_time, e_time = None, None
                     else:
