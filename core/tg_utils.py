@@ -50,7 +50,7 @@ async def send_telegram_menu():
     tunnel_status = "🟢 ĐANG BẬT" if api_status_db["internet_tunnel"]["active"] else "🔴 ĐANG TẮT"
     keyboard = {
         "inline_keyboard": [
-            [{"text": f"🌐 Tunnel (Cổng 16868): {tunnel_status}", "callback_data": "toggle_tunnel"}],
+            [{"text": f"🌐 Tên miền & Tunnel: {tunnel_status}", "callback_data": "toggle_tunnel"}],
             [{"text": "📊 Giám Sát", "callback_data": "server_stats"}, {"text": "🔬 Top Tiến Trình", "callback_data": "top_processes"}],
             [{"text": "🧹 Dọn rác", "callback_data": "clean_trash"}, {"text": "📦 Sao Lưu", "callback_data": "backup_code"}],
             [{"text": "🔄 Khởi động lại", "callback_data": "restart_api"}]
@@ -58,9 +58,9 @@ async def send_telegram_menu():
     }
     await send_telegram_message(
         "🎛️ <b>TRUNG TÂM CHỈ HUY UBUNTU CORE</b>\n\n"
-        "💡 <b>Mẹo nâng cấp:</b>\n"
-        "- Ném <code>Link YouTube</code> để bot tải.\n"
+        "💡 <b>Mẹo thao tác:</b>\n"
+        "- Ném <code>Link YouTube</code> để bot tải siêu tốc.\n"
         "- Lệnh DJ: <code>Phát bài [tên]</code>.\n"
-        "- Gõ <code>> [lệnh bash]</code> chạy Terminal.", 
+        "- Gõ <code>>[lệnh bash]</code> để chạy Terminal từ xa.", 
         reply_markup=keyboard
     )

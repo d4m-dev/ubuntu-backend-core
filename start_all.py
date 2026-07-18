@@ -40,9 +40,8 @@ def main():
     CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
     AUTO_START_SCRIPT = os.path.join(CURRENT_DIR, "scripts", "auto_start.sh")
 
-    # Kiểm tra xem file script có thực sự tồn tại trước khi chạy để tránh lỗi ngầm
     if not os.path.exists(AUTO_START_SCRIPT):
-        print(f"❌ [LỖI BAỎ MẬT] Không tìm thấy file cấu hình tại: {AUTO_START_SCRIPT}")
+        print(f"❌ [LỖI BẢO MẬT] Không tìm thấy file cấu hình tại: {AUTO_START_SCRIPT}")
         sys.exit(1)
 
     backend_cmd = f"bash {AUTO_START_SCRIPT}"
@@ -85,14 +84,24 @@ def main():
 
     except KeyboardInterrupt:
         print("\n\n🛑 [HỆ THỐNG] Nhận lệnh dừng từ Chủ tịch!")
-        print("⏳ Đang dọn dẹp và tắt các dịch vụ ngầm...")
+        print("⏳ Đang dọn dẹp và tiêu diệt triệt để các tiến trình ngầm (Giải phóng Port)...")
         try:
             backend_process.terminate()
             tunnel_process.terminate()
         except:
             pass
-        subprocess.run("pkill -f 'cloudflared'", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        print("✅ [HỆ THỐNG] Đã tắt an toàn. Hẹn gặp lại sếp! hẹ hẹ")
+        
+        # 🚀 Sát thủ diệt Zombie: Truy sát toàn bộ tàn dư để nhả Port
+        cleanup_cmds = [
+            "pkill -f 'python3 main.py'",
+            "pkill -f 'celery'",
+            "pkill -f 'cloudflared'",
+            "pkill -f 'php -S 0.0.0.0'"
+        ]
+        for cmd in cleanup_cmds:
+            subprocess.run(cmd, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            
+        print("✅ [HỆ THỐNG] Đã dọn dẹp Port sạch sẽ. Hẹn gặp lại sếp! hẹ hẹ")
         sys.exit(0)
 
 if __name__ == "__main__":

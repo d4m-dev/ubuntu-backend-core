@@ -8,6 +8,7 @@ import re
 import time
 import json
 import uuid
+import sys
 from urllib.parse import quote
 from core.config import settings
 
@@ -22,16 +23,8 @@ from core.tg_scheduler import run_scheduler
 pending_audio_tasks = {}
 pending_ytdl_tasks = {}
 
-# 🚀 HÀM BỔ TRỢ: LẤY LINK WEB CHUẨN XÁC TỪ FILE LOG CLOUDFLARE
 def get_web_ui_url(yt_url):
-    tunnel_link = ""
-    try:
-        from scripts.network_tunnel import get_tunnel_url
-        tunnel_link = get_tunnel_url()
-    except: pass
-    
-    base_url = tunnel_link if tunnel_link else "d4mdev.click"
-    return f"{base_url}/yt-downloader.html?url={quote(yt_url)}"
+    return f"https://d4mdev.click/yt-downloader.html?url={quote(yt_url)}"
 
 async def telegram_polling_task():
     if not settings.TELEGRAM_BOT_TOKEN: return
@@ -103,7 +96,7 @@ async def telegram_polling_task():
                                     await send_telegram_message(f"✅ Đã chốt tên: <b>{text}</b>\nChọn chức năng:", reply_markup=kb_options)
                                     continue
                                 
-                                # B. 🚀 YOUTUBE PRO: TÍCH HỢP BỘ LỌC 50MB VÀ DEEP LINK WEB
+                                # B. YOUTUBE PRO: TÍCH HỢP BỘ LỌC 50MB VÀ DEEP LINK WEB
                                 yt_match = re.search(r'(?:tải|tai|download)?\s*(mp3|mp4|video|audio)?\s*(https?://(?:www\.)?(?:youtube\.com|youtu\.be)[^\s]+)', text, re.IGNORECASE)
                                 if yt_match:
                                     fmt_str = yt_match.group(1).lower() if yt_match.group(1) else None
@@ -142,7 +135,6 @@ async def telegram_polling_task():
                                         task_id = str(uuid.uuid4())[:8]
                                         safe_title = info.get("title", "YouTube Video")
                                         
-                                        # 🚀 Tự động lấy Link Web UI chuẩn xác
                                         web_deep_link = get_web_ui_url(yt_url)
                                         
                                         pending_ytdl_tasks[chat_id] = {
@@ -195,21 +187,6 @@ async def telegram_polling_task():
                                     except Exception as e: await send_telegram_message(f"❌ Lỗi Terminal: {e}")
                                         
                                 elif text in ["/start", "/menu", "menu"]: await send_telegram_menu()
-                                elif text in ["/ram", "/hw"]:
-                                    cpu = await asyncio.to_thread(psutil.cpu_percent, 0.5); ram = psutil.virtual_memory()
-                                    await send_telegram_message(f"🎛️ CPU: {cpu}%\n▪️ RAM: {ram.percent}%")
-                                
-                                elif text == "/restart":
-                                    current_time = time.time()
-                                    if os.path.exists(RESTART_LOCK_FILE):
-                                        try:
-                                            with open(RESTART_LOCK_FILE, "r") as f:
-                                                if current_time - float(f.read().strip()) < 120: continue
-                                        except: pass
-                                    with open(RESTART_LOCK_FILE, "w") as f: f.write(str(current_time))
-                                    await send_telegram_message("🔄 Đang tiến hành restart hệ thống...")
-                                    await client.get(url, params={"offset": update_id, "timeout": 2})
-                                    import sys; os.execl(sys.executable, sys.executable, *sys.argv)
                                         
                                 elif text.startswith("/weather"):
                                     city = text.split(maxsplit=1)[1] if len(text.split()) > 1 else "Phu Quoc"
@@ -228,7 +205,6 @@ async def telegram_polling_task():
                                     
                                     if not song_name: continue
 
-                                    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
                                     MUSIC_DIR = os.path.join(BASE_DIR, "audio_workspace", "music")
                                     found_folder = next((f for f in os.listdir(MUSIC_DIR) if song_name.replace(" ", "") in f.replace("-", "").replace("_", "").lower()), None) if os.path.exists(MUSIC_DIR) else None
                                     
@@ -277,15 +253,12 @@ async def telegram_polling_task():
                             
                             if chat_id == str(settings.TELEGRAM_CHAT_ID).strip():
                                 
-                                # YT: Định dạng
                                 if data_cb.startswith("ytdl_fmt_"):
                                     parts = data_cb.split("_")
                                     tid, fmt = parts[2], parts[3]
                                     if chat_id in pending_ytdl_tasks and pending_ytdl_tasks[chat_id]["task_id"] == tid:
                                         pending_ytdl_tasks[chat_id]["format"] = fmt
                                         task_info = pending_ytdl_tasks[chat_id]
-                                        
-                                        # Lấy URL web chuẩn xác để gán vào nút
                                         web_deep_link = get_web_ui_url(task_info["url"])
                                         
                                         if fmt == "mp4":
@@ -305,17 +278,13 @@ async def telegram_polling_task():
                                             kb = {"inline_keyboard": []}
                                             a320, a128 = task_info['audio_320'], task_info['audio_128']
                                             has_large_mp3 = False
-                                            
                                             if a320 <= 49.5: kb["inline_keyboard"].append([{"text": f"🎧 320kbps • {a320} MB", "callback_data": f"ytdl_dl_{tid}_320"}])
                                             else: has_large_mp3 = True
-                                            
                                             if a128 <= 49.5: kb["inline_keyboard"].append([{"text": f"🎵 128kbps • {a128} MB", "callback_data": f"ytdl_dl_{tid}_128"}])
                                             else: has_large_mp3 = True
-                                            
                                             if has_large_mp3: kb["inline_keyboard"].append([{"text": "🌐 Tải Âm thanh quá lớn (>50MB)", "url": web_deep_link}])
                                             await send_telegram_message(f"🎧 <b>{task_info['title']}</b>\nChọn chất lượng:", reply_markup=kb)
                                 
-                                # YT: Tải xuống
                                 elif data_cb.startswith("ytdl_dl_"):
                                     parts = data_cb.split("_")
                                     tid, quality = parts[2], parts[3]
@@ -323,7 +292,6 @@ async def telegram_polling_task():
                                         task_info = pending_ytdl_tasks.pop(chat_id)
                                         asyncio.create_task(trigger_ytdl_download(chat_id, task_info, quality))
                                 
-                                # Audio: Chốt tên
                                 elif data_cb == "confirm_audio_name":
                                     if chat_id in pending_audio_tasks and pending_audio_tasks[chat_id].get("step") == "name":
                                         suggested = pending_audio_tasks[chat_id]["suggested_name"]
@@ -332,58 +300,115 @@ async def telegram_polling_task():
                                         kb_options = {"inline_keyboard": [[{"text": "🎤 Tách Giọng", "callback_data": "extract_vocal"}, {"text": "🥁 Tách Nhạc", "callback_data": "extract_beat"}], [{"text": "🌟 Xử lý TẤT CẢ", "callback_data": "extract_all"}]]}
                                         await send_telegram_message(f"✅ Đã chốt tên: <b>{suggested}</b>", reply_markup=kb_options)
                                         
-                                # Audio: Tải xuống
                                 elif data_cb in ["extract_vocal", "extract_beat", "extract_lyric", "extract_all"]:
                                     if chat_id in pending_audio_tasks and pending_audio_tasks[chat_id].get("step") == "option":
                                         task_data = pending_audio_tasks.pop(chat_id)
                                         opt = "vocal" if "vocal" in data_cb else "beat" if "beat" in data_cb else "lyric" if "lyric" in data_cb else "all"
                                         asyncio.create_task(trigger_audio_processing(chat_id, task_data["file_id"], task_data["chosen_name"], task_data["original_filename"], opt))
                                 
-                                # Các nút Menu cũ
-                                from api.dashboard import api_status_db
+                                # -----------------------------------------------------
+                                # 🚀 FIX 4 NÚT MENU THẦN THÁNH CỦA SẾP DƯỚI NÀY ĐÂY 🚀
+                                # -----------------------------------------------------
+                                from api.dashboard import api_status_db, save_status
                                 from scripts.network_tunnel import start_tunnel, stop_tunnel, get_tunnel_url
                                 
                                 if data_cb == "toggle_tunnel":
                                     if not api_status_db["internet_tunnel"]["active"]:
                                         start_tunnel()
-                                        await send_telegram_message("⏳ Đang bật Cloudflare Tunnel...")
-                                        link_found = ""
-                                        for _ in range(15):
-                                            await asyncio.sleep(1)
-                                            link_found = get_tunnel_url()
-                                            if link_found: break
-                                        if link_found:
-                                            api_status_db["internet_tunnel"]["public_url"] = link_found
-                                            await send_telegram_message(f"✅ Tunnel đã mở!\n🌐 Link: {link_found}")
-                                        else: await send_telegram_message("⚠️ Mạng chậm, lát ấn lại sếp nhé.")
+                                        api_status_db["internet_tunnel"]["active"] = True
+                                        api_status_db["internet_tunnel"]["public_url"] = get_tunnel_url()
+                                        save_status(api_status_db)
+                                        await send_telegram_message(f"✅ Tunnel đã mở chạy ngầm!\n🌐 Link: {get_tunnel_url()}")
                                     else:
                                         stop_tunnel()
+                                        api_status_db["internet_tunnel"]["active"] = False
                                         api_status_db["internet_tunnel"]["public_url"] = ""
+                                        save_status(api_status_db)
                                         await send_telegram_message("🔴 Đã ngắt kết nối Cloudflare Tunnel!")
                                     await send_telegram_menu()
+                                    
+                                # 1. FIX GIÁM SÁT (Thêm Ổ cứng + Pin điện thoại/VPS)
                                 elif data_cb == "server_stats":
-                                    await send_telegram_message(f"🎛️ CPU: {psutil.cpu_percent()}%\n🧠 RAM: {psutil.virtual_memory().percent}%")
+                                    cpu = psutil.cpu_percent(interval=0.5)
+                                    ram = psutil.virtual_memory()
+                                    disk = psutil.disk_usage('/') # Đọc ổ lưu trữ gốc của VPS/Android
+                                    bat = get_device_battery()
+                                    
+                                    msg = f"🎛️ <b>Thống Kê Máy Chủ Hệ Thống</b>\n\n"
+                                    msg += f"🖥️ CPU: <b>{cpu}%</b>\n"
+                                    msg += f"🧠 RAM: <b>{ram.percent}%</b> (Dùng: {round(ram.used/(1024**3), 2)}GB / Tổng: {round(ram.total/(1024**3), 2)}GB)\n"
+                                    msg += f"💾 Ổ cứng: <b>{disk.percent}%</b> (Còn trống: {round(disk.free/(1024**3), 2)}GB)\n"
+                                    msg += f"🔋 {bat}"
+                                    await send_telegram_message(msg)
+
+                                # 2. FIX TOP TIẾN TRÌNH (Bằng thư viện Python để chống lỗi nền tảng chéo)
+                                elif data_cb == "top_processes":
+                                    try:
+                                        # Quét thẳng bằng lõi psutil, bao chạy trên cả Termux và Ubuntu
+                                        processes = []
+                                        for proc in psutil.process_iter(['pid', 'name', 'cpu_percent', 'memory_percent']):
+                                            try: processes.append(proc.info)
+                                            except: pass
+                                        
+                                        # Lọc ra 10 đứa ngốn CPU mạnh nhất
+                                        processes = sorted(processes, key=lambda p: p['cpu_percent'], reverse=True)[:10]
+                                        res_str = "PID   | TÊN TIẾN TRÌNH | CPU | RAM\n"
+                                        res_str += "-"*35 + "\n"
+                                        for p in processes:
+                                            res_str += f"{p['pid']:<5} | {p['name'][:12]:<12} | {p['cpu_percent']}% | {round(p['memory_percent'], 1)}%\n"
+                                        
+                                        await send_telegram_message(f"🔬 <b>Top Tiến Trình Đang Chạy:</b>\n<pre>{res_str}</pre>")
+                                    except Exception as e:
+                                        await send_telegram_message(f"❌ Lỗi quét tiến trình: {e}")
+
+                                # 3. FIX DỌN RÁC (Đã quét sạch rác Demucs/Whisper/Audio Tải Tạm)
                                 elif data_cb == "clean_trash":
-                                    await send_telegram_message("🧹 Đã dọn dẹp hệ thống!")
+                                    await send_telegram_message("🧹 <b>Đang dọn dẹp rác hệ thống...</b>\n- Xóa file tải Youtube tạm thời\n- Xóa phôi rác AI Audio\n- Kích hoạt Cleanup tác vụ rác")
+                                    try:
+                                        from api.audio_engine import WORKSPACE_DIR
+                                        # Xóa thư mục Youtube Tạm
+                                        temp_dl = os.path.join(WORKSPACE_DIR, "temp_downloads")
+                                        if os.path.exists(temp_dl): shutil.rmtree(temp_dl, ignore_errors=True)
+                                        # Xóa thư mục AI Phôi (Demucs/Whisper) đang mắc kẹt
+                                        for f in os.listdir(WORKSPACE_DIR):
+                                            if f.startswith("temp_"):
+                                                p = os.path.join(WORKSPACE_DIR, f)
+                                                if os.path.isdir(p): shutil.rmtree(p, ignore_errors=True)
+                                        
+                                        # Kích hoạt luôn luồng dọn rác phụ của hệ thống sếp
+                                        try:
+                                            from api.cleanup import run_cleanup_task
+                                            await asyncio.to_thread(run_cleanup_task)
+                                        except: pass
+                                        
+                                        await send_telegram_message("✅ <b>Hoàn tất!</b> Hệ thống đã sạch sẽ 100%.")
+                                    except Exception as e:
+                                        await send_telegram_message(f"❌ Lỗi dọn rác: {e}")
+
                                 elif data_cb == "backup_code":
-                                    await send_telegram_message("📦 Đang đóng gói...")
+                                    await send_telegram_message("📦 Đang đóng gói source code...")
                                     try:
                                         zip_file_path = await asyncio.to_thread(create_backup_zip)
                                         with open(zip_file_path, "rb") as f:
                                             await client.post(f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/sendDocument", data={"chat_id": chat_id}, files={"document": f}, timeout=60.0)
                                         os.remove(zip_file_path)
-                                    except Exception as e: await send_telegram_message(f"❌ Lỗi: {e}")
+                                    except Exception as e: await send_telegram_message(f"❌ Lỗi sao lưu: {e}")
+
+                                # 4. FIX KHỞI ĐỘNG LẠI (Sử dụng thuật toán Re-Spawn bằng Bash)
                                 elif data_cb == "restart_api":
-                                    current_time = time.time()
-                                    if os.path.exists(RESTART_LOCK_FILE):
-                                        try:
-                                            with open(RESTART_LOCK_FILE, "r") as f:
-                                                if current_time - float(f.read().strip()) < 120: continue
-                                        except: pass
-                                    with open(RESTART_LOCK_FILE, "w") as f: f.write(str(current_time))
-                                    await client.get(url, params={"offset": update_id, "timeout": 2})
-                                    import sys; os.execl(sys.executable, sys.executable, *sys.argv)
+                                    await send_telegram_message("🔄 <b>Đang tái khởi động toàn bộ hệ thống...</b>\n<i>Quá trình này mất khoảng 5-10 giây, Sếp vui lòng đợi chút!</i>")
+                                    await client.post(f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/answerCallbackQuery", json={"callback_query_id": cb_id})
+                                    
+                                    # Lệnh cực mạnh: Đợi 2 giây (để tin nhắn gửi đi thành công)
+                                    # Kéo sập main.py và start_all.py đang chạy, rồi gọi bash gọi start_all.py mới tinh
+                                    start_script = os.path.join(BASE_DIR, "start_all.py")
+                                    cmd = f"(sleep 2 && pkill -f 'main.py' && pkill -f 'start_all.py' && nohup python3 {start_script} > /dev/null 2>&1 &) &"
+                                    os.system(cmd)
+                                    
+                                    # Ép chết luồng Bot hiện tại để tiến trình mới tiếp quản
+                                    sys.exit(0) 
                                 
+                                # Gửi cờ xác nhận với Telegram Server để nút bấm không bị "quay quay"
                                 await client.post(f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/answerCallbackQuery", json={"callback_query_id": cb_id})
                                 
             except Exception as e:
