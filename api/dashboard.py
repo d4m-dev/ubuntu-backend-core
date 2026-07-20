@@ -2,10 +2,11 @@ import os
 import psutil
 import time
 import json
+from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends
 from core.security import verify_token
 from scripts.network_tunnel import get_tunnel_url, start_tunnel, stop_tunnel
-from core.database import get_request_stats, db_manager 
+from core.database import db_manager 
 from api.audio_engine import WORKSPACE_DIR
 
 router = APIRouter(
@@ -112,58 +113,54 @@ async def toggle_service(service_name: str):
     
     return {"status": "error", "message": "Dịch vụ không tồn tại trong hệ thống."}
 
+# ==========================================
+# 📈 TRAFFIC ANALYTICS (Máy Đếm Nhịp Tim)
+# ==========================================
 @router.get("/analytics")
 async def get_traffic_analytics():
-    try:
-        stats = get_request_stats()
-        return {"status": "success", "data": stats["timeline"]}
-    except Exception as e:
-        return {"status": "error", "message": str(e)}
-
-# ==========================================
-# 🔗 API Thống kê Tracking Bio
-# ==========================================
-@router.get("/bio-stats")
-async def get_bio_stats():
+    """Đếm log trong bảng api_logs, gom nhóm theo từng phút trong 7 phút gần nhất"""
     if not getattr(db_manager, "connection", None):
-        return {"status": "error", "message": "Mất kết nối tới MariaDB"}
+        return {"status": "error", "message": "Mất kết nối MariaDB"}
 
     try:
+        # Chuẩn bị trước 7 mốc thời gian (Phút hiện tại lùi về 7 phút trước)
+        now = datetime.now()
+        timeline = []
+        labels = []
+        for i in range(6, -1, -1):
+            target_time = now - timedelta(minutes=i)
+            labels.append(target_time.strftime("%H:%M"))
+            timeline.append({"time": target_time.strftime("%H:%M"), "count": 0})
+
+        # Quét Database để lấy log trong 10 phút gần nhất (dư ra 3 phút cho chắc)
         cursor = db_manager.connection.cursor()
+        ten_mins_ago = (now - timedelta(minutes=10)).strftime("%Y-%m-%d %H:%M:%S")
         
-        cursor.execute("SELECT COUNT(*) FROM bio_tracking")
-        total_clicks = cursor.fetchone()[0]
-
         cursor.execute("""
-            SELECT platform, COUNT(*) as count 
-            FROM bio_tracking 
-            GROUP BY platform 
-            ORDER BY count DESC
-        """)
-        platforms = [{"name": row[0], "count": row[1]} for row in cursor.fetchall()]
-
-        cursor.execute("""
-            SELECT link_id, platform, ip_address, clicked_at 
-            FROM bio_tracking 
-            ORDER BY clicked_at DESC 
-            LIMIT 10
-        """)
-        recent_clicks = [
-            {
-                "link_id": row[0],
-                "platform": row[1],
-                "ip_address": row[2],
-                "time": row[3].strftime("%H:%M - %d/%m/%Y") if row[3] else "Unknown"
-            }
-            for row in cursor.fetchall()
-        ]
+            SELECT timestamp 
+            FROM api_logs 
+            WHERE timestamp >= %s
+        """, (ten_mins_ago,))
+        
+        # Đổ dữ liệu log thực tế vào các mốc thời gian tương ứng
+        for row in cursor.fetchall():
+            log_time_str = row[0].strftime("%H:%M")
+            for item in timeline:
+                if item["time"] == log_time_str:
+                    item["count"] += 1
+                    break
+                    
         cursor.close()
 
+        # Tách ra mảng Labels (Thời gian) và Values (Lượt truy cập) để trả về Frontend
+        values = [item["count"] for item in timeline]
+
         return {
-            "status": "success",
-            "total_clicks": total_clicks,
-            "platform_stats": platforms,
-            "recent_history": recent_clicks
+            "status": "success", 
+            "data": {
+                "labels": labels,
+                "values": values
+            }
         }
     except Exception as e:
         return {"status": "error", "message": str(e)}

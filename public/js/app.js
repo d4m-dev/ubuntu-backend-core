@@ -1,202 +1,290 @@
 // ==============================================================================
-// D4M OMNI-PANEL CORE LOGIC - GOD MODE
+// D4M OMNI-PANEL CORE LOGIC - GOD MODE (SAFE VERSION)
 // ==============================================================================
 
-// Tự động nhận diện URL đang truy cập (dù là IP mạng Lan, ngrok, Cloudflare hay Domain public)
 const API_BASE_URL = window.location.origin + "/api";
 
-function getAuthToken() { return localStorage.getItem("d4m_sso_token"); }
-function getApiHeaders() { return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getAuthToken()}` }; }
-
-let globalTunnelUrl = "";
-let activeIntervals = [];
-let logInterval = null;
-
 // ==========================================
-// 🚀 1. HỆ THỐNG XÁC THỰC SSO VÀ ĐIỀU HƯỚNG
+// 🚀 1. HỆ THỐNG XÁC THỰC SSO & QUYỀN LỰC
 // ==========================================
-
-function redirectToAuth() {
-    window.location.href = `/auth?redirect=${window.location.pathname}`;
-}
+function redirectToAuth() { window.location.href = `/auth?redirect=${window.location.pathname}`; }
 
 function parseJwt(token) {
     if(!token) return null;
     try {
         const base64Url = token.split('.')[1];
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-        }).join(''));
-        return JSON.parse(jsonPayload);
+        const base64 = decodeURIComponent(atob(base64Url.replace(/-/g, '+').replace(/_/g, '/')).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+        return JSON.parse(base64);
     } catch (e) { return null; }
 }
 
-function getAuthToken() { return localStorage.getItem('d4m_sso_token'); }
+function getAuthToken() { return localStorage.getItem('d4m_sso_token') || localStorage.getItem('token') || localStorage.getItem('ubuntu_token'); }
 function getApiHeaders() { return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getAuthToken()}` }; }
 
 function logout() { 
     localStorage.removeItem("d4m_sso_token"); 
+    localStorage.removeItem("token"); 
+    localStorage.removeItem("ubuntu_token"); 
     redirectToAuth(); 
 }
 
-async function fetchWithAuth(url, options = {}) {
-    if (!options.headers) options.headers = {};
-    options.headers['Authorization'] = `Bearer ${getAuthToken()}`;
-    const response = await fetch(url, options);
-    if (response.status === 401) { logout(); throw new Error("Phiên bản hết hạn"); }
-    return response;
-}
-
-function clearAllIntervals() {
-    activeIntervals.forEach(clearInterval); activeIntervals = [];
-    if(logInterval) clearInterval(logInterval);
-}
-
-// 🚀 ĐÂY LÀ HÀM CHECK CỦA SẾP (Đã được nâng cấp để điều khiển UI Omni-Panel)
 function checkAuthorization() {
     const token = getAuthToken();
-    const appContent = document.getElementById('appContent');
+    const appNav = document.getElementById('appNav');
+    const appMain = document.getElementById('appMain');
     const unauthorizedState = document.getElementById('unauthorizedState');
-    const unauthTitle = document.getElementById('unauthTitle');
-    const unauthDesc = document.getElementById('unauthDesc');
 
     const showLock = (title, desc) => {
-        if(unauthTitle && title) unauthTitle.innerText = title;
-        if(unauthDesc && desc) unauthDesc.innerHTML = desc;
-        if(unauthorizedState) {
-            unauthorizedState.classList.remove('hidden');
-            unauthorizedState.classList.add('flex');
-        }
-        if(appContent) appContent.classList.add('hidden');
+        if(document.getElementById('unauthTitle')) document.getElementById('unauthTitle').innerText = title;
+        if(document.getElementById('unauthDesc')) document.getElementById('unauthDesc').innerHTML = desc;
+        unauthorizedState?.classList.remove('hidden');
+        unauthorizedState?.classList.add('flex');
+        appNav?.classList.add('hidden');
+        appMain?.classList.add('hidden');
     };
 
-    if (!token) {
-        showLock("Cần Đăng Nhập", "Sếp chưa mang thẻ định danh D4M ID.<br>Vui lòng đăng nhập vào hệ sinh thái để tiếp tục.");
-        return false;
-    }
+    if (!token) return showLock("Cần Đăng Nhập", "Sếp chưa mang thẻ định danh D4M ID.<br>Vui lòng đăng nhập vào hệ sinh thái để tiếp tục.");
 
     const payload = parseJwt(token);
-    if (!payload || (payload.exp && payload.exp * 1000 < Date.now())) {
-        showLock("Lỗi Định Danh", "Thẻ D4M ID của sếp bị hỏng hoặc đã hết hạn.<br>Vui lòng đăng xuất và đăng nhập lại.");
-        return false;
-    }
-
-    if (Number(payload.active) !== 1) {
-        showLock("Tài Khoản Bị Đóng Băng", "Tài khoản của sếp <b>chưa đăng ký</b>.<br>Vui lòng liên hệ Admin để kích hoạt!");
-        return false;
-    }
-
-    // 🚀 BẮT BUỘC ROLE = 1 VÌ ĐÂY LÀ TRANG ADMIN
-    if (Number(payload.role) !== 1) {
-        showLock("Không Đủ Thẩm Quyền", "Khu vực này là trung tâm đầu não của Hệ thống.<br>Chỉ có <b>Tư Lệnh (Admin)</b> mới được phép truy cập!");
-        return false;
-    }
-
-    // Pass mọi chốt chặn -> Load User Info và mở UI
-    if(document.getElementById('adminName')) document.getElementById('adminName').innerText = payload.full_name || payload.sub || "Tư Lệnh";
-    if(document.getElementById('adminAvatar') && payload.avatar_url) document.getElementById('adminAvatar').src = payload.avatar_url;
+    if (!payload) return showLock("Lỗi Định Danh", "Thẻ D4M ID của sếp bị hỏng hoặc đã hết hạn.<br>Vui lòng đăng xuất và đăng nhập lại.");
     
-    if(unauthorizedState) {
-        unauthorizedState.classList.remove('flex');
-        unauthorizedState.classList.add('hidden');
+    if (Number(payload.active) !== 1) return showLock("Tài Khoản Đóng Băng", "Tài khoản của sếp <b>chưa đăng ký</b>.<br>Vui lòng kích hoạt tài khoản!");
+
+    // 🛡️ CHỐT CHẶN GOD MODE: CHỈ CÓ ROLE 1 HOẶC 'admin' MỚI QUA ĐƯỢC
+    if (Number(payload.role) !== 1 && payload.role !== 'admin') {
+        return showLock("Không Đủ Thẩm Quyền", "CẢNH BÁO: Chỉ có Tư Lệnh mới được phép truy cập Trung Tâm Lõi OMNI-PANEL.");
     }
-    if(appContent) {
-        appContent.classList.remove('hidden');
-        setTimeout(() => appContent.classList.remove('opacity-0'), 100);
-    }
+
+    // Pass chặn -> Mở UI
+    appNav?.classList.remove('hidden');
+    appMain?.classList.remove('hidden');
+    if(document.getElementById('top-admin-name')) document.getElementById('top-admin-name').innerText = payload.full_name || payload.username || "Tư Lệnh";
+    
+    // Nạp Avatar (Chạy ngầm)
+    try {
+        fetch(`${API_BASE_URL}/auth/profile/me`, { headers: getApiHeaders() })
+            .then(res => res.json())
+            .then(data => { if(data.status === 'success' && document.getElementById('adminAvatar')) document.getElementById('adminAvatar').src = data.data.avatar_url; });
+    } catch(e){}
+
     return true;
 }
 
-window.switchView = function(viewId) {
-    document.querySelectorAll('.nav-item').forEach(el => { el.classList.remove('active', 'active-red'); });
-    const activeNav = document.getElementById(`nav-${viewId}`);
-    if(activeNav) activeNav.classList.add(viewId === 'security' ? 'active-red' : 'active');
+// ==========================================
+// 🔔 2. HỆ THỐNG GIAO DIỆN CHUNG (TOAST & MODAL)
+// ==========================================
+window.showToast = function(message, type = 'success') {
+    const container = document.getElementById('toast-container');
+    if(!container) return;
+    const toast = document.createElement('div');
+    const icon = type === 'success' ? '<i class="fa-solid fa-shield-check text-green-400 text-lg"></i>' : '<i class="fa-solid fa-triangle-exclamation text-red-400 text-lg"></i>';
+    const border = type === 'success' ? 'border-green-500/30' : 'border-red-500/30';
+    const glow = type === 'success' ? 'shadow-[0_0_20px_rgba(74,222,128,0.2)]' : 'shadow-[0_0_20px_rgba(239,68,68,0.2)]';
+
+    toast.className = `flex items-center gap-3 px-5 py-4 rounded-2xl border ${border} bg-black/80 backdrop-blur-xl ${glow} toast-enter min-w-[280px] pointer-events-auto`;
+    toast.innerHTML = `${icon} <span class="text-white text-sm font-medium tracking-wide">${message}</span>`;
     
-    const titles = { 'dashboard': 'Tổng Quan Hệ Thống', 'upload': 'Trung Tâm Dữ Liệu', 'scripts': 'Kịch Bản Vận Hành', 'security': 'Aegis Radar Shield' };
-    if(document.getElementById('viewTitle')) document.getElementById('viewTitle').innerText = titles[viewId];
-
-    document.querySelectorAll('.omni-view').forEach(el => { el.classList.add('hidden'); el.classList.remove('block'); });
-    const viewEl = document.getElementById(`view-${viewId}`);
-    if(viewEl) { viewEl.classList.remove('hidden'); viewEl.classList.add('block'); }
-
-    clearAllIntervals();
-    if (viewId === 'dashboard') initDashboard();
-    else if (viewId === 'upload') initUpload();
-    else if (viewId === 'scripts') initScripts();
-    else if (viewId === 'security') initSecurity();
+    container.appendChild(toast);
+    setTimeout(() => {
+        toast.style.transform = 'translateX(120%)';
+        toast.style.opacity = '0';
+        toast.style.transition = 'all 0.4s ease-in';
+        setTimeout(() => toast.remove(), 400);
+    }, 4000);
 }
 
-// 🚀 KÍCH HOẠT LÁ CHẮN NGAY KHI LOAD TRANG
-document.addEventListener('DOMContentLoaded', () => {
-    const isAuthorized = checkAuthorization();
-    if (isAuthorized) {
-        window.switchView('dashboard');
+let pendingActionCallback = null;
+
+window.openConfirmModal = function(title, message, iconClass, colorTheme, btnText, callback) {
+    if(document.getElementById('confirmTitle')) document.getElementById('confirmTitle').innerText = title;
+    if(document.getElementById('confirmMessage')) document.getElementById('confirmMessage').innerText = message;
+    
+    const iconBox = document.getElementById('confirmIconBox');
+    const icon = document.getElementById('confirmIcon');
+    const btn = document.getElementById('confirmBtn');
+
+    if (iconBox && icon && btn) {
+        iconBox.className = `w-16 h-16 mx-auto rounded-2xl flex items-center justify-center mb-5 border shadow-lg bg-${colorTheme}-500/10 border-${colorTheme}-500/30 shadow-[0_0_20px_rgba(var(--tw-color-${colorTheme}-500),0.3)]`;
+        icon.className = `fa-solid ${iconClass} text-3xl text-${colorTheme}-500`;
+        btn.className = `flex-1 py-3 px-4 text-white rounded-xl font-bold transition-all shadow-[0_0_15px_rgba(var(--tw-color-${colorTheme}-500),0.4)] bg-${colorTheme}-600 hover:bg-${colorTheme}-500 hover:scale-105`;
+        btn.innerText = btnText;
     }
-});
 
-// ==========================================
-// 📊 2. LOGIC MODULE DASHBOARD
-// ==========================================
-let bioPlatformChartObj = null;
-
-function initDashboard() {
-    fetchSystemStats(); fetchBioStats(); fetchAITasks(); fetchServices();
-    activeIntervals.push(setInterval(fetchSystemStats, 2000));
-    activeIntervals.push(setInterval(fetchBioStats, 30000));
-    activeIntervals.push(setInterval(fetchAITasks, 2000));
+    pendingActionCallback = callback;
+    const modal = document.getElementById('customConfirmModal');
+    const content = document.getElementById('customConfirmContent');
+    if(modal && content) {
+        modal.classList.remove('hidden');
+        setTimeout(() => { modal.classList.remove('opacity-0'); content.classList.remove('scale-95'); }, 10);
+    }
 }
 
+window.closeConfirmModal = function() {
+    const modal = document.getElementById('customConfirmModal');
+    const content = document.getElementById('customConfirmContent');
+    if(modal && content) {
+        modal.classList.add('opacity-0');
+        content.classList.add('scale-95');
+        setTimeout(() => { modal.classList.add('hidden'); pendingActionCallback = null; }, 300);
+    }
+}
+
+window.executeConfirmAction = function() {
+    if (pendingActionCallback) { pendingActionCallback(); closeConfirmModal(); }
+}
+
+
+// ==========================================
+// 👑 3. BẢNG PHONG THẦN (QUẢN LÝ USER)
+// ==========================================
+let globalUsersList = [];
+
+window.fetchAdminUsers = async function() {
+    const tbody = document.getElementById('usersTableBody');
+    if(!tbody) return;
+    tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-10 text-center text-gray-500"><i class="fa-solid fa-circle-notch animate-spin text-purple-500 mr-2"></i>Đang triệu hồi dữ liệu...</td></tr>`;
+    try {
+        const res = await fetch(`${API_BASE_URL}/auth/admin/users`, { headers: getApiHeaders() });
+        const data = await res.json();
+        if(data.status === 'success') {
+            globalUsersList = data.users;
+            window.renderUsersTable(globalUsersList);
+        } else { showToast(data.detail, "error"); }
+    } catch(e) { showToast("Lỗi kết nối CSDL Người Dùng", "error"); }
+}
+
+window.renderUsersTable = function(users) {
+    const tbody = document.getElementById('usersTableBody');
+    if(!tbody) return;
+    tbody.innerHTML = '';
+    
+    if(users.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-10 text-center text-gray-500">Hệ thống chưa có người dùng nào.</td></tr>`;
+        return;
+    }
+
+    users.forEach(u => {
+        const roleBadge = u.role === 1 || u.role === 'admin' 
+            ? `<span class="bg-purple-500/20 text-purple-400 border border-purple-500/30 px-2 py-1 rounded text-[9px] font-black tracking-widest shadow-[0_0_15px_rgba(168,85,247,0.3)]"><i class="fa-solid fa-crown mr-1"></i>ADMIN</span>`
+            : `<span class="bg-gray-500/10 text-gray-400 border border-gray-500/20 px-2 py-1 rounded text-[9px] font-bold tracking-widest">USER</span>`;
+            
+        const activeBadge = u.active === 1
+            ? `<span class="text-green-400 text-[10px] font-bold block mt-1.5"><i class="fa-solid fa-circle-check"></i> Được Phép</span>`
+            : `<span class="text-red-400 text-[10px] font-bold block mt-1.5"><i class="fa-solid fa-ban"></i> Bị Khóa Ngục</span>`;
+
+        tbody.innerHTML += `
+            <tr class="border-b border-white/5 hover:bg-white/5 transition-colors user-row" data-search="${(u.full_name + ' ' + u.username + ' ' + u.email).toLowerCase()}">
+                <td class="px-4 py-3">
+                    <div class="flex items-center gap-3">
+                        <img src="${u.avatar_url}" class="w-8 h-8 rounded-lg border border-white/10 object-cover shadow-lg">
+                        <div>
+                            <p class="font-bold text-xs text-white">${u.full_name || u.username}</p>
+                            <p class="text-[9px] font-mono text-blue-400 bg-blue-500/10 inline-block px-1 mt-0.5 rounded border border-blue-500/20">@${u.username}</p>
+                        </div>
+                    </div>
+                </td>
+                <td class="px-4 py-3">
+                    <p class="text-[11px] text-gray-300 font-medium mb-0.5"><i class="fa-solid fa-envelope text-gray-500 w-3"></i> ${u.email}</p>
+                    <span class="text-[9px] font-bold ${u.is_verified ? 'text-green-400' : 'text-orange-400'}">${u.is_verified ? '<i class="fa-solid fa-shield-check"></i> Đã xác thực' : '<i class="fa-solid fa-triangle-exclamation"></i> Chờ xác thực'}</span>
+                </td>
+                <td class="px-4 py-3">${roleBadge}${activeBadge}</td>
+                <td class="px-4 py-3 text-right">
+                    <div class="flex gap-1.5 justify-end">
+                        <button onclick="actionToggleStatus(${u.id}, ${u.active})" class="w-7 h-7 rounded border border-white/10 bg-black/40 hover:bg-white/10 text-gray-300 transition-all flex items-center justify-center hover:scale-110" title="Khóa / Mở Khóa">
+                            <i class="fa-solid ${u.active === 1 ? 'fa-lock text-orange-400' : 'fa-unlock text-green-400'} text-[10px]"></i>
+                        </button>
+                        <button onclick="actionToggleRole(${u.id}, ${u.role})" class="w-7 h-7 rounded border border-white/10 bg-black/40 hover:bg-white/10 text-gray-300 transition-all flex items-center justify-center hover:scale-110" title="Phong Tước / Giáng Chức">
+                            <i class="fa-solid fa-user-shield ${u.role === 1 ? 'text-red-400' : 'text-purple-400'} text-[10px]"></i>
+                        </button>
+                        <button onclick="actionDeleteUser(${u.id})" class="w-7 h-7 rounded bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 transition-all flex items-center justify-center hover:scale-110 shadow-[0_0_10px_rgba(239,68,68,0.2)]" title="Thanh Trừng">
+                            <i class="fa-solid fa-skull text-[10px]"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+window.filterUsers = function() {
+    const input = document.getElementById('userSearchInput');
+    if(!input) return;
+    const query = input.value.toLowerCase();
+    document.querySelectorAll('.user-row').forEach(row => {
+        row.style.display = row.getAttribute('data-search').includes(query) ? '' : 'none';
+    });
+}
+
+window.actionToggleStatus = function(id, currentActive) {
+    const isLocking = currentActive === 1;
+    openConfirmModal(
+        isLocking ? "Giam Cầm Tài Khoản?" : "Ân Xá Tài Khoản?",
+        isLocking ? "Người này sẽ bị mất toàn quyền truy cập. Xác nhận khóa?" : "Khôi phục lại quyền truy cập cho tài khoản này vào hệ thống?",
+        isLocking ? "fa-lock" : "fa-unlock",
+        isLocking ? "orange" : "green",
+        isLocking ? "Khóa Ngay" : "Mở Khóa",
+        async () => {
+            try {
+                const res = await fetch(`${API_BASE_URL}/auth/admin/users/${id}/toggle-active`, { method: 'PUT', headers: getApiHeaders() });
+                const data = await res.json();
+                if(data.status === 'success') { showToast("Lệnh thay đổi Trạng Thái đã được thi hành!"); window.fetchAdminUsers(); }
+                else showToast(data.detail, "error");
+            } catch(e) { showToast("Lỗi mạng", "error"); }
+        }
+    );
+}
+
+window.actionToggleRole = function(id, currentRole) {
+    const isPromoting = currentRole !== 1;
+    openConfirmModal(
+        isPromoting ? "Phong Tước Tư Lệnh?" : "Giáng Chức Dân Thường?",
+        isPromoting ? "Tài khoản này sẽ có quyền hạn tối cao, kiểm soát sinh tử các user khác. Sếp chắc chứ?" : "Tước bỏ quyền Admin của tài khoản này?",
+        "fa-crown",
+        isPromoting ? "purple" : "orange",
+        isPromoting ? "Sắc Phong" : "Giáng Chức",
+        async () => {
+            try {
+                const res = await fetch(`${API_BASE_URL}/auth/admin/users/${id}/change-role`, { method: 'PUT', headers: getApiHeaders() });
+                const data = await res.json();
+                if(data.status === 'success') { showToast("Chiếu chỉ Tước Vị đã được ban hành!"); window.fetchAdminUsers(); }
+                else showToast(data.detail, "error");
+            } catch(e) { showToast("Lỗi mạng", "error"); }
+        }
+    );
+}
+
+window.actionDeleteUser = function(id) {
+    openConfirmModal(
+        "LỆNH THANH TRỪNG",
+        "CẢNH BÁO MỨC ĐỘ 1: Tài khoản này sẽ bị xóa VĨNH VIỄN khỏi Database. Không thể hoàn tác!",
+        "fa-skull-crossbones",
+        "red",
+        "Khai Đao",
+        async () => {
+            try {
+                const res = await fetch(`${API_BASE_URL}/auth/admin/users/${id}`, { method: 'DELETE', headers: getApiHeaders() });
+                const data = await res.json();
+                if(data.status === 'success') { showToast("Kẻ phản nghịch đã bị loại bỏ khỏi hệ thống!"); window.fetchAdminUsers(); }
+                else showToast(data.detail, "error");
+            } catch(e) { showToast("Lỗi mạng", "error"); }
+        }
+    );
+}
+
+
+// ==========================================
+// 📡 4. HỆ THỐNG GỌI TÀI NGUYÊN (DASHBOARD)
+// ==========================================
 async function fetchSystemStats() {
     try {
-        const res = await fetchWithAuth(`${API_BASE_URL}/dashboard/system-stats`);
+        const res = await fetch(`${API_BASE_URL}/dashboard/system-stats`, { headers: getApiHeaders() });
         const data = await res.json();
-        if(document.getElementById('cpu-val')) document.getElementById('cpu-val').innerText = `${data.cpu_usage_percent}%`;
-        if(document.getElementById('ram-val')) document.getElementById('ram-val').innerText = `${data.ram.percent}%`;
-        if(document.getElementById('ram-detail')) document.getElementById('ram-detail').innerText = `${data.ram.used_gb} / ${data.ram.total_gb} GB`;
-        if(document.getElementById('disk-val')) document.getElementById('disk-val').innerText = `${data.storage.percent}%`;
-        if(document.getElementById('disk-detail')) document.getElementById('disk-detail').innerText = `Free: ${data.storage.free_gb} GB`;
-    } catch (e) {}
-}
-
-window.fetchBioStats = async function() {
-    try {
-        const res = await fetchWithAuth(`${API_BASE_URL}/dashboard/bio-stats`);
-        const data = await res.json();
-        if (data.status === 'success') {
-            if(document.getElementById('totalBioClicks')) document.getElementById('totalBioClicks').innerText = data.total_clicks;
-            
-            const tbody = document.getElementById('bioHistoryTable');
-            if(tbody) {
-                tbody.innerHTML = '';
-                if (data.recent_history.length > 0) {
-                    data.recent_history.forEach(item => { tbody.innerHTML += `<tr class="hover:bg-white/5 transition border-b border-white/5 last:border-0"><td class="px-4 py-3 text-gray-400">${item.time}</td><td class="px-4 py-3 font-bold text-blue-400">${item.platform}</td><td class="px-4 py-3 text-gray-300">${item.link_id}</td><td class="px-4 py-3 text-gray-500 font-mono text-[10px]">${item.ip_address}</td></tr>`; });
-                } else { tbody.innerHTML = '<tr><td colspan="4" class="px-4 py-8 text-center text-gray-500">Hệ thống chưa ghi nhận lượt click nào.</td></tr>'; }
-            }
-
-            const canvas = document.getElementById('bioPlatformChart');
-            if(canvas) {
-                const ctx = canvas.getContext('2d');
-                if (bioPlatformChartObj) bioPlatformChartObj.destroy();
-                bioPlatformChartObj = new Chart(ctx, { type: 'doughnut', data: { labels: data.platform_stats.map(p => p.name), datasets: [{ data: data.platform_stats.map(p => p.count), backgroundColor: ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#ef4444'], borderColor: 'transparent', hoverOffset: 4 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom', labels: { color: '#9ca3af', font: {size: 10} } } } } });
-            }
-        }
-    } catch (e) {}
-}
-
-async function fetchAITasks() {
-    try {
-        const res = await fetchWithAuth(`${API_BASE_URL}/dashboard/tasks`);
-        const data = await res.json();
-        const list = document.getElementById('ai-task-list');
-        if(!list) return;
-        if (data.tasks.length === 0) list.innerHTML = '<p class="text-gray-500 text-sm italic py-8 text-center"><i class="fa-solid fa-check-double text-2xl mb-2 block"></i>Hàng đợi trống rỗng.</p>';
-        else {
-            list.innerHTML = '';
-            data.tasks.forEach(task => {
-                let cClass = task.color === 'orange' ? 'bg-orange-500' : (task.color === 'purple' ? 'bg-purple-500' : 'bg-blue-500');
-                list.innerHTML += `<div class="bg-black/30 p-3 rounded-xl border border-white/5"><div class="flex justify-between mb-2"><h3 class="font-bold text-[13px] text-white truncate max-w-[70%]">${task.title}</h3><span class="text-[10px] font-bold text-${task.color}-400">${task.status}</span></div><div class="w-full bg-[#111] rounded-full h-1.5"><div class="${cClass} h-1.5 rounded-full progress-striped" style="width: ${task.progress}%"></div></div></div>`;
-            });
+        if(data.status === 'success') {
+            if(document.getElementById('cpu-val')) document.getElementById('cpu-val').innerText = `${data.cpu_usage_percent}%`;
+            if(document.getElementById('ram-val')) document.getElementById('ram-val').innerText = `${data.ram.percent}%`;
+            if(document.getElementById('ram-detail')) document.getElementById('ram-detail').innerText = `${data.ram.used_gb} / ${data.ram.total_gb} GB`;
+            if(document.getElementById('disk-val')) document.getElementById('disk-val').innerText = `${data.storage.percent}%`;
+            if(document.getElementById('disk-detail')) document.getElementById('disk-detail').innerText = `Free: ${data.storage.free_gb} GB`;
         }
     } catch (e) {}
 }
@@ -205,363 +293,136 @@ async function fetchServices() {
     const container = document.getElementById('services-container');
     if(!container) return;
     try {
-        const res = await fetchWithAuth(`${API_BASE_URL}/dashboard/services`);
+        const res = await fetch(`${API_BASE_URL}/dashboard/services`, { headers: getApiHeaders() });
         const data = await res.json();
         container.innerHTML = ''; 
         for (const [serviceName, info] of Object.entries(data.services)) {
             const isChecked = info.active ? 'checked' : '';
-            let linkHtml = (info.active && info.public_url) ? `<div class="mt-3 text-[11px] bg-black/40 py-2 px-3 rounded-lg flex items-center justify-between border border-green-500/20 group w-full"><i class="fa-solid fa-globe text-green-400 mr-2 animate-pulse"></i><a href="${info.public_url}" target="_blank" class="text-green-400 hover:text-green-300 font-mono tracking-wider truncate flex-1">${info.public_url}</a><button onclick="copyToClipboard('${info.public_url}', this)" class="text-gray-400 hover:text-white bg-white/5 p-1 rounded ml-2"><i class="fa-regular fa-copy"></i></button></div>` : '';
-            container.innerHTML += `<div class="flex justify-between items-center p-4 rounded-2xl bg-white/5 hover:bg-white/10 transition border border-white/5"><div class="flex-1 pr-4 min-w-0"><h4 class="font-bold text-blue-300 capitalize text-sm truncate">${serviceName.replace(/_/g, ' ')}</h4><p class="text-[10px] text-gray-400 mt-1 uppercase tracking-widest truncate">${info.description}</p>${linkHtml}</div><label class="relative inline-flex items-center cursor-pointer flex-shrink-0"><input type="checkbox" id="toggle-${serviceName}" ${isChecked} onchange="toggleService('${serviceName}')" class="sr-only peer"><div class="w-10 h-5 bg-gray-700 rounded-full peer peer-checked:bg-purple-500 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-full"></div></label></div>`;
+            let linkHtml = (info.active && info.public_url) ? `<div class="mt-2 text-[10px] bg-black/40 py-1.5 px-2 rounded flex justify-between"><a href="${info.public_url}" target="_blank" class="text-green-400 truncate">${info.public_url}</a></div>` : '';
+            container.innerHTML += `<div class="flex justify-between items-center p-3 rounded-xl bg-white/5 border border-white/5"><div class="flex-1 pr-4 min-w-0"><h4 class="font-bold text-blue-300 capitalize text-sm">${serviceName.replace(/_/g, ' ')}</h4><p class="text-[10px] text-gray-400 mt-0.5 truncate">${info.description}</p>${linkHtml}</div><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" ${isChecked} onchange="toggleService('${serviceName}')" class="sr-only peer"><div class="w-9 h-5 bg-gray-700 rounded-full peer peer-checked:bg-purple-500 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-full"></div></label></div>`;
         }
     } catch (e) {}
 }
 
 window.toggleService = async function(serviceName) {
-    try { await fetchWithAuth(`${API_BASE_URL}/dashboard/services/toggle/${serviceName}`, { method: 'POST' }); setTimeout(fetchServices, 600); } catch (e) { fetchServices(); }
+    try { await fetch(`${API_BASE_URL}/dashboard/services/toggle/${serviceName}`, { method: 'POST', headers: getApiHeaders() }); setTimeout(fetchServices, 500); } catch (e) {}
 }
 
-// === AI SYSADMIN CHAT ===
-window.sendQuickPrompt = function(promptText) {
-    const aiInput = document.getElementById('ai-input');
-    if(!aiInput) return;
-    aiInput.value = promptText;
-    document.getElementById('ai-form').dispatchEvent(new Event('submit')); 
+window.fetchAITasks = async function() {
+    try {
+        const res = await fetch(`${API_BASE_URL}/dashboard/tasks`, { headers: getApiHeaders() });
+        const data = await res.json();
+        const list = document.getElementById('ai-task-list');
+        if(!list) return;
+        if (data.tasks.length === 0) {
+            list.innerHTML = '<p class="text-gray-500 text-sm italic py-8 text-center"><i class="fa-solid fa-check-double text-2xl mb-2 block"></i>Hàng đợi trống rỗng.</p>';
+        } else {
+            list.innerHTML = '';
+            data.tasks.forEach(task => {
+                let cClass = task.color === 'orange' ? 'bg-orange-500' : (task.color === 'purple' ? 'bg-purple-500' : 'bg-blue-500');
+                list.innerHTML += `
+                    <div class="bg-black/30 p-3 rounded-xl border border-white/5 relative overflow-hidden group">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-bold text-[13px] text-white truncate max-w-[65%]" title="${task.title}">${task.title}</h3>
+                            <span class="text-[10px] font-bold text-${task.color}-400 px-2 py-0.5 bg-${task.color}-900/30 rounded border border-${task.color}-500/20">${task.status}</span>
+                        </div>
+                        <div class="w-full bg-[#111] rounded-full h-1.5 mt-2">
+                            <div class="${cClass} h-1.5 rounded-full transition-all duration-1000 progress-striped progress-animated" style="width: ${task.progress}%"></div>
+                        </div>
+                    </div>`;
+            });
+        }
+    } catch (e) {}
 }
 
-function appendMessage(sender, text, actionText = null) {
-    const box = document.getElementById('ai-chat-box');
-    if(!box) return;
-    const isUser = sender === 'user';
-    const bg = isUser ? 'bg-gradient-to-br from-purple-600 to-blue-600 text-white rounded-br-none shadow-md border border-purple-500/50' : 'bg-black/50 text-gray-300 rounded-bl-none shadow-sm border border-white/10';
-    const icon = isUser ? '' : '<div class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex flex-shrink-0 items-center justify-center shadow-md"><i class="fa-solid fa-robot text-white text-xs"></i></div>';
-    let actionHtml = actionText ? `<div class="mt-3 text-xs text-green-400 bg-green-500/10 py-1.5 px-3 rounded-lg border border-green-500/20 flex items-center"><i class="fa-solid fa-bolt text-yellow-400 mr-2 animate-pulse"></i>${actionText}</div>` : '';
-    const displayText = isUser ? text : parseAIMessage(text);
-    box.innerHTML += `<div class="flex items-start space-x-3 ${isUser?'justify-end':'justify-start'} w-full">${!isUser ? icon : ''}<div class="${bg} p-3.5 rounded-2xl max-w-[85%] text-[13px] leading-relaxed relative">${displayText}${actionHtml}</div></div>`;
-    box.scrollTop = box.scrollHeight;
+// ==========================================
+// 📦 5. TÍNH NĂNG UPLOAD & AI CHAT
+// ==========================================
+const dropZone = document.getElementById('drop-zone');
+const fileInput = document.getElementById('file-input');
+if (dropZone && fileInput) {
+    dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('drag-active'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-active'));
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault(); dropZone.classList.remove('drag-active');
+        if (e.dataTransfer.files.length) { fileInput.files = e.dataTransfer.files; handleFileUpload(fileInput.files[0]); }
+    });
+    fileInput.addEventListener('change', () => { if (fileInput.files.length) handleFileUpload(fileInput.files[0]); });
+}
+
+async function handleFileUpload(file) {
+    if (!file.name.endsWith('.zip')) return showToast("Chỉ chấp nhận định dạng .zip", "error");
+    const uploadText = document.getElementById('upload-text');
+    const uploadIcon = document.getElementById('upload-icon');
+    uploadText.innerText = `Đang xử lý: ${file.name}...`;
+    uploadIcon.className = "fa-solid fa-circle-notch fa-spin text-4xl text-yellow-400 mb-3";
+    
+    const formData = new FormData(); formData.append("file", file);
+    try {
+        const res = await fetch(`${API_BASE_URL}/projects/upload`, { method: "POST", headers: {'Authorization': `Bearer ${getAuthToken()}`}, body: formData });
+        if (res.ok) {
+            uploadText.innerText = "Triển khai thành công!";
+            uploadIcon.className = "fa-solid fa-circle-check text-4xl text-green-400 mb-3";
+            showToast("Đã deploy xong dự án mới!", "success");
+        } else {
+            uploadText.innerText = "Lỗi khi triển khai!";
+            uploadIcon.className = "fa-solid fa-circle-xmark text-4xl text-red-400 mb-3";
+            showToast("Có lỗi xảy ra", "error");
+        }
+    } catch(e) {
+        uploadText.innerText = "Mất kết nối máy chủ!";
+    }
+    setTimeout(() => {
+        uploadText.innerText = "Thả file .ZIP vào đây để Deploy";
+        uploadIcon.className = "fa-solid fa-cloud-arrow-up text-4xl text-blue-400 mb-3";
+    }, 3000);
 }
 
 const aiForm = document.getElementById('ai-form');
-if (aiForm) {
+if(aiForm) {
     aiForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const aiInput = document.getElementById('ai-input');
-        const msg = aiInput.value.trim(); if (!msg) return;
-        appendMessage('user', msg);
-        aiInput.value = ''; aiInput.disabled = true;
-
+        const inputEl = document.getElementById('ai-input');
         const box = document.getElementById('ai-chat-box');
+        const msg = inputEl.value.trim(); if(!msg) return;
+        
+        box.innerHTML += `<div class="flex items-start space-x-3 justify-end w-full"><div class="bg-gradient-to-br from-purple-600 to-blue-600 text-white p-3.5 rounded-2xl rounded-br-none max-w-[85%] text-[13px]">${msg}</div></div>`;
+        inputEl.value = ''; inputEl.disabled = true; box.scrollTop = box.scrollHeight;
+        
         const tempId = 'loading-' + Date.now();
-        box.innerHTML += `<div id="${tempId}" class="flex items-start space-x-3 w-full"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex flex-shrink-0 items-center justify-center shadow-md"><i class="fa-solid fa-robot text-white text-xs animate-pulse"></i></div><div class="bg-black/50 border border-white/10 px-4 py-3 rounded-2xl rounded-bl-none flex items-center space-x-1 h-10"><div class="w-1.5 h-1.5 bg-purple-400 rounded-full animate-bounce"></div><div class="w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div><div class="w-1.5 h-1.5 bg-purple-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div></div></div>`;
+        box.innerHTML += `<div id="${tempId}" class="flex items-start space-x-3 w-full"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex justify-center items-center"><i class="fa-solid fa-robot text-white text-xs animate-pulse"></i></div><div class="bg-black/50 border border-white/10 px-4 py-3 rounded-2xl rounded-bl-none text-gray-400 text-xs">Đang suy nghĩ...</div></div>`;
         box.scrollTop = box.scrollHeight;
 
         try {
-            const res = await fetchWithAuth(`${API_BASE_URL}/ai-admin/chat`, { method: 'POST', body: JSON.stringify({ message: msg }) });
-            document.getElementById(tempId).remove();
-            if (res.ok) {
+            const res = await fetch(`${API_BASE_URL}/ai-admin/chat`, { method: 'POST', headers: getApiHeaders(), body: JSON.stringify({ message: msg }) });
+            document.getElementById(tempId)?.remove();
+            if(res.ok) {
                 const data = await res.json();
-                appendMessage('ai', data.reply, data.action_executed);
+                let actionHtml = data.action_executed ? `<div class="mt-2 text-[10px] text-green-400 bg-green-500/10 py-1 px-2 rounded border border-green-500/20"><i class="fa-solid fa-bolt mr-1"></i>${data.action_executed}</div>` : '';
+                box.innerHTML += `<div class="flex items-start space-x-3 w-full"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex justify-center items-center"><i class="fa-solid fa-robot text-white text-xs"></i></div><div class="bg-black/50 border border-white/10 p-3.5 rounded-2xl rounded-bl-none max-w-[85%] text-[13px] text-gray-300">${data.reply}${actionHtml}</div></div>`;
                 if(data.action_executed) fetchServices();
-            } else { appendMessage('ai', `❌ Lỗi kết nối: ${(await res.json()).detail}`); }
-        } catch (error) {
-            if(document.getElementById(tempId)) document.getElementById(tempId).remove();
-            appendMessage('ai', "❌ Lão đại, tôi không thể kết nối tới lõi xử lý AI.");
-        } finally { aiInput.disabled = false; aiInput.focus(); }
+            }
+        } catch(e) { document.getElementById(tempId)?.remove(); }
+        inputEl.disabled = false; inputEl.focus(); box.scrollTop = box.scrollHeight;
     });
 }
+window.sendQuickPrompt = function(txt) { const input = document.getElementById('ai-input'); if(input) { input.value = txt; document.getElementById('ai-form').dispatchEvent(new Event('submit')); } }
 
 // ==========================================
-// ☁️ 3. LOGIC MODULE UPLOAD CENTER
-// ==========================================
-let typingTimer;
-
-function initUpload() { window.switchUploadTab('music'); }
-
-window.switchUploadTab = function(tab) {
-    if(document.getElementById('tab-up-music')) document.getElementById('tab-up-music').className = tab === 'music' ? "flex-1 py-3 rounded-xl border border-blue-500/50 bg-blue-500/10 text-blue-400 font-bold transition-all" : "flex-1 py-3 rounded-xl border border-white/10 bg-white/5 text-gray-400 hover:text-white transition-all";
-    if(document.getElementById('tab-up-image')) document.getElementById('tab-up-image').className = tab === 'image' ? "flex-1 py-3 rounded-xl border border-emerald-500/50 bg-emerald-500/10 text-emerald-400 font-bold transition-all" : "flex-1 py-3 rounded-xl border border-white/10 bg-white/5 text-gray-400 hover:text-white transition-all";
-    if(document.getElementById('form-music')) document.getElementById('form-music').style.display = tab === 'music' ? 'block' : 'none';
-    if(document.getElementById('form-image')) document.getElementById('form-image').style.display = tab === 'image' ? 'block' : 'none';
-}
-
-window.checkFolderExistence = async function(type, value) {
-    clearTimeout(typingTimer);
-    const wEl = document.getElementById(`${type}-warning`);
-    const name = value.trim();
-    if (!name) { wEl.classList.add('hidden'); return; }
-    wEl.className = "text-sm font-bold mt-2 text-blue-400"; wEl.innerHTML = 'Đang tìm kiếm...'; wEl.classList.remove('hidden');
-    
-    typingTimer = setTimeout(async () => {
-        try {
-            const res = await fetchWithAuth(`${API_BASE_URL}/admin/check-folder?folder_type=${type}&name=${name}`);
-            if (res.ok) {
-                const data = await res.json();
-                if (data.exists) wEl.innerHTML = type === 'music' ? '<span class="text-yellow-500">⚠️ Thư mục đã tồn tại! Sẽ GHI ĐÈ.</span>' : '<span class="text-blue-400">ℹ️ Thư viện đã có! Ảnh sẽ CỘNG DỒN.</span>';
-                else wEl.innerHTML = '<span class="text-green-400">✅ Hợp lệ: Thư mục mới!</span>';
-            }
-        } catch (e) { wEl.innerHTML = '<span class="text-red-400">Lỗi kết nối</span>'; }
-    }, 500);
-}
-
-window.uploadMusic = async function() {
-    const name = document.getElementById('music-name').value.trim();
-    if(!name) return showToast('LỖI', 'Vui lòng nhập tên bài hát!', 'error');
-    const fd = new FormData(); fd.append('base_name', name);
-    const files = { 'audio': document.getElementById('m-audio')?.files[0], 'beat': document.getElementById('m-beat')?.files[0], 'video': document.getElementById('m-video')?.files[0], 'cover': document.getElementById('m-cover')?.files[0], 'lyric': document.getElementById('m-lyric')?.files[0] };
-    let hasFiles = false; for (const [k, v] of Object.entries(files)) if (v) { fd.append(k, v); hasFiles = true; }
-    if (!hasFiles) return showToast('LỖI', 'Vui lòng chọn ít nhất 1 file!', 'error');
-    try {
-        showToast('HỆ THỐNG', 'Đang tải lên cloud...', 'success');
-        const res = await fetch(`${API_BASE_URL}/admin/upload-music`, { method: 'POST', headers: {'Authorization': `Bearer ${getAuthToken()}`}, body: fd });
-        if(res.ok) { showToast('THÀNH CÔNG', 'Tải lên hoàn tất!', 'success'); document.getElementById('music-name').value = ''; }
-        else showToast('THẤT BẠI', 'Upload lỗi', 'error');
-    } catch(e) {}
-}
-
-window.uploadImages = async function() {
-    const folder = document.getElementById('image-folder').value.trim();
-    const files = document.getElementById('i-files')?.files;
-    if(!folder || !files || files.length===0) return showToast('LỖI', 'Chưa nhập đủ thông tin!', 'error');
-    const fd = new FormData(); fd.append('folder_name', folder); for(let f of files) fd.append('images', f);
-    try {
-        showToast('HỆ THỐNG', 'Đang tải ảnh lên...', 'success');
-        const res = await fetch(`${API_BASE_URL}/admin/upload-images`, { method: 'POST', headers: {'Authorization': `Bearer ${getAuthToken()}`}, body: fd });
-        if(res.ok) { showToast('THÀNH CÔNG', 'Tải lên hoàn tất!', 'success'); document.getElementById('image-folder').value = ''; }
-    } catch(e) {}
-}
-
-// ==========================================
-// ⚙️ 4. LOGIC MODULE BỘ TƯ LỆNH SCRIPTS
-// ==========================================
-let currentScript = null, isRunning = false, currentScriptConfig = {};
-
-function initScripts() { 
-    window.fetchScripts(); 
-    const grid = document.getElementById('cronMonthlyDaysGrid');
-    if(grid && grid.innerHTML === '') {
-        for(let i=1; i<=31; i++) grid.innerHTML += `<label class="flex items-center gap-1 bg-white/5 p-1 rounded"><input type="checkbox" name="cronMonthDays" value="${i}" onchange="compileCronFromUI()"><span>${i}</span></label>`;
-    }
-}
-
-window.fetchScripts = async function() {
-    try {
-        const res = await fetch(`${API_BASE_URL}/scripts/list`, { headers: getApiHeaders() });
-        if (!res.ok) return;
-        const data = await res.json();
-        const listEl = document.getElementById('scriptList');
-        if(!listEl) return;
-        listEl.innerHTML = '';
-        data.scripts.forEach(sc => {
-            const isRun = sc.status === 'running';
-            if (currentScript === sc.name) { isRunning = isRun; currentScriptConfig = {expr: sc.raw_cron_expr, auto_yes: sc.raw_auto_yes, args: sc.raw_args}; updateControlPanel(sc.cron); }
-            const badge = sc.cron ? `<span class="text-[9px] bg-purple-500/20 text-purple-300 px-1.5 py-0.5 rounded border border-purple-500/30">Cron</span>` : '';
-            listEl.innerHTML += `<div onclick="selectScript('${sc.name}', ${isRun}, '${sc.cron || ''}')" class="glass-card p-3 flex justify-between items-center ${currentScript===sc.name?'border-purple-500 bg-purple-500/10 cursor-pointer':'cursor-pointer'}"><div class="flex items-center gap-3"><i class="fa-brands fa-python text-lg ${isRun?'text-green-400':'text-gray-500'}"></i><div><h3 class="font-bold text-white text-xs">${sc.name}</h3><div class="text-[9px] mt-0.5 ${isRun?'text-green-400':'text-gray-500'}">${isRun?'Running':'Ready'}</div></div></div>${badge}</div>`;
-        });
-    } catch(e) {}
-}
-
-function updateControlPanel(cronInfo) {
-    if(document.getElementById('ctrlTitle')) document.getElementById('ctrlTitle').innerText = currentScript;
-    if(document.getElementById('terminalTitle')) document.getElementById('terminalTitle').innerText = `root@d4m-server:~/scripts/${currentScript}`;
-    if(document.getElementById('ctrlStatus')) document.getElementById('ctrlStatus').innerHTML = isRunning ? `<i class="fa-solid fa-circle text-[10px] text-green-500 animate-pulse mr-1"></i> Đang chạy` : `<i class="fa-solid fa-circle text-[10px] text-gray-500 mr-1"></i> Đã dừng`;
-    if(document.getElementById('ctrlCron')) document.getElementById('ctrlCron').innerHTML = cronInfo ? `<i class="fa-solid fa-clock text-purple-400 mr-1"></i> ${cronInfo}` : `<i class="fa-solid fa-clock text-gray-600 mr-1"></i> Trống`;
-    
-    const btnPlay = document.getElementById('btnPlayStop');
-    if(btnPlay) {
-        btnPlay.disabled = false; 
-        if (isRunning) { btnPlay.className = "px-6 py-2 rounded-lg font-bold bg-red-600 text-white"; btnPlay.innerText = "Buộc Dừng"; document.getElementById('terminalInputBox')?.classList.remove('hidden'); document.getElementById('manualAutoYesLabel')?.classList.add('hidden'); } 
-        else { btnPlay.className = "px-6 py-2 rounded-lg font-bold bg-green-600 text-white"; btnPlay.innerText = "Khởi Động"; document.getElementById('terminalInputBox')?.classList.add('hidden'); document.getElementById('manualAutoYesLabel')?.classList.remove('hidden'); }
-    }
-    if(document.getElementById('btnCron')) document.getElementById('btnCron').disabled = false;
-}
-
-window.selectScript = function(name, runState, cronInfo) {
-    currentScript = name; isRunning = runState; window.fetchScripts();
-    if(document.getElementById('terminalBody')) document.getElementById('terminalBody').innerHTML = `> Đang tải log của ${name}...\n`;
-    if(logInterval) clearInterval(logInterval);
-    fetchLogs(); logInterval = setInterval(() => { fetchLogs(); window.fetchScripts(); }, 2000); 
-}
-
-window.toggleCurrentScript = async function() {
-    if (!currentScript) return;
-    const action = isRunning ? 'stop' : 'start';
-    const autoYes = document.getElementById('manualAutoYes')?.checked || false;
-    if(document.getElementById('btnPlayStop')) document.getElementById('btnPlayStop').innerText = "Đang gửi...";
-    try {
-        const res = await fetch(`${API_BASE_URL}/scripts/${action}/${currentScript}${action==='start'?'?auto_yes='+autoYes:''}`, { method: 'POST', headers: getApiHeaders() });
-        if(res.ok) { isRunning = !isRunning; updateControlPanel(''); window.fetchScripts(); } 
-        else showToast('LỖI', (await res.json()).detail, 'error');
-    } catch(e) {}
-}
-
-async function fetchLogs() {
-    if (!currentScript) return;
-    try {
-        const res = await fetch(`${API_BASE_URL}/scripts/logs/${currentScript}`, { headers: getApiHeaders() });
-        if (res.ok) {
-            const data = await res.json();
-            let coloredLog = data.logs.replace(/ERROR|LỖI/g, '<span class="text-red-400 font-bold">$&</span>').replace(/BẮT ĐẦU CHẠY/g, '<span class="text-blue-400 font-bold">$&</span>');
-            const term = document.getElementById('terminalBody');
-            if (term && coloredLog !== term.innerHTML) { term.innerHTML = coloredLog || '> Chưa có log...'; term.scrollTop = term.scrollHeight; }
-        }
-    } catch(e) {}
-}
-
-window.sendTerminalInput = async function() {
-    if (!currentScript || !isRunning) return;
-    const inputEl = document.getElementById('terminalInput');
-    const cmd = inputEl.value; inputEl.value = ''; inputEl.disabled = true;
-    try {
-        await fetch(`${API_BASE_URL}/scripts/input/${currentScript}`, { method: 'POST', headers: getApiHeaders(), body: JSON.stringify({ command: cmd }) });
-        fetchLogs(); 
-    } catch (e) { showToast("LỖI", "Không thể gửi lệnh!", "error"); }
-    inputEl.disabled = false; inputEl.focus();
-}
-
-if(document.getElementById('terminalInput')) {
-    document.getElementById('terminalInput').addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') { e.preventDefault(); window.sendTerminalInput(); }
-    });
-}
-
-// CRON MODAL UI
-window.openCronModal = function() { 
-    if(!currentScript) return; 
-    if(document.getElementById('cronFileName')) document.getElementById('cronFileName').innerText = currentScript;
-    if(document.getElementById('cronInput')) document.getElementById('cronInput').value = currentScriptConfig.expr || '* * * * *';
-    if(document.getElementById('cronTypeSelect')) { document.getElementById('cronTypeSelect').value = 'custom'; window.handleCronTypeChange(); }
-    const modal = document.getElementById('cronModal');
-    if(modal) { modal.classList.remove('hidden'); setTimeout(() => modal.classList.remove('opacity-0'), 10); }
-}
-window.closeCronModal = function() { 
-    const modal = document.getElementById('cronModal');
-    if(modal) { modal.classList.add('opacity-0'); setTimeout(() => modal.classList.add('hidden'), 300); }
-}
-window.handleCronTypeChange = function() { 
-    document.querySelectorAll('.cron-sub-panel').forEach(p => p.classList.add('hidden')); 
-    const typeSelect = document.getElementById('cronTypeSelect');
-    if(typeSelect) {
-        const panel = document.getElementById(`panel-${typeSelect.value}`);
-        if(panel) panel.classList.remove('hidden'); 
-        window.compileCronFromUI(); 
-    }
-}
-window.compileCronFromUI = function() { 
-    if(document.getElementById('computedCronString') && document.getElementById('cronInput')) {
-        document.getElementById('computedCronString').innerText = document.getElementById('cronInput').value; 
-    }
-}
-window.saveCron = async function() { 
-    const e = document.getElementById('computedCronString')?.innerText; 
-    if(e) {
-        await fetch(`${API_BASE_URL}/scripts/schedule/${currentScript}`, { method:'POST', headers: getApiHeaders(), body:JSON.stringify({cron_expr: e, auto_yes: false, args: ""}) }); 
-        window.closeCronModal(); window.fetchScripts(); 
-    }
-}
-window.removeCron = async function() { 
-    await fetch(`${API_BASE_URL}/scripts/unschedule/${currentScript}`, { method:'POST', headers: getApiHeaders() }); 
-    window.closeCronModal(); window.fetchScripts(); 
-}
-
-// ==========================================
-// 🛡️ 5. LOGIC MODULE AEGIS RADAR
-// ==========================================
-function initSecurity() {
-    window.fetchRadarData(); window.fetchBlacklist();
-    activeIntervals.push(setInterval(window.fetchRadarData, 5000));
-    activeIntervals.push(setInterval(window.fetchBlacklist, 10000));
-}
-
-window.fetchRadarData = async function() {
-    try {
-        const res = await fetch(`${API_BASE_URL}/security/radar`, { headers: getApiHeaders() });
-        if(!res.ok) return; const data = await res.json();
-        if(data.report) {
-            if(document.getElementById('statTotal')) document.getElementById('statTotal').innerText = data.report.total_requests;
-            if(document.getElementById('statPeak')) document.getElementById('statPeak').innerText = data.report.peak_hour.split(' ')[0];
-            const devBox = document.getElementById('statDevices'); 
-            if(devBox) {
-                devBox.innerHTML = '';
-                for (const [device, count] of Object.entries(data.report.device_stats)) devBox.innerHTML += `<div class="text-center"><i class="fa-solid fa-microchip text-xl text-gray-400 mb-1"></i><div class="text-[10px] font-bold text-white">${count}</div></div>`;
-            }
-            const ipList = document.getElementById('topIpList');
-            if(ipList) {
-                if(data.report.top_attackers_or_users.length === 0) ipList.innerHTML = '<div class="text-gray-500 font-mono text-center text-sm">Radar trống.</div>';
-                else {
-                    const maxReq = data.report.top_attackers_or_users[0].count; ipList.innerHTML = '';
-                    data.report.top_attackers_or_users.forEach((item, index) => {
-                        const percent = Math.max(5, (item.count / maxReq) * 100);
-                        const isThreat = item.count > 100 ? 'bg-red-500 shadow-[0_0_10px_#ef4444]' : 'bg-blue-500';
-                        ipList.innerHTML += `<div class="glass-card p-3 group"><div class="flex justify-between items-center mb-2"><div class="flex gap-2 items-center"><span class="text-[10px] text-gray-500">#${index+1}</span><span class="font-mono text-sm ${item.count>100?'text-red-400':'text-blue-300'} font-bold">${item.ip}</span></div><div class="flex items-center gap-2"><span class="font-black text-white">${item.count}</span> <button onclick="quickBan('${item.ip}')" class="text-red-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition"><i class="fa-solid fa-crosshairs"></i></button></div></div><div class="w-full bg-black/50 rounded-full h-1"><div class="h-1 rounded-full ${isThreat}" style="width: ${percent}%"></div></div></div>`;
-                    });
-                }
-            }
-        }
-    } catch(e) {}
-}
-
-window.fetchBlacklist = async function() {
-    try {
-        const res = await fetch(`${API_BASE_URL}/security/blacklist`, { headers: getApiHeaders() });
-        if(!res.ok) return; const data = await res.json();
-        const keys = Object.keys(data.blacklist);
-        if(document.getElementById('blacklistCount')) document.getElementById('blacklistCount').innerText = `${keys.length} Bị Giam`;
-        if(document.getElementById('statBannedCount')) document.getElementById('statBannedCount').innerText = `${keys.length} IP bị giam`;
-        
-        const threatEl = document.getElementById('statThreat');
-        if(threatEl) {
-            if(keys.length > 5) { threatEl.innerText = "BÁO ĐỘNG"; threatEl.className = "text-2xl font-black text-red-500 mt-1"; } 
-            else { threatEl.innerText = "AN TOÀN"; threatEl.className = "text-2xl font-black text-green-500 mt-1"; }
-        }
-        
-        const container = document.getElementById('blacklistContainer');
-        if(container) {
-            if(keys.length === 0) container.innerHTML = '<div class="text-center text-gray-600 py-8 font-mono text-sm">Hầm ngục trống.</div>';
-            else {
-                container.innerHTML = '';
-                for (const [ip, info] of Object.entries(data.blacklist)) {
-                    const d = new Date(info.expires_at * 1000).toLocaleString('vi-VN', {hour:'2-digit', minute:'2-digit', day:'2-digit', month:'2-digit'});
-                    container.innerHTML += `<div class="bg-red-950/20 p-2 rounded-lg flex justify-between items-center group"><div class="font-mono text-xs text-red-400">${ip}<div class="text-[9px] text-gray-500 mt-0.5">Khóa đến: ${d}</div></div><button onclick="unbanIp('${ip}')" class="px-2 py-1 bg-gray-800 text-[10px] text-white rounded hover:bg-green-600 opacity-0 group-hover:opacity-100 transition">Thả</button></div>`;
-                }
-            }
-        }
-    } catch(e) {}
-}
-
-window.quickBan = function(ip) { 
-    if(document.getElementById('banIpInput')) { document.getElementById('banIpInput').value = ip; document.getElementById('banIpInput').focus(); }
-}
-
-window.executeBan = async function() {
-    const ip = document.getElementById('banIpInput')?.value.trim(); 
-    const hours = document.getElementById('banHoursInput')?.value || 24;
-    if(!ip) return showToast('LỖI', 'Chưa nhập IP', 'error');
-    try {
-        const res = await fetch(`${API_BASE_URL}/security/ban`, { method: 'POST', headers: getApiHeaders(), body: JSON.stringify({ ip, hours, reason: "Manual Ban from Omni-Panel" }) });
-        if(res.ok) { document.getElementById('banIpInput').value = ''; window.fetchBlacklist(); showToast('ĐÃ KHÓA', `IP ${ip} đã bị giam ${hours} giờ.`, 'success'); }
-        else showToast('THẤT BẠI', (await res.json()).detail, 'error');
-    } catch(e) {}
-}
-
-window.unbanIp = async function(ip) {
-    try { 
-        const res = await fetch(`${API_BASE_URL}/security/unban/${ip}`, { method: 'POST', headers: getApiHeaders() }); 
-        if(res.ok) { window.fetchBlacklist(); showToast('PHÓNG THÍCH', `Đã mở khóa IP ${ip}`, 'success'); } 
-    } catch(e) {}
-}
-
-// ==========================================
-// 🚀 KHỞI ĐỘNG HỆ THỐNG GỐC (LIFECYCLE)
+// 🚀 6. KHỞI ĐỘNG CHUNG (LIFECYCLE)
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
-    const payload = parseJwt(getAuthToken());
-    if (!payload || Number(payload.role) !== 1) {
-        if(document.getElementById('lockScreen')) document.getElementById('lockScreen').style.display = 'flex';
-    } else {
-        if(document.getElementById('lockScreen')) document.getElementById('lockScreen').style.display = 'none';
-        if(document.getElementById('adminName')) document.getElementById('adminName').innerText = payload.full_name || payload.sub;
-        if(document.getElementById('adminAvatar') && payload.avatar_url) document.getElementById('adminAvatar').src = payload.avatar_url;
+    if(checkAuthorization()) {
+        // Nạp dữ liệu lần đầu
+        fetchSystemStats(); 
+        fetchServices(); 
+        fetchAdminUsers(); 
+        fetchAITasks();
         
-        // Mở màn hình đầu tiên
-        window.switchView('dashboard');
+        // Cắm cờ lập lịch tải ngầm (Tránh Spam)
+        setInterval(fetchSystemStats, 2000); // 2s / lần
+        setInterval(fetchAITasks, 2000);     // Hàng đợi Redis
+        setInterval(fetchServices, 10000);   // Các API Service đang mở
     }
 });

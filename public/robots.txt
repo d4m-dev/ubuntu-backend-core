@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /hub.html
+Allow: /$
+Disallow: /admin/
+Disallow: /admin-master.html
+Disallow: /admin-users.html
+Disallow: /api/
+Disallow: /auth/
+Disallow: /audio-test.html

@@ -129,7 +129,7 @@ def setup_frontend_routes(app: FastAPI):
         "/": "index.html", 
         "/hub": "hub.html", 
         "/auth": "auth.html",
-        "/documentation": "documentation.html", 
+        "/docs": "documentation.html", 
         
         # 📂 ADMIN (Lõi Quản trị)
         "/admin/dashboard": "admin/dashboard.html", 

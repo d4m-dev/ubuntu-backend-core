@@ -3,173 +3,186 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>d4m-dev Core | Documentation</title>
+    <title>D4M OMNI-PANEL | Documentation v2.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .glass-card { background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); transition: all 0.3s ease; }
-        .glass-card:hover { border-color: rgba(59, 130, 246, 0.3); box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4); }
+        .glass-card:hover { border-color: rgba(168, 85, 247, 0.3); box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4); }
         .glass-header { background: rgba(0, 0, 0, 0.2); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
         code { font-family: 'Courier New', Courier, monospace; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(147, 51, 234, 0.5); }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(168, 85, 247, 0.5); }
     </style>
 </head>
-<body class="bg-[#0b0f19] bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-900/20 via-[#0b0f19] to-[#0b0f19] min-h-screen text-gray-200 font-sans antialiased pb-16">
+<body class="bg-[#0b0f19] bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-purple-900/20 via-[#0b0f19] to-blue-900/10 min-h-screen text-gray-200 font-sans antialiased pb-16">
 
     <nav class="glass-header sticky top-0 z-50 px-6 py-4 mb-10">
         <div class="max-w-6xl mx-auto flex justify-between items-center">
             <h1 class="text-2xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 uppercase">
-                <i class="fa-brands fa-ubuntu text-orange-500 mr-2"></i>d4m-dev Core
+                <i class="fa-brands fa-ubuntu text-orange-500 mr-2"></i>D4M OMNI-PANEL
             </h1>
-            <span class="text-xs font-mono bg-purple-500/10 border border-purple-500/20 px-3 py-1 rounded-full text-purple-400 font-bold tracking-wider">DOCUMENTATION v1.0.0</span>
+            <span class="text-xs font-mono bg-purple-500/10 border border-purple-500/20 px-3 py-1 rounded-full text-purple-400 font-bold tracking-wider animate-pulse">DOCUMENTATION v2.0.0</span>
         </div>
     </nav>
 
     <main class="max-w-6xl mx-auto px-6 space-y-12">
         
         <div class="glass-card p-8 rounded-3xl relative overflow-hidden">
-            <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-600/10 to-transparent rounded-full blur-3xl pointer-events-none"></div>
-            <h2 class="text-3xl font-black text-white mb-4 tracking-wide uppercase">Hệ Thống Ubuntu Backend Core</h2>
+            <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-purple-600/10 to-transparent rounded-full blur-3xl pointer-events-none"></div>
+            <h2 class="text-3xl font-black text-white mb-4 tracking-wide uppercase">Hệ Thống Backend Core Đại Tu</h2>
             <p class="text-gray-400 leading-relaxed max-w-3xl">
-                Hệ sinh thái máy chủ cục bộ toàn diện được tối ưu hóa cho thiết bị di động cao cấp. Hệ thống được xây dựng trên nền tảng <strong class="text-blue-400">FastAPI</strong> mạnh mẽ, tích hợp Trí tuệ Nhân tạo (Google Gemini), Động cơ xử lý đa phương tiện Studio (Meta Demucs AI & FFmpeg), và hạ tầng quản lý máy chủ ảo động Serverless. Hệ thống vận hành biệt lập an toàn tại cổng kết nối phong thủy <strong class="text-purple-400 font-mono">16868</strong>.
+                Hệ sinh thái máy chủ siêu việt tối ưu cho môi trường ARM64 (Android/Ubuntu). Vận hành trên động cơ <strong class="text-blue-400">FastAPI</strong> kết hợp hàng đợi <strong class="text-red-400">Redis & Celery</strong> để tải Youtube và bóc tách Audio AI (Demucs/Whisper). Tích hợp Trí tuệ Nhân tạo J.A.R.V.I.S có "trí nhớ vĩnh cửu", Bảng Phong Thần SSO Auth bảo mật đa tầng, và hạ tầng Auto-Backup gửi báo cáo qua Telegram định kỳ.
             </p>
         </div>
 
         <div>
-            <h3 class="text-lg font-bold text-white mb-5 flex items-center"><i class="fa-solid fa-star text-yellow-400 mr-2"></i> Tính Năng Cốt Lõi</h3>
+            <h3 class="text-lg font-bold text-white mb-5 flex items-center"><i class="fa-solid fa-crown text-yellow-400 mr-2"></i> 6 Vũ Khí Tối Thượng (Trùm Cuối)</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div class="glass-card p-6 rounded-2xl">
-                    <i class="fa-solid fa-robot text-3xl text-purple-400 mb-4 block"></i>
-                    <h4 class="font-bold text-white mb-2 text-base">AI SysAdmin Tự Động</h4>
-                    <p class="text-xs text-gray-400 leading-relaxed">Tích hợp SDK Gemini mới giúp đọc hiểu dữ liệu logs.db, tự động phát hiện tấn công bất thường và nhận lệnh tắt/mở API bằng ngôn ngữ tự nhiên.</p>
+                <!-- Tính năng 1 -->
+                <div class="glass-card p-6 rounded-2xl relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-2 h-full bg-red-500/50 shadow-[0_0_15px_#ef4444]"></div>
+                    <i class="fa-solid fa-server text-3xl text-red-400 mb-4 block"></i>
+                    <h4 class="font-bold text-white mb-2 text-base">Hàng Đợi Redis & Celery</h4>
+                    <p class="text-xs text-gray-400 leading-relaxed">Động cơ tác chiến ngầm! Bypass lỗi Kernel ARM64-COW-BUG. Xử lý tải Youtube (yt-dlp) và chạy luồng bóc tách AI Audio (Demucs) mà không làm sập tiến trình chính.</p>
                 </div>
-                <div class="glass-card p-6 rounded-2xl">
-                    <i class="fa-solid fa-sliders text-3xl text-blue-400 mb-4 block"></i>
-                    <h4 class="font-bold text-white mb-2 text-base">Trạm Audio Studio AI</h4>
-                    <p class="text-xs text-gray-400 leading-relaxed">Sử dụng FFmpeg trích xuất âm thanh chất lượng cao 320kbps từ video. Kết hợp Demucs AI của Meta để bóc tách luồng giọng hát (Vocal) và nhạc nền (Beat) riêng biệt.</p>
+                <!-- Tính năng 2 -->
+                <div class="glass-card p-6 rounded-2xl relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-2 h-full bg-purple-500/50 shadow-[0_0_15px_#a855f7]"></div>
+                    <i class="fa-solid fa-users-viewfinder text-3xl text-purple-400 mb-4 block"></i>
+                    <h4 class="font-bold text-white mb-2 text-base">SSO Auth & Bảng Phong Thần</h4>
+                    <p class="text-xs text-gray-400 leading-relaxed">Hệ thống xác thực JWT xuyên suốt hệ sinh thái. Cung cấp God Mode cho Tư Lệnh toàn quyền: Phong tước Admin, Giam cầm IP (Radar Aegis) và Thanh trừng tài khoản phản nghịch.</p>
                 </div>
-                <div class="glass-card p-6 rounded-2xl">
-                    <i class="fa-solid fa-box-archive text-3xl text-orange-400 mb-4 block"></i>
-                    <h4 class="font-bold text-white mb-2 text-base">Dynamic Project Hub</h4>
-                    <p class="text-xs text-gray-400 leading-relaxed">Triển khai thần tốc các dự án HTML5/Python động thông qua cơ chế kéo thả file nén dạng .ZIP trực tiếp ngay trên giao diện Dashboard quản trị.</p>
+                <!-- Tính năng 3 -->
+                <div class="glass-card p-6 rounded-2xl relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-2 h-full bg-blue-500/50 shadow-[0_0_15px_#3b82f6]"></div>
+                    <i class="fa-solid fa-brain text-3xl text-blue-400 mb-4 block"></i>
+                    <h4 class="font-bold text-white mb-2 text-base">J.A.R.V.I.S Persistent Brain</h4>
+                    <p class="text-xs text-gray-400 leading-relaxed">Trợ lý AI Gemini siêu thông minh. Khắc ghi trạng thái công tắc hệ thống (Tunnels, Services) xuống ổ cứng `api_status.json`. Mất điện khởi động lại vẫn nhớ y nguyên.</p>
                 </div>
-                <div class="glass-card p-6 rounded-2xl">
-                    <i class="fa-solid fa-snowflake text-3xl text-cyan-400 mb-4 block"></i>
-                    <h4 class="font-bold text-white mb-2 text-base">Đóng Băng Dự Án</h4>
-                    <p class="text-xs text-gray-400 leading-relaxed">Khóa tạm ngưng hoạt động của các thư mục dự án khi bảo trì. Tự động hiển thị màn hình Pop-up Glassmorphism đếm ngược 5 giây để chuyển hướng người dùng.</p>
+                <!-- Tính năng 4 -->
+                <div class="glass-card p-6 rounded-2xl relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-2 h-full bg-green-500/50 shadow-[0_0_15px_#22c55e]"></div>
+                    <i class="fa-solid fa-vault text-3xl text-green-400 mb-4 block"></i>
+                    <h4 class="font-bold text-white mb-2 text-base">Két Sắt Auto-Backup</h4>
+                    <p class="text-xs text-gray-400 leading-relaxed">Robot ngầm Night Shift hoạt động vào 02:00 sáng. Đóng gói MariaDB thành tệp nén `.gz`, giữ lại 7 bản sao gần nhất và báo cáo tình trạng trực tiếp qua vệ tinh Telegram.</p>
                 </div>
-                <div class="glass-card p-6 rounded-2xl">
-                    <i class="fa-solid fa-circle-nodes text-3xl text-green-400 mb-4 block"></i>
-                    <h4 class="font-bold text-white mb-2 text-base">Auto Cloudflare Tunnel</h4>
-                    <p class="text-xs text-gray-400 leading-relaxed">Tự động giám sát luồng vận hành của Cloudflare Tunnel, bóc tách chuỗi URL công khai ngẫu nhiên và đồng bộ liên kết động vào các dự án.</p>
+                <!-- Tính năng 5 -->
+                <div class="glass-card p-6 rounded-2xl relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-2 h-full bg-orange-500/50 shadow-[0_0_15px_#f97316]"></div>
+                    <i class="fa-solid fa-circle-nodes text-3xl text-orange-400 mb-4 block"></i>
+                    <h4 class="font-bold text-white mb-2 text-base">Hầm Ngầm Cloudflare</h4>
+                    <p class="text-xs text-gray-400 leading-relaxed">Đào hầm đưa Localhost 16868 ra mạng Public. Bot tự động cào file log để lấy URL mới và cập nhật tức thời lên bảng điều khiển Omni-Panel cho sếp.</p>
                 </div>
-                <div class="glass-card p-6 rounded-2xl">
-                    <i class="fa-solid fa-chart-line text-3xl text-pink-400 mb-4 block"></i>
-                    <h4 class="font-bold text-white mb-2 text-base">Giao Diện Premium UX</h4>
-                    <p class="text-xs text-gray-400 leading-relaxed">Bảng điều khiển thiết kế theo phong cách Glassmorphism đồng bộ dữ liệu tài nguyên phần cứng (CPU, RAM, 512GB Storage) theo thời gian thực.</p>
+                <!-- Tính năng 6 -->
+                <div class="glass-card p-6 rounded-2xl relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-2 h-full bg-pink-500/50 shadow-[0_0_15px_#ec4899]"></div>
+                    <i class="fa-brands fa-telegram text-3xl text-pink-400 mb-4 block"></i>
+                    <h4 class="font-bold text-white mb-2 text-base">Telegram Scheduler</h4>
+                    <p class="text-xs text-gray-400 leading-relaxed">Giám sát vệ tinh tài chính (USD/Vàng), cảnh báo thời tiết khi trời đổ mưa/bão và gửi tin nhắn chúc mừng các dịp lễ/sinh nhật với giọng điệu cực kỳ mặn mòi.</p>
                 </div>
             </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Cài đặt hệ thống -->
             <div class="glass-card p-6 rounded-2xl">
-                <h3 class="text-base font-bold text-white mb-4 flex items-center"><i class="fa-solid fa-terminal text-blue-400 mr-2"></i> Lệnh Cài Đặt Hệ Thống (Ubuntu Level)</h3>
+                <h3 class="text-base font-bold text-white mb-4 flex items-center"><i class="fa-solid fa-terminal text-blue-400 mr-2"></i> Lệnh Cài Đặt (Ubuntu Level)</h3>
                 <div class="bg-black/50 p-4 rounded-xl border border-white/5 font-mono text-xs text-green-400 space-y-2 leading-relaxed">
-                    <p class="text-gray-500"># Cập nhật hệ thống và cài đặt công cụ đa phương tiện</p>
+                    <p class="text-gray-500"># Cập nhật & Cài đặt thư viện đa phương tiện + Hàng đợi</p>
                     <p>apt update && apt upgrade -y</p>
-                    <p>apt install ffmpeg -y</p>
+                    <p>apt install ffmpeg redis-server -y</p>
                 </div>
 
-                <h3 class="text-base font-bold text-white mt-6 mb-4 flex items-center"><i class="fa-solid fa-box-open text-purple-400 mr-2"></i> Khởi Tạo Môi Trường Ảo & Thư Viện Pip3</h3>
+                <h3 class="text-base font-bold text-white mt-6 mb-4 flex items-center"><i class="fa-solid fa-box-open text-purple-400 mr-2"></i> Khởi Tạo Thư Viện Pip3</h3>
                 <div class="bg-black/50 p-4 rounded-xl border border-white/5 font-mono text-xs text-green-400 space-y-2 leading-relaxed">
-                    <p class="text-gray-500"># Kích hoạt môi trường myenv biệt lập độc lập</p>
+                    <p class="text-gray-500"># Vào môi trường myenv và nạp các Module lõi</p>
                     <p>source ~/myenv/bin/activate</p>
-                    <p class="text-gray-500 mt-2"># Cài đặt đồng bộ toàn bộ nguyên liệu độc quyền</p>
-                    <p class="whitespace-pre-wrap">pip3 install fastapi uvicorn pydantic-settings python-multipart pymysql psutil google-genai demucs pydub aiofiles pyjwt passlib bcrypt</p>
+                    <p class="whitespace-pre-wrap">pip3 install fastapi uvicorn pydantic-settings python-multipart pymysql psutil google-genai demucs pydub aiofiles pyjwt passlib bcrypt celery redis httpx yt-dlp</p>
                 </div>
             </div>
 
+            <!-- Biến môi trường -->
             <div class="glass-card p-6 rounded-2xl flex flex-col">
-                <h3 class="text-base font-bold text-white mb-4 flex items-center"><i class="fa-solid fa-sliders text-orange-400 mr-2"></i> Khai Báo Biến Môi Trường (.env)</h3>
-                <div class="bg-black/50 p-4 rounded-xl border border-white/5 font-mono text-xs text-gray-300 space-y-1.5 leading-relaxed flex-grow">
-                    <p><span class="text-purple-400">HOST</span>=0.0.0.0</p>
-                    <p><span class="text-purple-400">PORT</span>=16868 <span class="text-gray-500"># Chốt cổng 5 số đẹp tài lộc</span></p>
-                    <p><span class="text-purple-400">ENVIRONMENT</span>=production</p>
-                    <p><span class="text-purple-400">SECRET_KEY</span>=chuoi_bao_mat_ma_hoa_token_jwt</p>
-                    <p class="text-gray-500 mt-2"># Cấu hình kết nối MariaDB cục bộ</p>
-                    <p><span class="text-purple-400">DB_HOST</span>=127.0.0.1</p>
-                    <p><span class="text-purple-400">DB_PORT</span>=3306</p>
-                    <p><span class="text-purple-400">DB_USER</span>=root</p>
-                    <p><span class="text-purple-400">DB_PASS</span>=</p>
-                    <p><span class="text-purple-400">DB_NAME</span>=social_hub</p>
-                    <p class="text-gray-500 mt-2"># Khóa trí tuệ nhân tạo bộ não Google</p>
-                    <p><span class="text-purple-400">GEMINI_API_KEY</span>=AIzaSy..._khoa_api_studio_cua_ban</p>
+                <h3 class="text-base font-bold text-white mb-4 flex items-center"><i class="fa-solid fa-sliders text-orange-400 mr-2"></i> Biến Môi Trường (.env)</h3>
+                <div class="bg-black/50 p-4 rounded-xl border border-white/5 font-mono text-xs text-gray-300 space-y-1.5 leading-relaxed flex-grow overflow-y-auto">
+                    <p><span class="text-purple-400">HOST</span>=0.0.0.0 | <span class="text-purple-400">PORT</span>=16868</p>
+                    <p><span class="text-purple-400">SECRET_KEY</span>=chuoi_bao_mat_jwt_sieu_cung</p>
+                    <p class="text-gray-500 mt-2"># Cấu hình MariaDB & Adminer</p>
+                    <p><span class="text-purple-400">DB_USER</span>=root | <span class="text-purple-400">DB_NAME</span>=social_hub</p>
+                    <p><span class="text-purple-400">DB_ADMIN_PORT</span>=8080</p>
+                    <p class="text-gray-500 mt-2"># Hàng đợi Redis & AI Gemini</p>
+                    <p><span class="text-purple-400">REDIS_URL</span>=redis://localhost:6379/0</p>
+                    <p><span class="text-purple-400">GEMINI_API_KEY</span>=AIzaSy..._khoa_cua_sep</p>
+                    <p class="text-gray-500 mt-2"># SMTP Mail (Xác thực SSO) & Telegram Bot</p>
+                    <p><span class="text-purple-400">SENDER_EMAIL</span>=bot_cua_sep@gmail.com</p>
+                    <p><span class="text-purple-400">SENDER_PASSWORD</span>=mat_khau_ung_dung_google</p>
+                    <p><span class="text-purple-400">TELEGRAM_BOT_TOKEN</span>=bot_token_sinh_tu_botfather</p>
+                    <p><span class="text-purple-400">TELEGRAM_CHAT_ID</span>=id_telegram_cua_sep</p>
                 </div>
             </div>
         </div>
 
         <div class="glass-card p-6 rounded-2xl">
-            <h3 class="text-lg font-bold text-white mb-4 flex items-center"><i class="fa-solid fa-play text-green-400 mr-2"></i> Kích Hoạt Vận Hành Máy Chủ</h3>
-            <p class="text-sm text-gray-400 mb-4">Gọi trực tiếp trình biên dịch Python 3 trong môi trường ảo để kích nổ máy chủ Uvicorn:</p>
-            <div class="bg-black/50 p-4 rounded-xl border border-white/5 font-mono text-xs text-green-400 mb-6">
-                ~/myenv/bin/python3 main.py
+            <h3 class="text-lg font-bold text-white mb-4 flex items-center"><i class="fa-solid fa-power-off text-red-400 mr-2"></i> Kích Hoạt Vận Hành Toàn Diện</h3>
+            <p class="text-sm text-gray-400 mb-4">Hệ thống nay đã trang bị <strong>Sát thủ diệt Zombie Process</strong>. Chỉ cần chạy một lệnh duy nhất, nó sẽ tự động đánh thức MariaDB, kích nổ Redis (bỏ qua lỗi ARM64-COW), chạy Celery Worker, Uvicorn và bật Hầm Cloudflare:</p>
+            <div class="bg-black/50 p-4 rounded-xl border border-white/5 font-mono text-sm text-green-400 mb-6 font-bold shadow-[inset_0_0_10px_rgba(34,197,94,0.1)]">
+                python3 start_all.py
             </div>
             
-            <h4 class="text-sm font-bold text-white mb-3">Mạng lưới định tuyến hạ tầng đường dẫn:</h4>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 font-mono text-xs">
-                <div class="bg-black/30 p-3 rounded-xl border border-white/5">
-                    <span class="text-blue-400 font-bold block mb-1">🎛️ Admin Dashboard</span>
-                    <a href="http://127.0.0.1:16868/" target="_blank" class="text-gray-400 hover:text-white underline">/dashboard.html</a>
+            <h4 class="text-sm font-bold text-white mb-3">Mạng lưới Omni-Panel:</h4>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 font-mono text-xs">
+                <div class="bg-black/30 p-3 rounded-xl border border-white/5 hover:border-blue-500/50 transition">
+                    <span class="text-blue-400 font-bold block mb-1">🎛️ Dashboard Core</span>
+                    <span class="text-gray-400 underline">/admin-master.html</span>
                 </div>
-                <div class="bg-black/30 p-3 rounded-xl border border-white/5">
-                    <span class="text-purple-400 font-bold block mb-1">🎧 Audio Engine Studio</span>
-                    <a href="http://127.0.0.1:16868/audio-test.html" target="_blank" class="text-gray-400 hover:text-white underline">/audio-test.html</a>
+                <div class="bg-black/30 p-3 rounded-xl border border-white/5 hover:border-purple-500/50 transition">
+                    <span class="text-purple-400 font-bold block mb-1">👑 Bảng Phong Thần</span>
+                    <span class="text-gray-400 underline">/admin-users.html</span>
                 </div>
-                <div class="bg-black/30 p-3 rounded-xl border border-white/5">
-                    <span class="text-orange-400 font-bold block mb-1">📁 Project Hub mặt tiền</span>
-                    <a href="http://127.0.0.1:16868/hub.html" target="_blank" class="text-gray-400 hover:text-white underline">/hub.html</a>
+                <div class="bg-black/30 p-3 rounded-xl border border-white/5 hover:border-red-500/50 transition">
+                    <span class="text-red-400 font-bold block mb-1">🎧 Celery Music Hub</span>
+                    <span class="text-gray-400 underline">/audio-test.html</span>
+                </div>
+                <div class="bg-black/30 p-3 rounded-xl border border-white/5 hover:border-green-500/50 transition">
+                    <span class="text-green-400 font-bold block mb-1">🔒 Login SSO Portal</span>
+                    <span class="text-gray-400 underline">/auth</span>
                 </div>
             </div>
         </div>
 
-        <div class="glass-card p-6 rounded-2xl">
-            <h3 class="text-lg font-bold text-white mb-4 flex items-center"><i class="fa-solid fa-folder-tree text-blue-400 mr-2"></i> Sơ Đồ Cấu Trúc Phân Hệ Dự Án</h3>
+        <div class="glass-card p-6 rounded-2xl mb-10">
+            <h3 class="text-lg font-bold text-white mb-4 flex items-center"><i class="fa-solid fa-folder-tree text-blue-400 mr-2"></i> Sơ Đồ Cấu Trúc Đã Mở Rộng</h3>
             <div class="bg-[#070b12] p-6 rounded-xl border border-white/5 font-mono text-xs text-gray-400 leading-relaxed overflow-x-auto">
                 <p class="text-white font-bold">ubuntu-backend-core/</p>
-                <p>├── main.py                     <span class="text-gray-600"># Điểm kích nổ luồng Uvicorn Server</span></p>
-                <p>├── .env                        <span class="text-gray-600"># Lưu trữ toàn bộ token biến môi trường bảo mật</span></p>
+                <p>├── start_all.py                <span class="text-gray-600"># Script khởi động all-in-one & Diệt Zombie</span></p>
+                <p>├── main.py                     <span class="text-gray-600"># Đánh thức Uvicorn, Redis, Celery Worker, Adminer</span></p>
+                <p>├── .env                        <span class="text-gray-600"># Lưu trữ File biến môi trường siêu bảo mật</span></p>
                 <p>├── core/</p>
-                <p>│   ├── config.py               <span class="text-gray-600"># Trình điều phối và nạp biến môi trường</span></p>
-                <p>│   ├── database.py             <span class="text-gray-600"># Quản lý song song MariaDB & SQLite Nhật ký</span></p>
-                <p>│   └── security.py             <span class="text-gray-600"># Cơ chế khóa giải mã JWT Xác thực</span></p>
+                <p>│   ├── config.py, database.py, security.py</p>
+                <p>│   ├── <span class="text-red-400 font-bold">tasks.py</span>                  <span class="text-gray-600"># Trạm khai báo Tác vụ Celery (Audio, Youtube)</span></p>
+                <p>│   ├── <span class="text-blue-400 font-bold">tg_utils.py</span>               <span class="text-gray-600"># Utils gửi tin nhắn vệ tinh Telegram</span></p>
+                <p>│   ├── <span class="text-green-400 font-bold">tg_scheduler.py</span>           <span class="text-gray-600"># Bot báo thức thời tiết, tài chính, Nightly Backup</span></p>
+                <p>│   └── <span class="text-purple-400 font-bold">api_status.json</span>           <span class="text-gray-600"># Não bộ trí nhớ vĩnh cửu của J.A.R.V.I.S</span></p>
                 <p>├── api/</p>
-                <p>│   ├── server.py               <span class="text-gray-600"># Trung tâm định tuyến lõi FastAPI router</span></p>
-                <p>│   ├── ai_admin.py             <span class="text-gray-600"># Bộ não AI nhận lệnh gạt công tắc hệ thống</span></p>
-                <p>│   ├── audio_engine.py         <span class="text-gray-600"># Trạm bóc tách tầng âm Demucs/FFmpeg</span></p>
-                <p>│   ├── dashboard.py            <span class="text-gray-600"># Giám sát phần cứng thời gian thực (psutil)</span></p>
-                <p>│   └── projects.py             <span class="text-gray-600"># API giải nén mã nguồn dự án .ZIP</span></p>
+                <p>│   ├── server.py               <span class="text-gray-600"># Trung tâm định tuyến lõi FastAPI</span></p>
+                <p>│   ├── <span class="text-yellow-400 font-bold">auth.py</span>                 <span class="text-gray-600"># Trạm cấp thẻ D4M ID, OTP Mail & Cấp quyền SSO</span></p>
+                <p>│   ├── <span class="text-red-400 font-bold">ytdl.py</span>                 <span class="text-gray-600"># Engine trích xuất thông tin & tải Youtube Celery</span></p>
+                <p>│   ├── ai_admin.py, audio_engine.py, dashboard.py, projects.py</p>
                 <p>├── scripts/</p>
                 <p>│   └── network_tunnel.py       <span class="text-gray-600"># Động cơ quản lý bắt chuỗi Cloudflare Tunnel URL</span></p>
-                <p>├── middlewares/</p>
-                <p>│   └── dynamic_hosting.py      <span class="text-gray-600"># Điều phối proxy và render giao diện bảo trì</span></p>
-                <p>├── public/                     <span class="text-gray-600"># Kho lưu trữ giao diện tĩnh HTML/CSS/JS</span></p>
-                <p>│   ├── index.html              <span class="text-gray-600"># Giao diện Admin Dashboard chính</span></p>
-                <p>│   ├── hub.html                <span class="text-gray-600"># Giao diện trưng bày danh mục dự án công khai</span></p>
-                <p>│   ├── audio-test.html         <span class="text-gray-600"># Khung kiểm thử trạm âm thanh Studio</span></p>
-                <p>│   └── js/                     <span class="text-gray-600"># Logic frontend xử lý bất đồng bộ (app.js)</span></p>
-                <p>├── audio_workspace/            <span class="text-gray-600"># Thư mục tạm xử lý luồng nén bóc tách đa phương tiện (Tự sinh)</span></p>
-                <p>└── hosted_projects/            <span class="text-gray-600"># Không gian lưu trữ vận hành các website con (Tự sinh)</span></p>
+                <p>├── public/</p>
+                <p>│   ├── <span class="text-blue-400 font-bold">admin-master.html</span>       <span class="text-gray-600"># Giao diện Omni-Panel lõi</span></p>
+                <p>│   ├── <span class="text-purple-400 font-bold">admin-users.html</span>        <span class="text-gray-600"># Giao diện God Mode Bảng Phong Thần</span></p>
+                <p>│   └── hub, auth, audio-test, js/</p>
+                <p>├── backups/                    <span class="text-gray-600"># Két sắt lưu trữ các bản MariaDB Nightly Dump</span></p>
+                <p>└── audio_workspace/            <span class="text-gray-600"># Thư mục chứa File Tải & Bóc tách Audio AI</span></p>
             </div>
         </div>
 
     </main>
-
-    <footer class="mt-16 py-6 border-t border-white/5 bg-black/20 text-center text-xs text-gray-500">
-        &copy; 2026 Developed with ⚡ by d4m-dev. Built for Premium Performance & Scaling.
-    </footer>
 
 </body>
 </html>
